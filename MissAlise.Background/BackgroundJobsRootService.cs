@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MissAlise.Background.Settings;
 
 namespace MissAlise.Background
 {

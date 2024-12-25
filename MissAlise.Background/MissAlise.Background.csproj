@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MissAlise.Background.Abstractions\MissAlise.Background.Abstractions.csproj" />
     <ProjectReference Include="..\MissAlise.ServiceDefaults\MissAlise.Shared.csproj" />
   </ItemGroup>
 

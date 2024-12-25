@@ -38,15 +38,15 @@ namespace MissAlise.Background
 		public override ValueTask Fire(CancellationToken cancel)
 			=> FireStarter(_job, cancel);
 	}
-
+	
 #nullable enable
 
 	public abstract record EventTrigger
-	{		
+	{
 		public string JobKey { get; set; } = null!;
 		public string Description { get; set; } = null!;
 		public bool IsEnabled { get; set; } = true;
-		public abstract BackgroundJob Job { get; }
+		public abstract IBackgroundJob Job { get; }
 
 		public MonthWeek[]? Weeks { get; set; }//переделать на флаг
 		public DayOfWeek[]? Days { get; set; }
@@ -81,7 +81,7 @@ namespace MissAlise.Background
 			return isOk;
 		}
 
-		public abstract ValueTask Fire(CancellationToken cancel);		
+		public abstract ValueTask Fire(CancellationToken cancel);
 	}
 #nullable enable
 }

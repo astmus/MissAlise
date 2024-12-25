@@ -1,11 +1,12 @@
+#nullable disable
 using System.Threading.Channels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MissAlise.Utils;
 
 namespace MissAlise.Background
 {
-#nullable disable
 	public abstract class BackgroundJobService : BackgroundService
 	{
 		public static BackgroundServer Server { get; protected set; }
@@ -31,13 +32,14 @@ namespace MissAlise.Background
 			{
 				using var handleScope = _scopesFactory.CreateScope();
 				var backJob = handleScope.ServiceProvider.GetRequiredService<BackgroundJob<TJob>> ();
-				
+				var jobsRepository = handleScope.ServiceProvider.GetRequiredService<IBackgroundJobRepository>();
+				var dbJob = await jobsRepository.LoadAsync<BackgroundJob<TJob>>(Id<TJob>.UniqueName, cancellationToken);
+				if (dbJob.ToString() != backJob.ToString()) // сравниваем строки потому что Triggers есть указатели на List которые конечно же будут разными, хорошо бы сравнивать и эти коллекции если они изменились, но это как нить потом
+					await jobsRepository.AddOrReplaceAsync(backJob, cancellationToken);
 				foreach (var trigger in backJob.Triggers)
 				{
-					var job = backJob with
-					{						
-						//Description = trigger.Description + " " + trigger.ToString()[15..^2].Split(",").Where(w => w.EndsWith("= ") == false).Skip(2).Aggregate((s, S2k) => s + S2k) 
-					};
+					var job = backJob with {};
+
 					trigger.Description = $"{job.Description} {trigger.Description}";
 					trigger.Setup(job, _jobsChannel.Writer.WriteAsync);
 
@@ -88,25 +90,25 @@ namespace MissAlise.Background
 					log.LogInformation("Обработка {job}", job);
 					job.SetCancel(cancel.Cancel);
 
-					job.Start();
+					job.StartJob();
 
 					await handler.StartAsync(job, cancel.Token).ConfigureAwait(false);
 					await handler.HandleJobAsync(job, cancel.Token).ConfigureAwait(false);
 					await handler.EndAsync(job, cancel.Token).ConfigureAwait(false);
 
-					job.End(JobCompletionState.Success);
-					log.LogInformation("Обработка успешна {job}", job);
+					job.EndJob(JobCompletionState.Success);
+					log.LogInformation("Обработка успешна {job}", job.Description);
 				}
 			}
 			catch (OperationCanceledException)
 			{
-				job.End(JobCompletionState.Cancelled);
-				log.LogWarning("Отмена фоновой задачи: {job}", job);
+				job.EndJob(JobCompletionState.Cancelled);
+				log.LogWarning("Отмена фоновой задачи: {job}", job.Description);
 			}
 			catch (Exception error)
 			{
-				job.End(JobCompletionState.Failed);
-				log.LogError("Ошибка фоновой задачи: {job} {error}",job, error);
+				job.EndJob(JobCompletionState.Failed);
+				log.LogError("Ошибка фоновой задачи: {job} {error}", job.Description, error);
 			}
 			finally
 			{

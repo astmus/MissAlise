@@ -1,5 +1,4 @@
-﻿#nullable disable
-namespace MissAlise.Background
+﻿namespace MissAlise.Background
 {
 	public enum JobCompletionState : byte
 	{
@@ -8,4 +7,3 @@ namespace MissAlise.Background
 		Cancelled
 	}
 }
-#nullable enable
