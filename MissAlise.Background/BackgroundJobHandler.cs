@@ -7,7 +7,7 @@ namespace MissAlise.Background
 	{
 		internal ILogger _logger { get; set; }
 
-		static int HandlersCount = 0;
+		//static int HandlersCount = 0;
 		protected BackgroundJobHandler()
 		{
 
@@ -26,7 +26,7 @@ namespace MissAlise.Background
 
 		public Task HandleJobAsync(BackgroundJob<TJobTask> job, CancellationToken cancel)
 		{
-			return HandleAsync(job.JobData, cancel);
+			return HandleAsync(job.Data, cancel);
 		}
 
 		protected void LogError(string message, Exception error = default, [CallerMemberName] string method = default)

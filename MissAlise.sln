@@ -11,6 +11,22 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.Shared", "MissAli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.Background", "MissAlise.Background\MissAlise.Background.csproj", "{7E0ABF22-9A0D-48B2-8E56-80A400081BDF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise", "MissAlise\MissAlise.csproj", "{B6871D2A-74A8-4DBD-8FB6-F18166710806}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.Core", "MissAlise.Core\MissAlise.Core.csproj", "{1CD1E1A9-CE4F-468F-BB63-0322D25C346C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.Application", "MissAlise.Application\MissAlise.Application.csproj", "{4C63C2BC-B5C2-4828-A938-DD5AACAFC22B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{029C5ED3-ABC7-4423-9D81-216ABB8D6E54}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{E9A0D5CC-032F-42BC-8350-753FDA2CE3AE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{7DF210E5-96C3-4716-AD1E-F321B6777F1D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{6EDC1486-EB91-4D1F-93D6-F18BDA8D2FD0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.DataBase", "MissAlise.DataBase\MissAlise.DataBase.csproj", "{26149FAB-CF5A-4DCF-A82A-30ECAEBAB599}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,8 +49,30 @@ Global
 		{7E0ABF22-9A0D-48B2-8E56-80A400081BDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E0ABF22-9A0D-48B2-8E56-80A400081BDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E0ABF22-9A0D-48B2-8E56-80A400081BDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6871D2A-74A8-4DBD-8FB6-F18166710806}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6871D2A-74A8-4DBD-8FB6-F18166710806}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6871D2A-74A8-4DBD-8FB6-F18166710806}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6871D2A-74A8-4DBD-8FB6-F18166710806}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CD1E1A9-CE4F-468F-BB63-0322D25C346C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CD1E1A9-CE4F-468F-BB63-0322D25C346C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CD1E1A9-CE4F-468F-BB63-0322D25C346C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CD1E1A9-CE4F-468F-BB63-0322D25C346C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C63C2BC-B5C2-4828-A938-DD5AACAFC22B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C63C2BC-B5C2-4828-A938-DD5AACAFC22B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C63C2BC-B5C2-4828-A938-DD5AACAFC22B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C63C2BC-B5C2-4828-A938-DD5AACAFC22B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26149FAB-CF5A-4DCF-A82A-30ECAEBAB599}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26149FAB-CF5A-4DCF-A82A-30ECAEBAB599}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26149FAB-CF5A-4DCF-A82A-30ECAEBAB599}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26149FAB-CF5A-4DCF-A82A-30ECAEBAB599}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B6871D2A-74A8-4DBD-8FB6-F18166710806} = {E9A0D5CC-032F-42BC-8350-753FDA2CE3AE}
+		{1CD1E1A9-CE4F-468F-BB63-0322D25C346C} = {7DF210E5-96C3-4716-AD1E-F321B6777F1D}
+		{4C63C2BC-B5C2-4828-A938-DD5AACAFC22B} = {7DF210E5-96C3-4716-AD1E-F321B6777F1D}
+		{26149FAB-CF5A-4DCF-A82A-30ECAEBAB599} = {029C5ED3-ABC7-4423-9D81-216ABB8D6E54}
 	EndGlobalSection
 EndGlobal

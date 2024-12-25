@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="linq2db.AspNet" Version="5.4.1" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="System.Data.SQLite.Core" Version="1.0.119" />
+		<PackageReference Include="System.Text.Json" Version="8.0.5" />
+	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MissAlise.ServiceDefaults\MissAlise.Shared.csproj" />
+    <ProjectReference Include="..\MissAlise\MissAlise.csproj" />
+  </ItemGroup>
+
+</Project>

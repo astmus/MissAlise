@@ -12,10 +12,9 @@ builder.Services.AddHostedService<BackgroundJobsRootService>();
 
 builder.Services
 	.AddBackgroundJob<UpdateUsersBackgroundTask, UpdateUsersJobHandler>(
-		backJob => backJob.SetDescription("Обработка сессий Db").SetWeight(10),
-		trigger => trigger.SetDescription("Обработка сессий Db").SetDelay(Time.Minute),
-		new UpdateUsersBackgroundTask(64), new UpdateUsersBackgroundTask(32)
-		);
+		builder => builder.SetDescription("Обновление пользователей").SetWeight(10).AddTrigger(new UpdateUsersBackgroundTask(64), "Ежеминутно").SetDelay(Time.Minute)		
+	);
+
 //	AddBackgroundService<UpdateIssuesBackgroundTask, UpdateIssuesJobHandler>().AddTrigger<UpdateIssuesBackgroundTask>(
 //		t => { t.Delay = TimeSpan.FromMinutes(30); t.Description = "Синхронизация задач"; })
 //	.AddBackgroundService<SyncBackgroundTask, SyncJobHandler>().AddTrigger<SyncBackgroundTask>(

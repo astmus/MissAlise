@@ -1,9 +1,7 @@
-using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace MissAlise.Background
 {
@@ -32,20 +30,18 @@ namespace MissAlise.Background
 			try
 			{
 				using var handleScope = _scopesFactory.CreateScope();
-				var backJob = handleScope.ServiceProvider.GetService<IOptions<BackgroundJob<TJob>>> ().Value;
-				var dataCollection = handleScope.ServiceProvider.GetService<JobDataCollection<TJob>>();
-				var trigger = handleScope.ServiceProvider.GetService<IOptions<EventTrigger<TJob>>>().Value;
-
-				foreach (var data in dataCollection)
+				var backJob = handleScope.ServiceProvider.GetRequiredService<BackgroundJob<TJob>> ();
+				
+				foreach (var trigger in backJob.Triggers)
 				{
 					var job = backJob with
-					{
-						JobData = data,
-						Description = trigger.Description + " " + trigger.ToString()[15..^2].Split(",").Where(w => w.EndsWith("= ") == false).Skip(2).Aggregate((s, S2k) => s + S2k) 
+					{						
+						//Description = trigger.Description + " " + trigger.ToString()[15..^2].Split(",").Where(w => w.EndsWith("= ") == false).Skip(2).Aggregate((s, S2k) => s + S2k) 
 					};
+					trigger.Description = $"{job.Description} {trigger.Description}";
+					trigger.Setup(job, _jobsChannel.Writer.WriteAsync);
 
-					trigger.SetJob(job);
-					EventTriggerCollection.Instance.Add(trigger with { FireStarter = _jobsChannel.Writer.WriteAsync });
+					EventTriggerCollection.Instance.Add(trigger);
 				}
 			}
 			catch (Exception e)
