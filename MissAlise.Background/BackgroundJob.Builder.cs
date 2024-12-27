@@ -26,7 +26,7 @@ namespace MissAlise.Background
 				return this;
 			}
 
-			public IBackgroundJobBuilder<TJob> IsDisabled(int count)
+			public IBackgroundJobBuilder<TJob> IsDisabled()
 			{
 				_job.IsEnabled = false;
 				return this;

@@ -34,7 +34,7 @@ namespace MissAlise.Background
 				var backJob = handleScope.ServiceProvider.GetRequiredService<BackgroundJob<TJob>> ();
 				var jobsRepository = handleScope.ServiceProvider.GetRequiredService<IBackgroundJobRepository>();
 				var dbJob = await jobsRepository.LoadAsync<BackgroundJob<TJob>>(Id<TJob>.UniqueName, cancellationToken);
-				if (dbJob.ToString() != backJob.ToString()) // сравниваем строки потому что Triggers есть указатели на List которые конечно же будут разными, хорошо бы сравнивать и эти коллекции если они изменились, но это как нить потом
+				if (dbJob?.ToString() != backJob.ToString()) // сравниваем строки потому что Triggers есть указатели на List которые конечно же будут разными, хорошо бы сравнивать и эти коллекции если они изменились, но это как нить потом
 					await jobsRepository.AddOrReplaceAsync(backJob, cancellationToken);
 				foreach (var trigger in backJob.Triggers)
 				{

@@ -1,4 +1,3 @@
-
 using Microsoft.Extensions.DependencyInjection;
 using MissAlise.AppHost.Background;
 using MissAlise.AppHost.Background.Handlers;
@@ -15,10 +14,8 @@ builder.Services.AddHostedService<BackgroundJobsRootService>();
 builder.Services
 	.AddBackgroundJob<UpdateUsersBackgroundTask, UpdateUsersJobHandler>(
 		builder => builder.SetDescription("Обновление пользователей").SetWeight(10).AddTrigger(new UpdateUsersBackgroundTask(64), "Ежеминутно").SetDelay(Time.Minute)		
+	).AddBackgroundJob<SyncBackgroundTask, SyncBackgroundTaskHandler>(
+		builder => builder.SetDescription("Обновление пользователей").SetWeight(10).IsDisabled().AddTrigger(new SyncBackgroundTask(64), "Полуминутно").SetDelay(Time.Minute/2).SetEnabled(false)
 	);
 
-//	AddBackgroundService<UpdateIssuesBackgroundTask, UpdateIssuesJobHandler>().AddTrigger<UpdateIssuesBackgroundTask>(
-//		t => { t.Delay = TimeSpan.FromMinutes(30); t.Description = "Синхронизация задач"; })
-//	.AddBackgroundService<SyncBackgroundTask, SyncJobHandler>().AddTrigger<SyncBackgroundTask>(
-//		t => { t.Delay = TimeSpan.FromDays(1); t.Description = "Синхронизация данных"; });
 builder.Build().Run();
