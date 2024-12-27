@@ -1,29 +1,62 @@
+using System.Text.Json.Serialization;
+using Azure.Identity;
+using Microsoft.Extensions.Options;
+using Microsoft.Graph;
+using MissAlise.WebApi.Auth;
+
 namespace MissAlise.WebApi;
 
 public class Program
 {
-    public static void Main(string[] args)
-    {
-        var builder = WebApplication.CreateBuilder(args);
-        builder.AddServiceDefaults();
+	public static void Main(string[] args)
+	{
+		var builder = WebApplication.CreateBuilder(args);
+		builder.AddServiceDefaults();
 
-        // Add services to the container.
+		builder.Logging.AddDebug();
+		builder.Logging.AddConsole();
 
-        builder.Services.AddControllers();
+		builder.Services.AddControllers().AddJsonOptions(options =>
+		{
+			options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;			
+		});
 
-        var app = builder.Build();
+		builder.Services.Configure<AzureConfiguration>(builder.Configuration.GetSection("AzureAd"));
 
-        app.MapDefaultEndpoints();
+		builder.Services.AddSingleton<GraphServiceClient>(serviceProvider =>
+		{
+			var azureConfig = serviceProvider.GetRequiredService<IOptions<AzureConfiguration>>().Value;
+			var credential = new InteractiveBrowserCredential(new InteractiveBrowserCredentialOptions
+			{
+				ClientId = azureConfig.ClientId,
+				TenantId = azureConfig.TenantId
+			});
+			return new GraphServiceClient(credential, azureConfig.GetScopes());
+		});
 
-        // Configure the HTTP request pipeline.
+		var app = builder.Build();
 
-        app.UseHttpsRedirection();
+		app.UseAuthentication();
+		app.UseAuthorization();		
 
-        app.UseAuthorization();
+		app.UseHttpsRedirection();
+		app.UseStaticFiles();
 
+		app.UseRouting();
 
-        app.MapControllers();
+		app.MapControllers();
 
-        app.Run();
-    }
+		//app.MapDefaultEndpoints();
+
+		//// Configure the HTTP request pipeline.
+
+		//app.UseHttpsRedirection();
+
+		//app.UseAuthentication();
+		//app.UseAuthorization();
+
+		//app.MapControllers();
+
+		app.Run();
+	}
 }

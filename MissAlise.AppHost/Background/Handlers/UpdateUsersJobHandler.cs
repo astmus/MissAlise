@@ -15,7 +15,7 @@ namespace MissAlise.AppHost.Background.Handlers
 
 		public override async Task HandleAsync(UpdateUsersBackgroundTask backgroundTask, CancellationToken cancel)
 		{
-			for (int i = 0; i < 10; i++)
+			for (int i = 0; i < 1; i++)
 			{
 				logger.LogInformation("{i} {time}", i, Time.Now);
 				await Task.Delay(1000);

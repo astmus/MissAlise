@@ -15,7 +15,7 @@ builder.Services
 	.AddBackgroundJob<UpdateUsersBackgroundTask, UpdateUsersJobHandler>(
 		builder => builder.SetDescription("Обновление пользователей").SetWeight(10).AddTrigger(new UpdateUsersBackgroundTask(64), "Ежеминутно").SetDelay(Time.Minute)		
 	).AddBackgroundJob<SyncBackgroundTask, SyncBackgroundTaskHandler>(
-		builder => builder.SetDescription("Обновление пользователей").SetWeight(10).IsDisabled().AddTrigger(new SyncBackgroundTask(64), "Полуминутно").SetDelay(Time.Minute/2).SetEnabled(false)
+		builder => builder.SetDescription("Синхронизация данных").SetWeight(10).IsDisabled().AddTrigger(new SyncBackgroundTask(64), "Полуминутно").SetDelay(Time.Minute/2).SetEnabled(false)
 	);
 
 builder.Build().Run();
