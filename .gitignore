@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /MissAlise.WebApi/appsettings.Development.json
 /MissAlise.AppHost/appsettings.Development.json
+/MissAlise.Worker/appsettings.Development.json

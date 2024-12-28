@@ -15,15 +15,15 @@ namespace MissAlise.Background
 	public class BackgroundJobService<TJob> : BackgroundJobService where TJob : class
 	{
 		private readonly IServiceScopeFactory _scopesFactory;
-		private readonly ILogger<BackgroundJob<TJob>> log;
+		private readonly ILogger<TJob> log;
 		Channel<BackgroundJob<TJob>> _jobsChannel;
-		
-		public BackgroundJobService(IServiceScopeFactory scopesFactory, ILogger<BackgroundJob<TJob>> log)
+
+		public BackgroundJobService(IServiceScopeFactory scopesFactory, ILogger<TJob> log)
 		{
-			Server = new BackgroundServer() { Id = Guid.NewGuid() };	
+			Server = new BackgroundServer() { Id = Guid.NewGuid() };
 			_scopesFactory = scopesFactory;
 			this.log = log;
-			_jobsChannel = Channel.CreateUnbounded<BackgroundJob<TJob>>(new UnboundedChannelOptions() { SingleWriter = true });			
+			_jobsChannel = Channel.CreateUnbounded<BackgroundJob<TJob>>(new UnboundedChannelOptions() { SingleWriter = true });
 		}
 
 		public sealed override async Task StartAsync(CancellationToken cancellationToken)
@@ -31,19 +31,18 @@ namespace MissAlise.Background
 			try
 			{
 				using var handleScope = _scopesFactory.CreateScope();
-				var backJob = handleScope.ServiceProvider.GetRequiredService<BackgroundJob<TJob>> ();
+				var backJob = handleScope.ServiceProvider.GetRequiredService<BackgroundJob<TJob>>();
 				var jobsRepository = handleScope.ServiceProvider.GetRequiredService<IBackgroundJobRepository>();
 				var dbJob = await jobsRepository.LoadAsync<BackgroundJob<TJob>>(Id<TJob>.UniqueName, cancellationToken);
+				
 				if (dbJob?.ToString() != backJob.ToString()) // сравниваем строки потому что Triggers есть указатели на List которые конечно же будут разными, хорошо бы сравнивать и эти коллекции если они изменились, но это как нить потом
 					await jobsRepository.AddOrReplaceAsync(backJob, cancellationToken);
+
 				foreach (var trigger in backJob.Triggers)
 				{
-					var job = backJob with {};
-
-					trigger.Description = $"{job.Description} {trigger.Description}";
+					var job = backJob with { };
 					trigger.Setup(job, _jobsChannel.Writer.WriteAsync);
-
-					EventTriggerCollection.Instance.Add(trigger);
+					EventTriggerCollection.Instance.Add(trigger with { Description = $"{job.Description} {trigger.Description}" });
 				}
 			}
 			catch (Exception e)
@@ -82,14 +81,14 @@ namespace MissAlise.Background
 				if (handle != 1) return;
 
 				using (var handleScope = _scopesFactory.CreateScope())
-				{					
+				{
 					using var cancel = CancellationTokenSource.CreateLinkedTokenSource(hostCancel);
 
 					var handler = handleScope.ServiceProvider.GetRequiredService<BackgroundJobHandler<TJob>>();
-					
-					log.LogInformation("Обработка {job}", job);
-					job.SetCancel(cancel.Cancel);
 
+					log.LogInformation("Обработка {job}", job);
+
+					job.SetCancel(cancel.Cancel);
 					job.StartJob();
 
 					await handler.StartAsync(job, cancel.Token).ConfigureAwait(false);

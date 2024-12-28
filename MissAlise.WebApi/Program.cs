@@ -13,7 +13,6 @@ public class Program
 		var builder = WebApplication.CreateBuilder(args);
 		builder.AddServiceDefaults();
 
-		builder.Logging.AddDebug();
 		builder.Logging.AddConsole();
 
 		builder.Services.AddControllers().AddJsonOptions(options =>
@@ -39,8 +38,7 @@ public class Program
 		app.UseAuthentication();
 		app.UseAuthorization();		
 
-		app.UseHttpsRedirection();
-		app.UseStaticFiles();
+		app.UseHttpsRedirection();		
 
 		app.UseRouting();
 

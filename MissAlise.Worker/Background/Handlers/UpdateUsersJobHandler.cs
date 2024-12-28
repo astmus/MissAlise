@@ -1,10 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 using MissAlise.Background;
 using MissAlise.Utils;
+using MissAlise.Worker.Background;
 
-namespace MissAlise.AppHost.Background.Handlers
+namespace MissAlise.Worker.Background.Handlers
 {
-	public class UpdateUsersJobHandler : BackgroundJobHandler<UpdateUsersBackgroundTask>
+	public class UpdateUsersJobHandler : BackgroundJobHandler<UpdateUsersJob>
 	{
 		private readonly ILogger<UpdateUsersJobHandler> logger;
 
@@ -13,16 +14,16 @@ namespace MissAlise.AppHost.Background.Handlers
 			this.logger = logger;
 		}
 
-		public override async Task HandleAsync(UpdateUsersBackgroundTask backgroundTask, CancellationToken cancel)
+		public override async Task HandleAsync(UpdateUsersJob backgroundTask, CancellationToken cancel)
 		{
-			for (int i = 0; i < 1; i++)
+			for (var i = 0; i < 1; i++)
 			{
 				logger.LogInformation("{i} {time}", i, Time.Now);
 				await Task.Delay(1000);
 			}
 		}
 
-		public override async Task EndAsync(BackgroundJob<UpdateUsersBackgroundTask> job, CancellationToken cancel)
+		public override async Task EndAsync(BackgroundJob<UpdateUsersJob> job, CancellationToken cancel)
 		{
 			logger.LogInformation(" end task {task}", nameof(UpdateUsersJobHandler));
 			await base.EndAsync(job, cancel);

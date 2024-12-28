@@ -11,42 +11,19 @@ namespace MissAlise.Background
 		{
 			_log = logger;
 		}
-		//public override Task StartAsync(CancellationToken cancellationToken)
-		//{
-		//	DatabaseNotificationService.BackgroundJobStateChanged += OnBackgroundJobStateChanged;
-		//	return base.StartAsync(cancellationToken);
-		//}
 
-		//private void OnBackgroundJobStateChanged(BackgroundJobNotification notification)
-		//{
-		//	//if (notification.ServerId == StartupSettings.Current.ServerId) return;
-		//	var state = notification;
-		//	var trigger = EventTriggerCollection.Instance.FirstOrDefault(back => state.Key.EndsWith(back.JobKey) && back.Job.Organization.Id == notification.EntityId);
-		//	var job = trigger?.Job;
-		//	if (job == null) return;
-		//	job.Completed = state.Completed;
-		//	switch (state.Event)
-		//	{
-		//		case "start":
-		//		job.LastStart = state.Occured; // time zone надо будет еще доработать сейчас выставлены так что бы были один в один на моем компе и сервере
-		//		break;
-		//		case "end":
-		//		job.LastEnd = state.Occured; // time zone надо будет еще доработать сейчас выставлены так что бы были один в один на моем компе и сервере
-		//		break;
-		//		case "status":
-		//		switch (state.Status)
-		//		{
-		//			case "stop":
-		//			job.CancelJob();
-		//			break;
-		//			case "execute":
-		//			trigger?.Fire(default);
-		//			break;
-		//		}
-		//		break;
-		//	}
-		//}
+		public override Task StartAsync(CancellationToken cancellationToken)
+		{
+			_log.LogInformation("Start service");
+			return base.StartAsync(cancellationToken);
+		}
 
+		public override Task StopAsync(CancellationToken cancellationToken)
+		{
+			_log.LogInformation("Start service");
+			return base.StopAsync(cancellationToken);
+		}
+		
 		protected override async Task ExecuteAsync(CancellationToken cancellationToken)
 		{
 			do

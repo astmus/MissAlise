@@ -19,6 +19,7 @@
 		<ProjectReference Include="..\MissAlise.Background\MissAlise.Background.csproj" IsAspireProjectResource="false" />
 		<ProjectReference Include="..\MissAlise.DataBase\MissAlise.DataBase.csproj" IsAspireProjectResource="false" />
 		<ProjectReference Include="..\MissAlise.WebApi\MissAlise.WebApi.csproj" />
+		<ProjectReference Include="..\MissAlise.Worker\MissAlise.Worker.csproj" />
 	</ItemGroup>
 
 </Project>

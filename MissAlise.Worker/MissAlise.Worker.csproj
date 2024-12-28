@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-MissAlise.Worker-5e908781-9dc6-4fe1-91bd-1813344a09aa</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MissAlise.Background\MissAlise.Background.csproj" />
+    <ProjectReference Include="..\MissAlise.DataBase\MissAlise.DataBase.csproj" />
+    <ProjectReference Include="..\MissAlise.ServiceDefaults\MissAlise.Shared.csproj" />
+  </ItemGroup>
+</Project>
