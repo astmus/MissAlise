@@ -1,36 +1,49 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Microsoft.Graph;
+using MissAlise.WebApi.Auth;
 
 namespace MissAlise.WebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+
 public class LoginController : ControllerBase
 {
 	private readonly ILogger<LoginController> _logger;
-
-	public LoginController(ILogger<LoginController> logger, GraphServiceClient graphServiceClient)
+	private readonly AzureConfiguration config;
+	private readonly GraphServiceClient _graphServiceClient;
+	public LoginController(ILogger<LoginController> logger, GraphServiceClient graphServiceClient, IOptions<AzureConfiguration> options)
 	{
 		_logger = logger;
-		_graphServiceClient = graphServiceClient;
+		_graphServiceClient = graphServiceClient;	
+		config = options.Value;
 	}
-	private readonly GraphServiceClient _graphServiceClient;
+
 	public async Task ConnectAsync()
 	{
 		await Task.CompletedTask;
 	}
 		
-	[HttpGet("auth")]
-	public async Task<IActionResult> GetMe()
+	[HttpGet("auth")]	
+	public async Task<IActionResult> GetMe(CancellationToken cancel)
 	{
 		try
-		{
-			var me = await _graphServiceClient.Me.GetAsync();
-			return Ok(me);
+		{			
+			//var drive = users.Value.First().Drive;
+			var a = await _graphServiceClient.Me.GetAsync();
+			var data = await _graphServiceClient.Drives.GetAsync();
+			//var me = await _graphServiceClient.Drives.GetAsync();
+			return Ok(data);
 		}
 		catch (ServiceException ex)
 		{
 			return StatusCode(ex.ResponseStatusCode, ex.Message);
+		}
+		catch (Exception error)
+		{
+			int i = 0;
+			return StatusCode(error.HResult, error.Message);
 		}
 	}
 

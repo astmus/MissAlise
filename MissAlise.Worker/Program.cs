@@ -18,9 +18,9 @@ namespace MissAlise.Worker
 			builder.Services.AddHostedService<BackgroundJobsRootService>();
 			builder.Services
 				.AddBackgroundJob<UpdateUsersJob, UpdateUsersJobHandler>(
-					builder => builder.SetDescription("Обновление пользователей").SetWeight(10).AddTrigger(new UpdateUsersJob(64), "Ежеминутно").SetDelay(Time.Minute)
+					builder => builder.SetDescription("Обновление пользователей").AddTrigger(new UpdateUsersJob(64), "Ежеминутно").SetDelay(Time.Minute)
 				).AddBackgroundJob<SyncDataJob, SyncBackgroundTaskHandler>(
-					builder => builder.SetDescription("Синхронизация данных").SetWeight(10).IsDisabled().AddTrigger(new SyncDataJob(64), "Полуминутно").SetDelay(Time.Minute / 2).SetEnabled(false)
+					builder => builder.SetDescription("Синхронизация данных").AddTrigger(new SyncDataJob(64), "Полуминутно").SetDelay(Time.Minute / 2)
 				);
 
 			var host = builder.Build();

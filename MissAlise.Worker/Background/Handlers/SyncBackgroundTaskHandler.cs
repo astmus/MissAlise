@@ -21,7 +21,7 @@ namespace MissAlise.Worker.Background.Handlers
 			//var drive = await _graphServiceClient.Me.Drive.GetAsync();
 			//var root = await _graphServiceClient.Me.Drive.Root.Request().GetAsync();
 
-			for (var i = 0; i < 10; i++)
+			for (var i = 0; i < 5; i++)
 			{
 				_logger.LogInformation("{i} {time} {job}", i, Time.Now, nameof(SyncDataJob));
 				await Task.Delay(1000);
@@ -30,7 +30,7 @@ namespace MissAlise.Worker.Background.Handlers
 
 		public override async Task EndAsync(BackgroundJob<SyncDataJob> job, CancellationToken cancel)
 		{
-			_logger.LogInformation(" end task {task}", nameof(SyncDataJob));
+			//_logger.LogInformation(" end task {task}", nameof(SyncDataJob));
 			await base.EndAsync(job, cancel);
 		}
 	}

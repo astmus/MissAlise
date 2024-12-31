@@ -6,8 +6,8 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Azure.Identity" Version="1.13.1" />
-		<PackageReference Include="Microsoft.Graph" Version="5.67.0" />	
+		<PackageReference Include="Microsoft.Graph" Version="5.67.0" />
+		<PackageReference Include="Microsoft.Identity.Web" Version="3.5.0" />		
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\MissAlise.ServiceDefaults\MissAlise.Shared.csproj" />

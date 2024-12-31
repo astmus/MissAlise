@@ -9,6 +9,6 @@ public class AzureConfiguration
 	public string RedirectUri { get; set; }
 	public string Scopes { get; set; }
 	public IEnumerable<string> GetScopes()
-		=> initialScopes ?? (initialScopes = Scopes?.Split(','));
+		=> initialScopes ?? (initialScopes = Scopes?.Split(' '));
 	private IEnumerable<string> initialScopes;
 }
