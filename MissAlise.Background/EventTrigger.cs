@@ -20,7 +20,7 @@ namespace MissAlise.Background
 
 		public EventTrigger()
 		{
-			JobKey = Id<TJob>.UniqueName;			
+			JobKey = Identity<TJob>.Discriminator;			
 		}
 
 		public EventTrigger(TJob jobData = null) : this()

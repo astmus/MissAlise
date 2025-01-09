@@ -15,7 +15,8 @@ namespace MissAlise.Worker
 			builder.AddServiceDefaults();
 
 			builder.Services.AddPersistanceService(builder.Configuration);
-			builder.Services.AddHostedService<MissRootBackgroundWorker>();
+
+			builder.Services.AddBackgroundServer<MissAliseBackgroundServer>();
 			builder.Services
 				.AddBackgroundJob<UpdateUsersJob, UpdateUsersJobHandler>(
 					builder => builder.SetDescription("Обновление пользователей").AddTrigger(new UpdateUsersJob(64), "Ежеминутно").SetDelay(Time.Minute)

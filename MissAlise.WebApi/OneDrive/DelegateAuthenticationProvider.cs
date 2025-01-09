@@ -11,7 +11,7 @@ using Process = System.Diagnostics.Process;
 
 namespace MissAlise.WebApi.Auth
 {
-	public class DelegateAuthenticationProvider2 : IAuthenticationProvider
+	public class DelegateAuthenticationProvider : IAuthenticationProvider
 	{
 		private readonly AzureConfiguration config;
 		static AuthenticationResponse tokenResponse;
@@ -21,7 +21,7 @@ namespace MissAlise.WebApi.Auth
 			DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower
 		};
 
-		public DelegateAuthenticationProvider2(IOptions<AzureConfiguration> options)
+		public DelegateAuthenticationProvider(IOptions<AzureConfiguration> options)
 		{
 			this.config = options.Value;
 		}

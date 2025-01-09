@@ -11,13 +11,15 @@ namespace MissAlise.DataBase
 	{
 		public static IServiceCollection AddPersistanceService(this IServiceCollection services, IConfiguration appConfig)
 		{
+			services.AddScoped<IBackgroundJobRepository, BackgroundJobRepository>();
+
 			services.AddSingleton<IMongoClient>(new MongoClient("mongodb://localhost:27017"));
 			services.AddSingleton<IMongoDatabase>(sp =>
 			{
 				var client = sp.GetRequiredService<IMongoClient>();
-				return client.GetDatabase("Mongo"); // Название вашей базы данных
+				return client.GetDatabase("Mongo");
 			});
-			services.AddScoped<IBackgroundJobRepository, BackgroundJobRepository>();
+
 			
 			services.AddDbContextPool<UserMediaContext>(options =>
 				options.UseNpgsql(appConfig.GetConnectionString("missdb")));

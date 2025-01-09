@@ -3,25 +3,25 @@ using MissAlise.Utils;
 namespace MissAlise.Background
 {	
 	
-	public partial record BackgroundJob<TJob> : BackgroundJob, IBackgroundJob<TJob> where TJob : class
+	public partial record BackgroundJob<TJob> : BackgroundJob where TJob : class
 	{		
 		public TJob Data { get; set; } = null!;
-		public override string Key { get; init; } = Id<TJob>.UniqueName;
+		public override string Key { get; init; } = Identity<TJob>.Discriminator;
 		public ICollection<EventTrigger<TJob>> Triggers { get; set; } = new List<EventTrigger<TJob>>();
 
 		public static IBackgroundJobBuilder<TJob> CreateBuilder(BackgroundJob<TJob> job)
 			=> new Builder(job);
 
-		JobState _jobState = 0;
+		JobState jobState = 0;
 		public JobState GetState()
-			=> _jobState;
+			=> jobState;
 		public void PendingState()
-			=> _jobState = JobState.Pending;
+			=> jobState = JobState.Pending;
 		public void ResetState()
-			=> _jobState = JobState.ReadyToRun;
+			=> jobState = JobState.ReadyToRun;
 		public void StartJob()
 		{
-			_jobState = JobState.Executing;
+			jobState = JobState.Executing;
 			LastStart = Time.Now.TrimSeconds();
 		}
 		public void EndJob(JobCompletionState state)

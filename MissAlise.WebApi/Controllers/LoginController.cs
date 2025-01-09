@@ -12,42 +12,35 @@ namespace MissAlise.WebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-
 public class LoginController : ControllerBase
 {
-	private readonly ILogger<LoginController> _logger;
+	private readonly ILogger<LoginController> logger;
 	private readonly AzureConfiguration config;
-	private readonly GraphServiceClient _graphServiceClient;
+	private readonly GraphServiceClient graphServiceClient;
 	public LoginController(ILogger<LoginController> logger, GraphServiceClient graphServiceClient, IOptions<AzureConfiguration> options)
 	{
-		_logger = logger;
-		_graphServiceClient = graphServiceClient;	
+		this.logger = logger;
+		this.graphServiceClient = graphServiceClient;
 		config = options.Value;
 	}
 
-	public async Task ConnectAsync()
-	{
-		await Task.CompletedTask;
-	}
-		
-	[HttpGet("auth")]	
+	[HttpGet("auth")]
 	public async Task<IActionResult> GetMe(CancellationToken cancel)
 	{
 		try
 		{
-			
-			var me = await _graphServiceClient.Me.GetAsync();
-			var a = await _graphServiceClient.Me.Drives.GetAsync();
-var res=			JsonSerializer.Serialize(me, new JsonSerializerOptions() { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull });
-			var data = await _graphServiceClient.Drives[a.Value[0].Id].Root.GetAsync();
-			var childrewn = await _graphServiceClient.Drives[a.Value[0].Id].Items[data.Id].Children.GetAsync();
-			var sizes = childrewn.Value.OrderByDescending(item=> item.Size).ToList();
-			var ittt = await _graphServiceClient.Drives[a.Value[0].Id].Items["65FA3479348E5262%21226388"].Children.GetAsync();
-			var list = ittt.Value.Select(sel => _graphServiceClient.Drives[a.Value[0].Id].Items[sel.Id]).ToImmutableArray();
+			var me = await graphServiceClient.Me.GetAsync();
+			var a = await graphServiceClient.Me.Drives.GetAsync();
+			var res = JsonSerializer.Serialize(me, new JsonSerializerOptions() { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull });
+			var data = await graphServiceClient.Drives[a.Value[0].Id].Root.GetAsync();
+			var childrewn = await graphServiceClient.Drives[a.Value[0].Id].Items[data.Id].Children.GetAsync();
+			var sizes = childrewn.Value.OrderByDescending(item => item.Size).ToList();
+			var ittt = await graphServiceClient.Drives[a.Value[0].Id].Items["65FA3479348E5262%21226388"].Children.GetAsync();
+			var list = ittt.Value.Select(sel => graphServiceClient.Drives[a.Value[0].Id].Items[sel.Id]).ToImmutableArray();
 			Stopwatch sw = Stopwatch.StartNew();
 			await Parallel.ForEachAsync(list,
 			//list.AsParallel().WithMergeOptions(ParallelMergeOptions.NotBuffered).WithCancellation(cancel).ForAll(
-			async (item,cancel) =>
+			async (item, cancel) =>
 			{
 				var info = await item.GetAsync();
 				if (info.Photo is Photo photo && photo.TakenDateTime is DateTimeOffset timeOffset)
@@ -57,7 +50,7 @@ var res=			JsonSerializer.Serialize(me, new JsonSerializerOptions() { DefaultIgn
 					if (Directory.Exists(Path.Combine("D:\\Images", name)) == false)
 						Directory.CreateDirectory(path);
 					path = Path.Combine(path, info.Name);
-					await using (var streamWriter = System.IO.File.Create(path,4096))
+					await using (var streamWriter = System.IO.File.Create(path, 4096))
 					{
 						var stream = await item.Content.GetAsync(cancellationToken: cancel);
 						await stream.CopyToAsync(streamWriter, 4096, cancel);
@@ -66,7 +59,7 @@ var res=			JsonSerializer.Serialize(me, new JsonSerializerOptions() { DefaultIgn
 				}
 			});
 			sw.Stop();
-			
+
 			//foreach (var item in list)
 			//{
 			//	var info = await item.GetAsync();

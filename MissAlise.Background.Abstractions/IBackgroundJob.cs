@@ -11,17 +11,4 @@
 		JobCompletionState? State { get; set; }
 		int Weight { get; set; }
 	}
-
-	public interface IBackgroundJob<TJob> : IBackgroundJob where TJob : class
-	{
-		TJob Data { get; set; }
-		//ICollection<EventTrigger<TJob>> Triggers { get; set; }
-		JobState GetState();
-		void PendingState();
-		void ResetState();
-		void StartJob();
-		void EndJob(JobCompletionState state);
-		void CancelJob();
-		void SetCancel(Action cancelJob);
-	}
 }

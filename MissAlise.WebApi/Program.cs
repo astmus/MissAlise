@@ -23,10 +23,10 @@ public class Program
 
 		builder.Services.Configure<AzureConfiguration>(builder.Configuration.GetSection("AzureAd"));
 		var config = builder.Configuration.GetSection("AzureAd").Get<AzureConfiguration>();
-		builder.Services.AddTransient<DelegateAuthenticationProvider2>();
+		builder.Services.AddTransient<DelegateAuthenticationProvider>();
 		builder.Services.AddScoped<GraphServiceClient>(sp =>
 		{
-			return new GraphServiceClient(sp.GetRequiredService<DelegateAuthenticationProvider2>());
+			return new GraphServiceClient(sp.GetRequiredService<DelegateAuthenticationProvider>());
 		});	
 			
 		//builder.Services.AddAuthorization();

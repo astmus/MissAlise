@@ -1,18 +1,17 @@
-﻿using Microsoft.Extensions.Logging;
-using MissAlise.Background;
+﻿using MissAlise.Background;
 using MissAlise.Utils;
-using MissAlise.Worker.Background;
 
 namespace MissAlise.Worker.Background.Handlers
 {
 	public class SyncBackgroundTaskHandler : BackgroundJobHandler<SyncDataJob>
 	{
-		private readonly ILogger<SyncBackgroundTaskHandler> _logger;
-		//private readonly GraphServiceClient _graphServiceClient;
+		private readonly ILogger<SyncBackgroundTaskHandler> logger;
+		private readonly IServiceScopeFactory factory;		
 
-		public SyncBackgroundTaskHandler(ILogger<SyncBackgroundTaskHandler> logger/*, GraphServiceClient graphServiceClient*/)
+		public SyncBackgroundTaskHandler(ILogger<SyncBackgroundTaskHandler> logger/*, GraphServiceClient graphServiceClient*/, IServiceScopeFactory factory)
 		{
-			_logger = logger;
+			this.logger = logger;
+			this.factory = factory;
 			//_graphServiceClient = graphServiceClient;
 		}
 
@@ -23,7 +22,7 @@ namespace MissAlise.Worker.Background.Handlers
 
 			for (var i = 0; i < 5; i++)
 			{
-				_logger.LogInformation("{i} {time} {job}", i, Time.Now, nameof(SyncDataJob));
+				logger.LogInformation("{i} {time} {job}", i, Time.Now, nameof(SyncDataJob));
 				await Task.Delay(1000);
 			}
 		}

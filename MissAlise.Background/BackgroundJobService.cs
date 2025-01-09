@@ -7,42 +7,39 @@ using MissAlise.Utils;
 
 namespace MissAlise.Background
 {
-	public abstract class BackgroundJobService : BackgroundService
+	public class BackgroundJobService<TJob> : BackgroundService where TJob : class
 	{
-		public static BackgroundServer Server { get; protected set; }
-	}
-
-	public class BackgroundJobService<TJob> : BackgroundJobService where TJob : class
-	{
-		private readonly IServiceScopeFactory _scopesFactory;
+		BackgroundServer Server => BackgroundServer.Current;
+		private readonly IServiceScopeFactory scopesFactory;
 		private readonly ILogger<TJob> log;
-		Channel<BackgroundJob<TJob>> _jobsChannel;
+		private readonly IEventTriggersSource triggers;
+		private Channel<BackgroundJob<TJob>> jobsChannel;
 
-		public BackgroundJobService(IServiceScopeFactory scopesFactory, ILogger<TJob> log)
+		public BackgroundJobService(IServiceScopeFactory scopesFactory, ILogger<TJob> log, IEventTriggersSource triggers)
 		{
-			Server = new BackgroundServer() { Id = Guid.NewGuid() };
-			_scopesFactory = scopesFactory;
+			this.scopesFactory = scopesFactory;
 			this.log = log;
-			_jobsChannel = Channel.CreateUnbounded<BackgroundJob<TJob>>(new UnboundedChannelOptions() { SingleWriter = true });
+			this.triggers = triggers;
+			jobsChannel = Channel.CreateUnbounded<BackgroundJob<TJob>>(new UnboundedChannelOptions() { SingleWriter = true });
 		}
 
 		public sealed override async Task StartAsync(CancellationToken cancellationToken)
 		{
 			try
 			{
-				using var handleScope = _scopesFactory.CreateScope();
+				using var handleScope = scopesFactory.CreateScope();
 				var backJob = handleScope.ServiceProvider.GetRequiredService<BackgroundJob<TJob>>();
 				var jobsRepository = handleScope.ServiceProvider.GetRequiredService<IBackgroundJobRepository>();
-				var dbJob = await jobsRepository.LoadAsync<BackgroundJob<TJob>>(Id<TJob>.UniqueName, cancellationToken);
-				
+				var dbJob = await jobsRepository.LoadAsync<BackgroundJob<TJob>>(Identity<TJob>.Discriminator, cancellationToken);
+
 				if (dbJob?.ToString() != backJob.ToString()) // сравниваем строки потому что Triggers есть указатели на List которые конечно же будут разными, хорошо бы сравнивать и эти коллекции если они изменились, но это как нить потом
 					await jobsRepository.AddOrReplaceAsync(backJob, cancellationToken);
 
 				foreach (var trigger in backJob.Triggers)
 				{
 					var job = backJob with { };
-					trigger.Setup(job, _jobsChannel.Writer.WriteAsync);
-					EventTriggerCollection.Instance.Add(trigger with { Description = $"{job.Description} {trigger.Description}" });
+					trigger.Setup(job, jobsChannel.Writer.WriteAsync);
+					triggers.Add(trigger with { Description = $"{job.Description} {trigger.Description}" });
 				}
 			}
 			catch (Exception e)
@@ -57,7 +54,7 @@ namespace MissAlise.Background
 		{
 			while (!cancel.IsCancellationRequested)
 
-				await foreach (var job in _jobsChannel.Reader.ReadAllAsync(cancel).ConfigureAwait(false))
+				await foreach (var job in jobsChannel.Reader.ReadAllAsync(cancel).ConfigureAwait(false))
 				{
 					if (Server.IsOverdosed)
 						continue;
@@ -72,15 +69,12 @@ namespace MissAlise.Background
 
 		private async Task HandleAsync(BackgroundJob<TJob> job, CancellationToken hostCancel)
 		{
-			var handle = 0;
 			try
 			{
 				Server.IncreasePressure(job.Weight);
 				await Server.RentWorker(hostCancel);
-				handle = 1;//await _masterConnector.usp_fetchhandle(job, hostCancel).ConfigureAwait(false);
-				if (handle != 1) return;
 
-				using (var handleScope = _scopesFactory.CreateScope())
+				using (var handleScope = scopesFactory.CreateScope())
 				{
 					using var cancel = CancellationTokenSource.CreateLinkedTokenSource(hostCancel);
 
@@ -111,17 +105,11 @@ namespace MissAlise.Background
 			}
 			finally
 			{
-				if (handle != 0)
-				{
-					var result = 1;// await _masterConnector.usp_completehandle(job, hostCancel).ConfigureAwait(false);
-					if (result != 1)
-						log.LogWarning("Завершение обработки завершилось с результатом {result}", result);
-				}
 				job.ResetState();
 				Server.DecreasePressure(job.Weight);
 				Server.BackWorker();
 			}
 		}
 	}
-#nullable enable
 }
+#nullable restore

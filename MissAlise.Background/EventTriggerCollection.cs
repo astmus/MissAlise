@@ -3,8 +3,12 @@
 
 namespace MissAlise.Background
 {
-	public class EventTriggerCollection : BlockingCollection<EventTrigger>
+	public interface IEventTriggersSource : IEnumerable<EventTrigger>
 	{
-		public static readonly EventTriggerCollection Instance = new EventTriggerCollection();
+		void Add(EventTrigger item);
+	}
+
+	public class EventTriggerCollection : BlockingCollection<EventTrigger>, IEventTriggersSource
+	{	
 	}
 }

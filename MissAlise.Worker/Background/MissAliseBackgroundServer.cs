@@ -9,11 +9,11 @@ using MissAlise.DataBase.Models;
 
 namespace MissAlise.Worker.Background
 {
-	public class MissRootBackgroundWorker : BackgroundJobsRootService
+	public class MissAliseBackgroundServer : BackgroundServer
 	{
 		private readonly IServiceScopeFactory factory;
 
-		public MissRootBackgroundWorker(ILogger<MissRootBackgroundWorker> logger, IServiceScopeFactory factory) : base(logger)
+		public MissAliseBackgroundServer(ILogger<MissAliseBackgroundServer> logger, IServiceScopeFactory factory, IEventTriggersSource triggers) : base(logger, triggers)
 		{
 			this.factory = factory;
 		}
@@ -25,7 +25,7 @@ namespace MissAlise.Worker.Background
 			using var context = scope.ServiceProvider.GetRequiredService<UserMediaContext>();			
 			await context.Database.MigrateAsync(cancellationToken);
 
-			_log.LogInformation("Start service {Name}", nameof(MissRootBackgroundWorker));
+			log.LogInformation("Start service {Name}", nameof(MissAliseBackgroundServer));
 			await base.StartAsync(cancellationToken);
 		}
 	}
