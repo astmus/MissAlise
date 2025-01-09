@@ -1,4 +1,6 @@
-﻿using MissAlise.Background;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using MissAlise.Background;
 using MissAlise.Utils;
 
 namespace MissAlise.Worker.Background.Handlers

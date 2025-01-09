@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MissAlise.Background;
 using MissAlise.DataBase.Models;
 using MissAlise.Utils;

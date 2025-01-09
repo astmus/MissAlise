@@ -1,4 +1,4 @@
-@MissAlise.WebApi_HostAddress = https://localhost:7153
+@MissAlise.WebApi_HostAddress = http://alise.com:5001
 
 GET {{MissAlise.WebApi_HostAddress}}/weatherforecast/
 Accept: application/json
@@ -6,5 +6,9 @@ Accept: application/json
 ###
 
 GET {{MissAlise.WebApi_HostAddress}}/login/files
+
+###
+
+GET {{MissAlise.WebApi_HostAddress}}/
 
 ###

@@ -108,7 +108,8 @@ namespace MissAlise.WebApi.Auth
 		{
 			// Создаём HttpListener
 			var listener = new HttpListener();
-			listener.Prefixes.Add(redirectUri);
+
+			listener.Prefixes.Add("https://alise.com:8192/");
 			listener.Start();
 
 			Console.WriteLine($"Ожидаем запрос на {redirectUri}...");

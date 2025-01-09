@@ -1,6 +1,6 @@
 ﻿namespace MissAlise.WebApi.Auth;
 
-public class AzureConfiguration
+public class AzureAd
 {
 	public string Instance { get; set; }
 	public string TenantId { get; set; }
