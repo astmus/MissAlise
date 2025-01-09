@@ -3,11 +3,11 @@ using Microsoft.Extensions.Logging;
 
 namespace MissAlise.Background
 {
-	public sealed class BackgroundJobsRootService : BackgroundService
+	public class BackgroundJobsRootService : BackgroundService
 	{
-		private readonly ILogger _log;
+		protected readonly ILogger _log;
 
-		public BackgroundJobsRootService(ILogger<BackgroundJobsRootService> logger)
+		public BackgroundJobsRootService(ILogger logger)
 		{
 			_log = logger;
 		}

@@ -14,6 +14,7 @@ namespace MissAlise.WebApi.Auth
 	public class DelegateAuthenticationProvider2 : IAuthenticationProvider
 	{
 		private readonly AzureConfiguration config;
+		static AuthenticationResponse tokenResponse;
 		static readonly JsonSerializerOptions _options = new JsonSerializerOptions()
 		{
 			PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
@@ -27,6 +28,11 @@ namespace MissAlise.WebApi.Auth
 
 		public async Task AuthenticateRequestAsync(RequestInformation request, Dictionary<string, object>? additionalAuthenticationContext = null, CancellationToken cancellationToken = default)
 		{
+			if (tokenResponse != null)
+			{
+				request.Headers.Add("Authorization", $"Bearer {tokenResponse?.AccessToken}");
+				return;
+			}
 			var client = new HttpClient();
 
 			//var url = $"https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id={config.ClientId}&scope={config.Scopes}&response_type=code&redirect_uri={config.RedirectUri}";
@@ -77,8 +83,6 @@ namespace MissAlise.WebApi.Auth
 
 				// Отправка POST-запроса
 				var response = await client.PostAsync(tokenUrl, content);
-				AuthenticationResponse tokenResponse = null;
-
 
 				// Проверка результата
 				if (response.IsSuccessStatusCode)

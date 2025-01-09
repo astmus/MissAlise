@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Graph;
@@ -30,7 +29,7 @@ public class Program
 			return new GraphServiceClient(sp.GetRequiredService<DelegateAuthenticationProvider2>());
 		});	
 			
-		builder.Services.AddAuthorization();
+		//builder.Services.AddAuthorization();
 
 
 		// ƒобавление сервисов дл€ использовани€ Microsoft Graph API
@@ -70,18 +69,22 @@ public class Program
 		//	return client;
 		//});
 
+		builder.Services.AddProblemDetails();
 		var app = builder.Build();
-
+		if (app.Environment.IsDevelopment())
+			app.UseDeveloperExceptionPage();
+			else
+			app.UseExceptionHandler();
+		
 		app.UseRouting();
 		app.UseAuthentication();
 		app.UseAuthorization();
+		app.MapGet("/", void () => throw new Exception());
 
 		app.UseHttpsRedirection();
-
-
 		app.MapControllers();
 
-		app.MapDefaultEndpoints();
+		//app.MapDefaultEndpoints();
 
 		//// Configure the HTTP request pipeline.
 

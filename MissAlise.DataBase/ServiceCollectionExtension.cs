@@ -1,12 +1,15 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using MissAlise.Background;
+using MissAlise.DataBase.Models;
 using MongoDB.Driver;
 
 namespace MissAlise.DataBase
 {
 	public static class ServiceCollectionExtension
 	{
-		public static IServiceCollection AddPersistanceService(this IServiceCollection services)
+		public static IServiceCollection AddPersistanceService(this IServiceCollection services, IConfiguration appConfig)
 		{
 			services.AddSingleton<IMongoClient>(new MongoClient("mongodb://localhost:27017"));
 			services.AddSingleton<IMongoDatabase>(sp =>
@@ -15,6 +18,9 @@ namespace MissAlise.DataBase
 				return client.GetDatabase("Mongo"); // Название вашей базы данных
 			});
 			services.AddScoped<IBackgroundJobRepository, BackgroundJobRepository>();
+			
+			services.AddDbContextPool<UserMediaContext>(options =>
+				options.UseNpgsql(appConfig.GetConnectionString("missdb")));
 			return services;
 		}
 	}
