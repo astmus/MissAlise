@@ -28,9 +28,9 @@ public partial class UserMediaContext : DbContext
 	public virtual DbSet<User> Users { get; set; }
 
 	//protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-	//	=> optionsBuilder.UseNpgsql("Host=localhost;Database=missdb;Username=docker;Password=docker");
+	//	=> optionsBuilder.UseNpgsql("Host=192.168.0.3;Database=missdb;Username=docker;Password=docker");
 	//protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-	//=> optionsBuilder.UseNpgsql("Host=localhost;Database=files;Username=docker;Password=docker");
+	//=> optionsBuilder.UseNpgsql("Host=192.168.0.3;Database=files;Username=docker;Password=docker");
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		

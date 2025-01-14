@@ -1,7 +1,8 @@
-﻿using System.Threading.Channels;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MissAlise.Entities.OneDrive;
+using MissAlise.Interfaces;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -15,7 +16,8 @@ namespace MissAlise.Bot
 			private readonly ILogger<UpdateHandler> logger;
 			private readonly IServiceScopeFactory factory;
 			private Bot bot;
-
+			private IServiceScope currentScope;
+			private IServiceProvider services;
 			public UpdateHandler(ILogger<UpdateHandler> logger, IServiceScopeFactory factory)
 			{
 				this.logger = logger;
@@ -24,85 +26,94 @@ namespace MissAlise.Bot
 
 			protected override async Task ExecuteAsync(CancellationToken cancel)
 			{
-				try
+				while (!cancel.IsCancellationRequested)
 				{
-					using var scope = factory.CreateScope();
-					bot = scope.ServiceProvider.GetRequiredService<Bot>();
-
-					await foreach (var update in bot.Updates.Pending.ReadAllAsync(cancel))
+					try
 					{
-						if (cancel.IsCancellationRequested) break;
-						logger.LogInformation("Got update {Id}", update.Id);
-						await HandleUpdateAsync(bot.botClient, update, cancel).ConfigureAwait(false);
+						currentScope = factory.CreateScope();
+						bot = (services = currentScope.ServiceProvider).GetRequiredService<Bot>();
+						//azure = currentScope.ServiceProvider.GetRequiredService<AzureAd>();
+
+						await foreach (var update in bot.pendingUpdates.Reader.ReadAllAsync(cancel))
+						{
+							logger.LogInformation("Got update {Id}", update.Id);
+							await HandleUpdateAsync(bot.Client, update, cancel).ConfigureAwait(false);
+						}
+					}
+					catch (Exception error)
+					{
+						logger.LogError(error, error.Message);
 					}
 				}
-				catch (Exception error)
+			}
+
+			async Task<UserProfile> Authorize(ITelegramBotClient botClient, Update update, CancellationToken cancel)
+			{
+				var sender = update.GetCurrentMessage().From;
+				var db = currentScope.ServiceProvider.GetRequiredService<IUsersRepository>();
+				var profile = await db.FindAsync(sender.Id.ToString(), cancel);
+				if (profile == null)
 				{
-					logger.LogError(error, error.Message);
+					profile = new UserProfile()
+					{
+						Id = sender.Id.ToString(),
+						Telegram = new() { Id = sender.Id.ToString() }
+					};
+					await db.AddOrReplaceAsync(profile, cancel);
+				}
+
+				if (profile.AccessData == null)
+				{
+					var link = services.GetRequiredService<AzureAd>().AuthorizeLink(update.Message.Chat.Id.ToString());
+					await bot.Client.SetChatMenuButton(update.Message.Chat.Id, new MenuButtonWebApp() { Text = "Авторизоваться", WebApp = new WebAppInfo(link.ToString()) }, cancel);
+					await bot.Client.SendMessage(update.Message.Chat, "Необходима авторизация", parseMode: ParseMode.MarkdownV2, cancellationToken: cancel);
+					return null;
+				}
+				return profile;
+			}
+
+			public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancel)
+			{
+				if (await Authorize(botClient, update, cancel) is not UserProfile profile)
+					return;
+
+				using (var handleScope = currentScope.ServiceProvider.CreateScope())
+				{
+					var items = handleScope.ServiceProvider.GetRequiredService<IHandleContext>().Items;
+					items.Set(profile);
+					items.Set(update);
+
+					Task currentTask = update switch
+					{
+						//{ Command: not null } => HandleUpdateAsync(update, update.Command, stoppingToken),
+						{ CallbackQuery: not null } => HandleCallbackAsync(update, update.CallbackQuery, cancel),
+						{ InlineQuery: not null } => HandleSearchAsync(update, update.InlineQuery, cancel),
+						{ Message: not null } => handleScope.ServiceProvider.GetService< IAsyncHandler <Message>>().InvokeAsync(update.GetCurrentMessage(), cancel),
+						//{ ChosenInlineResult: not null } => Task.CompletedTask,
+						_ => Task.CompletedTask
+						//{ EditedMessage: not null } => UpdateType.EditedMessage,
+						//{ ChannelPost: not null } => UpdateType.ChannelPost,
+						//{ EditedChannelPost: not null } => UpdateType.EditedChannelPost,
+						//{ MessageReaction: not null } => UpdateType.MessageReaction,
+						//{ MessageReactionCount: not null } => UpdateType.MessageReactionCount,
+						//{ ShippingQuery: not null } => UpdateType.ShippingQuery,
+						//{ PreCheckoutQuery: not null } => UpdateType.PreCheckoutQuery,
+						//{ Poll: not null } => UpdateType.Poll,
+						//{ PollAnswer: not null } => UpdateType.PollAnswer,
+						//{ MyChatMember: not null } => UpdateType.MyChatMember,
+						//{ ChatMember: not null } => UpdateType.ChatMember,
+						//{ ChatJoinRequest: not null } => UpdateType.ChatJoinRequest,
+						//{ ChatBoost: not null } => UpdateType.ChatBoost,
+						//{ RemovedChatBoost: not null } => UpdateType.RemovedChatBoost,
+					};
+					await currentTask.ConfigureAwait(false);
 				}
 			}
 
-			public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
-			{
-				Task currentTask = Task.CompletedTask;
-				var link = "[link](https://login.microsoftonline.com/common/oauth2/v2.0/authorize?scope=offline_access+user.read+files.readwrite+openid+profile+files.readwrite.all&response_type=code&client_id=bfb48d29-c618-4084-a8cc-e28fee1f628d&redirect_uri=https%3A%2F%2F95.139.93.95%2F&prompt=select_account&client_info=1&state=" + update.Message.Chat.Id+")";
-				switch (update.Type)
-				{
-					case UpdateType.Unknown:
-					break;
-					case UpdateType.Message:
-					currentTask = bot.botClient.SendMessage(update.Message.Chat, link,parseMode:ParseMode.MarkdownV2, cancellationToken: cancellationToken);
-					break;
-					case UpdateType.InlineQuery:
-					break;
-					case UpdateType.ChosenInlineResult:
-					break;
-					case UpdateType.CallbackQuery:
-					break;
-					case UpdateType.EditedMessage:
-					break;
-					case UpdateType.ChannelPost:
-					break;
-					case UpdateType.EditedChannelPost:
-					break;
-					case UpdateType.ShippingQuery:
-					break;
-					case UpdateType.PreCheckoutQuery:
-					break;
-					case UpdateType.Poll:
-					break;
-					case UpdateType.PollAnswer:
-					break;
-					case UpdateType.MyChatMember:
-					break;
-					case UpdateType.ChatMember:
-					break;
-					case UpdateType.ChatJoinRequest:
-					break;
-					case UpdateType.MessageReaction:
-					break;
-					case UpdateType.MessageReactionCount:
-					break;
-					case UpdateType.ChatBoost:
-					break;
-					case UpdateType.RemovedChatBoost:
-					break;
-					case UpdateType.BusinessConnection:
-					break;
-					case UpdateType.BusinessMessage:
-					break;
-					case UpdateType.EditedBusinessMessage:
-					break;
-					case UpdateType.DeletedBusinessMessages:
-					break;
-					case UpdateType.PurchasedPaidMedia:
-					break;
-					default:
-					currentTask = bot.botClient.SendMessage(update.Message.Chat, update.Message.Text, ParseMode.Markdown, cancellationToken: cancellationToken);
-					break;
-				}
-				await currentTask.ConfigureAwait(false);
-			}
+			
+			private async Task HandleSearchAsync(Update update, InlineQuery inlineQuery, object stoppingToken) => throw new NotImplementedException();
+			private async Task HandleCallbackAsync(Update update, CallbackQuery callbackQuery, object stoppingToken) => throw new NotImplementedException();
 		}
 	}
 }
+

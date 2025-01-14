@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using MissAlise.Background;
 using MissAlise.DataBase.Models;
 
@@ -17,6 +15,7 @@ namespace MissAlise.Worker.Background
 
 		public override async Task StartAsync(CancellationToken cancellationToken)
 		{
+
 			using var scope = factory.CreateScope();
 
 			using var context = scope.ServiceProvider.GetRequiredService<UserMediaContext>();			

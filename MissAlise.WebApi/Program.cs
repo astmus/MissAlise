@@ -1,7 +1,12 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Azure.Core;
+using Azure.Identity;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Web;
+using Microsoft.Kiota.Abstractions.Authentication;
 using MissAlise.WebApi.Auth;
 
 namespace MissAlise.WebApi;
@@ -13,22 +18,17 @@ public class Program
 		var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(args);
 		builder.AddServiceDefaults();
 
-		builder.Logging.AddConsole();
-
 		builder.Services.AddControllers().AddJsonOptions(options =>
 		{
 			options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
 			options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 			options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
 		});
-
+	
 		builder.Services.Configure<AzureConfiguration>(builder.Configuration.GetSection("AzureAd"));
 		//var config = builder.Configuration.GetSection("AzureAd").Get<AzureConfiguration>();
-		builder.Services.AddTransient<DelegateAuthenticationProvider>();
-		builder.Services.AddScoped<GraphServiceClient>(sp =>
-		{
-			return new GraphServiceClient(sp.GetRequiredService<DelegateAuthenticationProvider>());
-		});			
+		builder.Services.AddScoped<IAuthenticationProvider, DelegateAuthenticationProvider>();
+		builder.Services.AddScoped<GraphServiceClient>();
 		
 		// ƒобавление сервисов дл€ использовани€ Microsoft Graph API
 		//builder.Services.AddScoped<GraphServiceClient>();
@@ -91,7 +91,7 @@ public class Program
 		//app.UseAuthorization();
 
 		//app.MapControllers();
-
+		
 		app.Run();
 	}
 }

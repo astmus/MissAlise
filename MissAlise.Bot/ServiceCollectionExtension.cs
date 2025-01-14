@@ -1,45 +1,40 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MissAlise.Background;
+using MissAlise.DataBase.Models;
+using MissAlise.Entities.OneDrive;
+using MissAlise.Interfaces;
+using MongoDB.Driver;
+using Telegram.Bot.Types;
 
 namespace MissAlise.Bot
 {
 	public static class ServiceCollectionExtension
 	{
-		public static IServiceCollection AddPresentationBot(this IServiceCollection services, IConfiguration appConfig)
+		public static IServiceCollection AddBotService(this IServiceCollection services, IConfiguration appConfig)
 		{
 			services
-				.AddSingleton<Bot>().Configure<BotConfig>(appConfig.GetSection(nameof(BotConfig)))
+				.AddScoped<IHandleContext, HandleContext>()
+				.AddScoped<IContextItems, ContextItems>()
+				.AddSingleton<Bot>().Configure<BotConfig>(appConfig.GetSection(nameof(BotConfig)))				
+				.AddTransient<IAuthorizationCompleter, AuthorizationCompleteHandler>()
 				.AddHostedService<Bot.UpdateReceiver>()
 				.AddHostedService<Bot.UpdateHandler>()
-				.AddHttpClient<Bot.UpdatesChannel>().ConfigureHttpClient(client =>
-				{
-					client.Timeout = TimeSpan.FromMinutes(5); // Бесконечный тайм-аут на стороне HttpClient (важно для Long Polling)
-				}).AddStandardResilienceHandler(config =>
-				{
-					TimeSpan timeSpan = TimeSpan.FromMinutes(3);
-					config.AttemptTimeout.Timeout = timeSpan;
-					config.CircuitBreaker.SamplingDuration = timeSpan * 2;
-					config.TotalRequestTimeout.Timeout = timeSpan * 3;
-				}); ;
-				//.AddPolicyHandler(GetLongPollingPolicy())
-				//.UseSocketsHttpHandler(soket => soket.Configure((handler, sp) => handler.PooledConnectionIdleTimeout = TimeSpan.FromMinutes(3)));
-			//.ConfigureHttpClient(http=>http.Timeout = TimeSpan.FromMinutes(8)).SetHandlerLifetime(TimeSpan.FromMinutes(8))
-			//.AddTransientHttpErrorPolicy(policyBuilder =>
-			//																																policyBuilder.WaitAndRetryAsync(3, retryNumber => TimeSpan.FromMilliseconds(600)));
+				.AddHttpClient("bot")
+				.UseSocketsHttpHandler((handler, _) => handler.PooledConnectionLifetime = TimeSpan.FromMinutes(2)) // Recreate connection every 2 minutes
+				.SetHandlerLifetime(Timeout.InfiniteTimeSpan);
+			
 			return services;
 		}
-		//static IAsyncPolicy<HttpResponseMessage> GetLongPollingPolicy()
-		//{
-		//	// Политика для обработки ошибок и повторных попыток
-		//	return HttpPolicyExtensions
-		//		.HandleTransientHttpError() // HTTP 5xx, 408
-		//		.Or<TaskCanceledException>() // Учитываем отмену запроса (важно для тайм-аутов)
-		//		.WaitAndRetryAsync(3, // Количество попыток
-		//			retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), // Экспоненциальная задержка
-		//			(outcome, timespan, retryCount, context) =>
-		//			{
-		//				Console.WriteLine($"Повтор #{retryCount} через {timespan.TotalSeconds} секунд из-за {outcome.Exception?.Message ?? outcome.Result.StatusCode.ToString()}.");
-		//			});
-		//}
+
+		public static IServiceCollection AddChatMessageHandler<THandler>(this IServiceCollection services) where THandler:class, IAsyncHandler<Message>
+			=> services.AddScoped<IAsyncHandler<Message>, THandler>();		
+
+		static internal Chat GetCurrentChat(this Update update)
+			=> update.GetCurrentMessage()?.Chat ?? new Chat() { Id = update.GetCurrentMessage()?.From?.Id ?? update.InlineQuery?.From.Id ?? update.CallbackQuery?.From.Id ?? update.ChosenInlineResult.From.Id };
+
+		static internal Message GetCurrentMessage(this Update update)
+			=> update.Message ?? update.CallbackQuery?.Message ?? update.EditedMessage ?? update.ChannelPost ?? update.EditedChannelPost ?? update.Message?.PinnedMessage ?? default;
 	}
 }

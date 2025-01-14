@@ -41,7 +41,7 @@ namespace MissAlise.WebApi.Auth
 					.WithAuthority(new Uri($"https://login.microsoftonline.com/common/oauth2/v2.0/authorize"))
 					.WithRedirectUri(config.RedirectUri)
 					.Build();
-
+					
 			var url = await cca.GetAuthorizationRequestUrl(config.GetScopes()).ExecuteAsync();
 			try
 			{

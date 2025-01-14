@@ -1,0 +1,22 @@
+using System.Collections.Concurrent;
+using MissAlise.Interfaces;
+using MissAlise.Utils;
+
+namespace MissAlise.Bot
+{
+	internal class ContextItems : ConcurrentDictionary<string, object>, IContextItems
+	{
+		public void Set<T>(T value, string key = null) where T : class
+			=> AddOrUpdate<T>(key ?? Identity<T>.Name,
+					(k, w) => w,
+					(k, o, w) => this[k] = w,
+					value);
+
+		public T Get<T>(string key = null) where T : class
+		{
+			if (TryGetValue(key ?? Identity<T>.Name, out var r) && r is T result)
+				return result;
+			return default;
+		}
+	}
+}

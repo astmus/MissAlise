@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MissAlise.Background;
 using MissAlise.DataBase.Models;
+using MissAlise.Interfaces;
 using MongoDB.Driver;
 
 namespace MissAlise.DataBase
@@ -12,6 +13,7 @@ namespace MissAlise.DataBase
 		public static IServiceCollection AddPersistanceService(this IServiceCollection services, IConfiguration appConfig)
 		{
 			services.AddScoped<IBackgroundJobRepository, BackgroundJobRepository>();
+			services.AddScoped<IUsersRepository, UsersRepository>();
 
 			services.AddSingleton<IMongoClient>(new MongoClient("mongodb://localhost:27017"));
 			services.AddSingleton<IMongoDatabase>(sp =>

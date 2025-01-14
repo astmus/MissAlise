@@ -1,10 +1,10 @@
-using System.Threading;
-using MissAlise.Entities.YandexTracker;
+using MissAlise.Entities.OneDrive;
 
 namespace MissAlise.Interfaces
 {
-	public interface IUsersRepository : IRepository<User>
+	public interface IUsersRepository
 	{
-		Task<(bool Abort, long RowsCopied, DateTime StartTime)> AddOrUpdateUsersAsync(IEnumerable<User> users, CancellationToken cancel);
+		Task AddOrReplaceAsync(UserProfile user, CancellationToken cancel);
+		Task<UserProfile> FindAsync(string name, CancellationToken cancel);
 	}
 }

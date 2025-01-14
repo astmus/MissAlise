@@ -28,27 +28,28 @@ public class AuthController : ControllerBase
 
 	[HttpGet]
 	public async Task Get([FromServices] HttpClient client)
-	{
-		await Task.CompletedTask;
+	{		
 		var query = HttpContext.Request.QueryString;
 
 		string authorizationCode = HttpContext.Request.Query["code"];
+		if (int.TryParse(HttpContext.Request.Query["state"], out var userId))
+		{ 
+			 
+		}
 
 		var tokenUrl = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
 
 		var content = new FormUrlEncodedContent(new[]
 		{
 					new KeyValuePair<string, string>("client_id", config.ClientId),
-					new KeyValuePair<string, string>("redirect_uri", config.RedirectUri),
+					new KeyValuePair<string, string>("redirect_uri", config.RedirectUri+"signin-oidc"),
 					new KeyValuePair<string, string>("client_secret", config.ClientSecret),
 					new KeyValuePair<string, string>("code", authorizationCode),
 					new KeyValuePair<string, string>("grant_type", "authorization_code")
 				});
-
-		// Отправка POST-запроса
+						
 		var response = await client.PostAsync(tokenUrl, content);
 
-		// Проверка результата
 		if (response.IsSuccessStatusCode)
 		{
 			var str = await response.Content.ReadAsStringAsync();
@@ -57,33 +58,14 @@ public class AuthController : ControllerBase
 		}
 		else
 		{
+			var res = await response.Content.ReadAsStringAsync();
 			Console.WriteLine("Error: " + response.StatusCode);
 		}
-
 		//request.Headers.Add("Authorization", $"Bearer {tokenResponse?.AccessToken}");
 	}
-	static JsonSerializerOptions _options = new JsonSerializerOptions()
+	static readonly JsonSerializerOptions _options = new JsonSerializerOptions()
 	{
 		PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
 		DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower
-	};
-	//[HttpPost("upload")]
-	//public async Task<IActionResult> UploadFile([FromForm] IFormFile file)
-	//{
-	//	try
-	//	{
-	//		using var stream = file.OpenReadStream();
-	//		var uploadedFile = await _graphServiceClient.Me.Drive.Root
-	//			.ItemWithPath(file.FileName)
-	//			.Content
-	//			.Request()
-	//			.PutAsync<DriveItem>(stream);
-
-	//		return Ok(uploadedFile);
-	//	}
-	//	catch (ServiceException ex)
-	//	{
-	//		return StatusCode((int)ex.StatusCode, ex.Message);
-	//	}
-	//}
+	};	
 }

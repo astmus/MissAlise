@@ -9,6 +9,5 @@ namespace MissAlise.Bot
 		}
 
 		public string ApiKey { get; set; }
-		public string AuthorizationLink { get; set; }
 	}
 }
