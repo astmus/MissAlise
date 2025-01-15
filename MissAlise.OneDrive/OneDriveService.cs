@@ -5,16 +5,17 @@ using MissAlise.Interfaces;
 
 namespace MissAlise.OneDrive
 {
-	public class OneDriveRemoteStorageService : IRemoteStorageService
+	public class OneDriveService : IRemoteStorageService
 	{
 		private readonly AzureAd azureOptions;
 		private readonly GraphServiceClient client;
 
-		public OneDriveRemoteStorageService(AzureAd azureOptions, GraphServiceClient client)
+		public OneDriveService(AzureAd azureOptions, GraphServiceClient client)
 		{
 			this.azureOptions = azureOptions;
 			this.client = client;
 		}
+
 		public Uri CreateAuthorizeLink(string stateIdentifier)
 		{
 			UriBuilder b = new UriBuilder(azureOptions.AuthPath);

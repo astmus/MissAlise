@@ -1,6 +1,4 @@
-﻿using Telegram.Bot;
-
-namespace MissAlise.Bot
+﻿namespace MissAlise.Bot
 {
 	internal class BotConfig
 	{		

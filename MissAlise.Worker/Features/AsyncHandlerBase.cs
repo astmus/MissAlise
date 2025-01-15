@@ -1,7 +1,7 @@
 ﻿using MissAlise.Interfaces;
 
 namespace MissAlise.Worker.Features
-{
+{	
 	public abstract class AsyncHandlerBase<TData> : IAsyncHandler<TData>
 	{
 		protected int isWork;

@@ -1,21 +1,37 @@
 ﻿using Azure.Core;
 using MissAlise.Entities.OneDrive;
+using MissAlise.Interfaces;
 
-namespace MissAlise.Bot
+namespace MissAlise.OneDrive
 {
 	class OAuthTokenCredentials : TokenCredential
 	{
 		private readonly UserProfile profile;
+		private readonly IOneDriveCredentialsService credentialService;
+		private readonly AzureAd config;
+		private readonly IUsersRepository repository;
 
-		public OAuthTokenCredentials(UserProfile profile)
+		public OAuthTokenCredentials(UserProfile profile, IOneDriveCredentialsService credentialService, AzureAd config, IUsersRepository repository)
 		{
 			this.profile = profile;
+			this.credentialService = credentialService;
+			this.config = config;
+			this.repository = repository;
 		}
+
 		public override async ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
 		{
-			await Task.CompletedTask;
-
-			return new AccessToken(profile.AccessData.AccessToken, DateTimeOffset.Now.AddSeconds(profile.AccessData.ExpiresIn));
+			if (DateTimeOffset.UtcNow > profile.AccessData.ExpiredAfter)
+			{
+				var response = await credentialService.RefreshCredentials(config, profile.AccessData.RefreshToken, cancellationToken).ConfigureAwait(false);
+				if (response.IsSuccessful)
+				{
+					profile.AccessData = response.Content;
+					profile.AccessData.ExpiredAfter = DateTimeOffset.UtcNow.AddSeconds(response.Content.ExpiresIn);
+					_ = repository.AddOrReplaceAsync(profile, cancellationToken);
+				}
+			}
+			return new AccessToken(profile.AccessData.AccessToken, profile.AccessData.ExpiredAfter);
 		}
 		public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken)
 		{

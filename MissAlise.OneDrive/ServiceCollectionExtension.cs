@@ -5,10 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Graph;
 using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
-using MissAlise.OneDrive;
 using Refit;
 
-namespace MissAlise.Bot
+namespace MissAlise.OneDrive
 {
 	public static class ServiceCollectionExtension
 	{
@@ -16,15 +15,21 @@ namespace MissAlise.Bot
 		{
 			var settings = new RefitSettings()
 			{
-				ContentSerializer = new SystemTextJsonContentSerializer(new System.Text.Json.JsonSerializerOptions() 
+				ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions()
 				{
 					PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
 				})
 			};
-			services.AddRefitClient<IOneDriveApi>(settings).ConfigureHttpClient(client => client.BaseAddress = new Uri("https://login.microsoftonline.com") );
+			
+			services.AddRefitClient<IOneDriveCredentialsService>(settings).ConfigureHttpClient(client => client.BaseAddress = new Uri("https://login.microsoftonline.com"));
 			services.AddScoped(sp => sp.GetRequiredService<IHandleContext>().GetCurrent<UserProfile>());
-			services.AddScoped<TokenCredential, OAuthTokenCredentials>().AddScoped<IRemoteStorageService, OneDriveRemoteStorageService>();
-			services.AddScoped<GraphServiceClient>(SP=>ActivatorUtilities.CreateInstance<GraphServiceClient>(SP));
+			services.AddScoped<TokenCredential, OAuthTokenCredentials>().AddScoped<IRemoteStorageService, OneDriveService>();
+			services.AddScoped(sp =>
+			{
+				var http = GraphClientFactory.Create(ActivatorUtilities.CreateInstance<OAuthTokenCredentials>(sp));
+				sp.GetRequiredService<IHandleContext>().Items.Set(http);
+				return ActivatorUtilities.CreateInstance<GraphServiceClient>(sp,http);
+			});
 			return services;
 		}
 	}

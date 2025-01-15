@@ -76,7 +76,7 @@ namespace MissAlise.Bot
 			{
 				if (await Authorize(botClient, update, cancel) is not UserProfile profile)
 					return;
-
+				await bot.Client.SetMyCommands(bot.Commands, BotCommandScope.Chat(update.GetCurrentChat().Id), cancellationToken: cancel);
 				using (var handleScope = currentScope.ServiceProvider.CreateScope())
 				{
 					var items = handleScope.ServiceProvider.GetRequiredService<IHandleContext>().Items;

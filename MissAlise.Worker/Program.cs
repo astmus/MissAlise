@@ -9,10 +9,13 @@ using MissAlise.Bot;
 using MissAlise.DataBase;
 using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
+using MissAlise.OneDrive;
 using MissAlise.Utils;
 using MissAlise.Worker.Background;
 using MissAlise.Worker.Background.Handlers;
 using MissAlise.Worker.Features.Bot;
+using MissAlise.Worker.Features.Sync;
+using MissAlise.Worker.Providers;
 
 namespace MissAlise.Worker
 {
@@ -34,10 +37,14 @@ namespace MissAlise.Worker
 					builder => builder.SetDescription("Обновление пользователей").AddTrigger(new UpdateUsersJob(64), "Ежеминутно").SetDelay(Time.Minute)
 				).AddBackgroundJob<SyncDataJob, SyncBackgroundTaskHandler>(
 					builder => builder.SetDescription("Синхронизация данных").AddTrigger(new SyncDataJob(64), "Полуминутно").SetDelay(Time.Minute / 2)
+				).AddBackgroundJob<SyncOneDriveFolderJob, SyncOneDriveFolderJobHandler>(
+					builder => builder.SetDescription("Синхронизация папки OneDrive")//.AddTrigger(new SyncOneDriveFolderJob(default,default), "1 min").SetDelay(Time.Minute)
 				);
 
 			builder.Services.AddBotService(builder.Configuration).AddChatMessageHandler<ChatMessageHandler>()
 			.AddOneDrive(builder.Configuration)
+			.AddScoped<IAsyncHandlersProvider, AsyncHandlersProvider>()
+			.AddScoped<IAsyncHandler<SyncCommand>, SyncCommandHandler>()
 			.AddTransient<AzureAd>(sp
 					=> sp.GetRequiredService<IConfiguration>().GetSection(nameof(AzureAd)).Get<AzureAd>());
 
@@ -53,7 +60,7 @@ namespace MissAlise.Worker
 			if (ctx.Request.Headers.Referer.Any(refer => refer == config.Instance) == false)			
 				return Results.Forbid();
 			
-			var response = await ctx.RequestServices.GetRequiredService<IOneDriveApi>().GetCredentialsByCode(config, code, cancel);
+			var response = await ctx.RequestServices.GetRequiredService<IOneDriveCredentialsService>().GetCredentialsByCode(config, code, cancel);
 			
 			if (!response.IsSuccessful)			
 				return Results.Problem(response.Error.ToString(),null, (int)response.StatusCode);

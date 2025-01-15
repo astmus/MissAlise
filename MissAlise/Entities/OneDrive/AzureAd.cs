@@ -4,8 +4,6 @@ namespace MissAlise.Entities.OneDrive;
 
 public class AzureAd
 {
-	private IEnumerable<string> initialScopes;
-
 	public string Instance { get; set; }
 	public string TenantId { get; set; }
 	public string ClientId { get; set; }
@@ -15,8 +13,7 @@ public class AzureAd
 	public string Scopes { get; set; }
 	public string AuthPath { get; set; }
 	public string TokenPath { get; set; }
-	public IEnumerable<string> GetScopes()
-		=> initialScopes ?? (initialScopes = Scopes?.Split(' '));
+
 	public Uri AuthorizeLink(string stateIdentifier)
 	{
 		UriBuilder b = new UriBuilder(AuthPath);

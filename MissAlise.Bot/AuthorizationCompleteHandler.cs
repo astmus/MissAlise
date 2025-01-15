@@ -24,7 +24,9 @@ namespace MissAlise.Bot
 			await repository.AddOrReplaceAsync(profile, default);
 			var chatId = int.Parse(state);
 			//await bot.Client.SetChatMenuButton(chatId, new MenuButtonCommands() {  }, default);
+			
 			await bot.Client.SendMessage(chatId, "Авторизация успешна", parseMode: ParseMode.MarkdownV2, cancellationToken: default);
+			await bot.Client.SetMyCommands(bot.Commands, BotCommandScope.Chat(chatId), cancellationToken: cancel);
 		}
 	}
 }

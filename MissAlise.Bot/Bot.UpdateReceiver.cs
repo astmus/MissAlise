@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
+using Telegram.Bot.Types;
 
 namespace MissAlise.Bot
 {
@@ -29,6 +30,7 @@ namespace MissAlise.Bot
 				try
 				{
 					bot.botInfo = await bot.Client.GetMe(cancellationToken).ConfigureAwait(false);
+					await bot.Client.DeleteMyCommands(cancellationToken:cancellationToken);				
 				}
 				catch (Exception error)
 				{
@@ -61,8 +63,7 @@ namespace MissAlise.Bot
 					var updatesQueue = new QueuedUpdateReceiver(bot.Client, bot.receiveOptions, bot.HandleErrorAsync);
 					
 					await foreach (var update in updatesQueue.WithCancellation(cancel))
-					{
-						if (cancel.IsCancellationRequested) break;
+					{						
 						logger.LogInformation("Got update {Id}", update.Id);
 						await bot.pendingUpdates.Writer.WriteAsync(update).ConfigureAwait(false);
 					}

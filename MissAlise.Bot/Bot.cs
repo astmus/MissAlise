@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
-using Telegram.Bot.Requests.Abstractions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -26,7 +25,7 @@ namespace MissAlise.Bot
 			}
 		);
 
-
+		public IEnumerable<BotCommand> Commands => [new BotCommand() { Command = "sync", Description = "синхронизировать файлы" }];
 		public Bot(IOptions<BotConfig> options, IHttpClientFactory factory, ILogger<Bot> log)
 		{
 			botOptions = options;			
