@@ -9,9 +9,9 @@ namespace MissAlise.OneDrive
 		private readonly UserProfile profile;
 		private readonly IOneDriveCredentialsService credentialService;
 		private readonly AzureAd config;
-		private readonly IUsersRepository repository;
+		private readonly IUserProfilesRepository repository;
 
-		public OAuthTokenCredentials(UserProfile profile, IOneDriveCredentialsService credentialService, AzureAd config, IUsersRepository repository)
+		public OAuthTokenCredentials(UserProfile profile, IOneDriveCredentialsService credentialService, AzureAd config, IUserProfilesRepository repository)
 		{
 			this.profile = profile;
 			this.credentialService = credentialService;

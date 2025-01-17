@@ -1,8 +1,8 @@
 ﻿namespace MissAlise.Bot
 {
-	internal class BotConfig
+	internal class BotConfiguration
 	{		
-		public BotConfig()
+		public BotConfiguration()
 		{	
 		}
 

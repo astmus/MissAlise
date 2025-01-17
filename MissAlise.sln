@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.Bot", "MissAlise.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.OneDrive", "MissAlise.OneDrive\MissAlise.OneDrive.csproj", "{61462F03-5EF4-438C-A694-BE595C5D92E5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.Application", "MissAlise.Application\MissAlise.Application.csproj", "{868C3DD9-5668-47A6-AFAF-1D091BB9011F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{61462F03-5EF4-438C-A694-BE595C5D92E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61462F03-5EF4-438C-A694-BE595C5D92E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61462F03-5EF4-438C-A694-BE595C5D92E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{868C3DD9-5668-47A6-AFAF-1D091BB9011F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{868C3DD9-5668-47A6-AFAF-1D091BB9011F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{868C3DD9-5668-47A6-AFAF-1D091BB9011F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{868C3DD9-5668-47A6-AFAF-1D091BB9011F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -88,5 +94,6 @@ Global
 		{87021025-FB55-4036-BD4C-CEA19E79DDDE} = {7DF210E5-96C3-4716-AD1E-F321B6777F1D}
 		{A9802D55-765D-4E16-864F-D037E73A6C7D} = {6EDC1486-EB91-4D1F-93D6-F18BDA8D2FD0}
 		{61462F03-5EF4-438C-A694-BE595C5D92E5} = {029C5ED3-ABC7-4423-9D81-216ABB8D6E54}
+		{868C3DD9-5668-47A6-AFAF-1D091BB9011F} = {7DF210E5-96C3-4716-AD1E-F321B6777F1D}
 	EndGlobalSection
 EndGlobal

@@ -14,7 +14,7 @@ namespace MissAlise.Bot
 		public ITelegramBotClient Client { get; }
 
 		private User botInfo;
-		private IOptions<BotConfig> botOptions;		
+		private IOptions<BotConfiguration> botOptions;		
 		private readonly ILogger<Bot> log;
 		private ReceiverOptions receiveOptions;
 		private readonly Channel<Update> pendingUpdates = Channel.CreateUnbounded<Update>(
@@ -26,7 +26,7 @@ namespace MissAlise.Bot
 		);
 
 		public IEnumerable<BotCommand> Commands => [new BotCommand() { Command = "sync", Description = "синхронизировать файлы" }];
-		public Bot(IOptions<BotConfig> options, IHttpClientFactory factory, ILogger<Bot> log)
+		public Bot(IOptions<BotConfiguration> options, IHttpClientFactory factory, ILogger<Bot> log)
 		{
 			botOptions = options;			
 			this.log = log;

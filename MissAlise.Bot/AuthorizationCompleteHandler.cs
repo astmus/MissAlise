@@ -1,4 +1,5 @@
-﻿using MissAlise.Entities.OneDrive;
+﻿using MissAlise.Application.Interfaces;
+using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -9,9 +10,9 @@ namespace MissAlise.Bot
 	internal class AuthorizationCompleteHandler : IAuthorizationCompleter
 	{
 		private readonly Bot bot;
-		private readonly IUsersRepository repository;
+		private readonly IUserProfilesRepository repository;
 
-		public AuthorizationCompleteHandler(Bot bot, IUsersRepository repository)
+		public AuthorizationCompleteHandler(Bot bot, IUserProfilesRepository repository)
 		{
 			this.bot = bot;
 			this.repository = repository;

@@ -1,17 +1,19 @@
 ﻿using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Logging;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
 
-namespace MissAlise.Worker.Features.Sync
+namespace MissAlise.Application.UseCases.Sync
 {
 	public class SyncCommandHandler : AsyncHandlerBase<SyncCommand>
-	{		
-		private readonly GraphServiceClient client;	
+	{
+		// не забыть перенести в OneDrive библиотеку, клиент и прочее что касается OneDrive
+		private readonly GraphServiceClient client;
 		private readonly ILogger<SyncCommandHandler> log;
-		const string ROOT_SYNC_PATH = @"M:\Sync\";
+		const string ROOT_SYNC_PATH = @"M:\Sync\"; // и вот это барахло тоже убрать
 		public SyncCommandHandler(GraphServiceClient client, ILogger<SyncCommandHandler> log)
-		{			
-			this.client = client;			
+		{
+			this.client = client;
 			this.log = log;
 		}
 		static readonly string[] fields = ["name", "folder", "parentReference", "size", "id", "createdDateTime", "file", "@microsoft.graph.downloadUrl", "fileSystemInfo", "photo", "image", "audio"];
@@ -21,12 +23,12 @@ namespace MissAlise.Worker.Features.Sync
 			{
 				var drive = await client.Me.Drive.GetAsync().ConfigureAwait(false);
 				var driveRoot = await client.Drives[drive.Id].Root.GetAsync().ConfigureAwait(false);
-				string userRoot = Path.Combine(ROOT_SYNC_PATH, drive.Owner.User.DisplayName);
+				var userRoot = Path.Combine(ROOT_SYNC_PATH, drive.Owner.User.DisplayName);
 				var children = await client.Drives[drive.Id].Items[driveRoot.Id].Children.GetAsync(query => query.QueryParameters.Select = fields).ConfigureAwait(false);
 
 				foreach (var childItem in children.Value)
 				{
-					string folderPath = string.Empty;
+					var folderPath = string.Empty;
 					await foreach (var item in ListFolderContentsWithPagination(client, cancel, childItem))
 					{
 						if (item.Folder != null)

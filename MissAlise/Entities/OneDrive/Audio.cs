@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace MissAlise.DataBase.Models;
+namespace MissAlise.Entities.OneDrive;
 
 public partial class Audio : File
 {

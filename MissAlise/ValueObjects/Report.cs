@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace MissAlise.ValueObjects.YandexTracker
+namespace MissAlise.ValueObjects
 {
 	public interface IReport
 	{

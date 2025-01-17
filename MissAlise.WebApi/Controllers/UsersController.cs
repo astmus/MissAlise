@@ -5,23 +5,24 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
+using MissAlise.Interfaces;
 
 namespace MissAlise.WebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class LoginController : ControllerBase
+public class UsersController : ControllerBase
 {
-	private readonly ILogger<LoginController> logger;
+	private readonly ILogger<UsersController> logger;
 	private readonly GraphServiceClient graphServiceClient;
-	public LoginController(ILogger<LoginController> logger, GraphServiceClient graphServiceClient)
+	public UsersController(ILogger<UsersController> logger, GraphServiceClient graphServiceClient)
 	{
 		this.logger = logger;
 		this.graphServiceClient = graphServiceClient;		
 	}
 
-	[HttpGet("auth")]
-	public async Task<IActionResult> GetMe(CancellationToken cancel)
+	[HttpGet("[action]")]
+	public async Task<IActionResult> All(IUsersRepository users,CancellationToken cancel)
 	{
 		try
 		{

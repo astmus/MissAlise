@@ -3,13 +3,20 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <Nullable>annotations</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\MissAlise.Core\MissAlise.Core.csproj" />
+  <ItemGroup>    
     <ProjectReference Include="..\MissAlise.ServiceDefaults\MissAlise.Shared.csproj" />
     <ProjectReference Include="..\MissAlise\MissAlise.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Dto\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Graph" Version="5.68.0" />
   </ItemGroup>
 
 </Project>

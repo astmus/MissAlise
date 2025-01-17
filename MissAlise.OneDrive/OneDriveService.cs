@@ -1,11 +1,11 @@
 ﻿using System.Web;
 using Microsoft.Graph;
+using MissAlise.Application.Interfaces;
 using MissAlise.Entities.OneDrive;
-using MissAlise.Interfaces;
 
 namespace MissAlise.OneDrive
 {
-	public class OneDriveService : IRemoteStorageService
+	public class OneDriveService : IOneDriveService
 	{
 		private readonly AzureAd azureOptions;
 		private readonly GraphServiceClient client;

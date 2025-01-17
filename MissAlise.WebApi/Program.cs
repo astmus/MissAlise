@@ -1,13 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Azure.Core;
-using Azure.Identity;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.Graph;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Web;
-using Microsoft.Kiota.Abstractions.Authentication;
-using MissAlise.WebApi.Auth;
+using MissAlise.Entities.OneDrive;
 
 namespace MissAlise.WebApi;
 
@@ -20,58 +13,27 @@ public class Program
 
 		builder.Services.AddControllers().AddJsonOptions(options =>
 		{
-			options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
+			options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault | JsonIgnoreCondition.WhenWritingNull;
 			options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 			options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
 		});
 	
-		builder.Services.Configure<AzureConfiguration>(builder.Configuration.GetSection("AzureAd"));
-		//var config = builder.Configuration.GetSection("AzureAd").Get<AzureConfiguration>();
-		builder.Services.AddScoped<IAuthenticationProvider, DelegateAuthenticationProvider>();
-		builder.Services.AddScoped<GraphServiceClient>();
+		builder.Services.Configure<AzureAd>(builder.Configuration.GetSection("AzureAd"));
 		
-		// Добавление сервисов для использования Microsoft Graph API
-		//builder.Services.AddScoped<GraphServiceClient>();
-
-		//builder.Services.AddSingleton<GraphServiceClient>(serviceProvider =>
-		//{
-		//	var azureConfig = serviceProvider.GetRequiredService<IOptions<AzureConfiguration>>().Value;
-
-		//	var app = ConfidentialClientApplicationBuilder.Create(azureConfig.ClientId)
-		//	.WithClientSecret(azureConfig.ClientSecret)
-		//	.WithAuthority(new Uri("https://login.microsoftonline.com/common/oauth2/v2.0/token"))
-		//	.Build();
-		//	var cacheFilePath = "D:\\Temp\\cache2.txt";
-		//	// Настройка кэширования с чтением и записью в файл
-		//	var tokenCache = app.AppTokenCache;
-		//	tokenCache.SetBeforeAccess(args =>
-		//	{
-		//		if (File.Exists(cacheFilePath))
-		//		{
-		//			args.TokenCache.DeserializeMsalV3(File.ReadAllBytes(cacheFilePath));
-		//		}
-		//	});
-
-		//	tokenCache.SetAfterAccess(args =>
-		//	{
-		//		if (args.HasStateChanged)
-		//		{
-		//			File.WriteAllBytes(cacheFilePath, args.TokenCache.SerializeMsalV3());
-		//		}
-		//	});
-		//	//var cacheHelper = new MsalCacheHelper(new StorageCreationProperties("myapp_token_cache.dat","D:\\"));
-		//	var authenticationProvider = new DelegateAuthenticationProvider();
-
-		//	GraphServiceClient client = new GraphServiceClient(authenticationProvider);
-
-		//	return client;
-		//});
-
 		builder.Services.AddProblemDetails();
+		
+		//builder.Services.AddEndpointsApiExplorer(); это только для minimal api
+		builder.Services.AddSwaggerGen();
+
 		var app = builder.Build();
+
 		if (app.Environment.IsDevelopment())
+		{
 			app.UseDeveloperExceptionPage();
-			else
+			app.UseSwagger();
+			app.UseSwaggerUI();
+		}		
+		else
 			app.UseExceptionHandler();
 		
 		app.UseHttpsRedirection();
@@ -80,7 +42,6 @@ public class Program
 		app.UseAuthorization();		
 
 		app.MapControllers();
-
 		app.MapDefaultEndpoints();
 
 		//// Configure the HTTP request pipeline.

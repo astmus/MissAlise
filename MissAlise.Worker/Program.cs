@@ -1,21 +1,17 @@
-﻿using System.Globalization;
-using System.Net;
-using System.Text;
-using System.Text.Json;
+﻿using System.Text;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Mvc;
+using MissAlise.Application;
+using MissAlise.Application.Interfaces;
+using MissAlise.Application.UseCases.Sync;
 using MissAlise.Background;
 using MissAlise.Bot;
 using MissAlise.DataBase;
 using MissAlise.Entities.OneDrive;
-using MissAlise.Interfaces;
 using MissAlise.OneDrive;
 using MissAlise.Utils;
 using MissAlise.Worker.Background;
 using MissAlise.Worker.Background.Handlers;
-using MissAlise.Worker.Features.Bot;
-using MissAlise.Worker.Features.Sync;
-using MissAlise.Worker.Providers;
 
 namespace MissAlise.Worker
 {
@@ -27,7 +23,8 @@ namespace MissAlise.Worker
 			var builder = WebApplication.CreateBuilder(args);
 			builder.AddServiceDefaults();
 
-			builder.Services.AddPersistanceService(builder.Configuration);
+			builder.Services.AddApplication(builder.Configuration).AddPersistanceService(builder.Configuration);
+
 			builder.Services.AddHttpLogging(opts => opts.LoggingFields = HttpLoggingFields.RequestProperties);
 			builder.Logging.AddFilter("Microsoft.AspNetCore.HttpLogging", LogLevel.Information);
 
@@ -41,12 +38,10 @@ namespace MissAlise.Worker
 					builder => builder.SetDescription("Синхронизация папки OneDrive")//.AddTrigger(new SyncOneDriveFolderJob(default,default), "1 min").SetDelay(Time.Minute)
 				);
 
-			builder.Services.AddBotService(builder.Configuration).AddChatMessageHandler<ChatMessageHandler>()
-			.AddOneDrive(builder.Configuration)
-			.AddScoped<IAsyncHandlersProvider, AsyncHandlersProvider>()
-			.AddScoped<IAsyncHandler<SyncCommand>, SyncCommandHandler>()
-			.AddTransient<AzureAd>(sp
-					=> sp.GetRequiredService<IConfiguration>().GetSection(nameof(AzureAd)).Get<AzureAd>());
+			builder.Services
+			.AddBotService(builder.Configuration.GetSection("BotConfiguration"))
+			.AddOneDriveService(builder.Configuration.GetSection(nameof(AzureAd)))
+			.AddScoped<IAsyncHandler<SyncCommand>, SyncCommandHandler>();			
 
 			var host = builder.Build();
 

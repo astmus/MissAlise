@@ -1,13 +1,13 @@
 using System.Collections.Concurrent;
-using MissAlise.Interfaces;
+using MissAlise.Application.Interfaces;
 using MissAlise.Utils;
 
-namespace MissAlise.Bot
+namespace MissAlise.Application.Context
 {
 	internal class ContextItems : ConcurrentDictionary<string, object>, IContextItems
 	{
 		public void Set<T>(T value, string key = null) where T : class
-			=> AddOrUpdate<T>(key ?? Identity<T>.Name,
+			=> AddOrUpdate(key ?? Identity<T>.Name,
 					(k, w) => w,
 					(k, o, w) => this[k] = w,
 					value);

@@ -1,13 +1,14 @@
-﻿using MissAlise.Interfaces;
+﻿using Microsoft.Extensions.DependencyInjection;
+using MissAlise.Application.Interfaces;
 
-namespace MissAlise.Worker.Providers
+namespace MissAlise.Application.Providers
 {
 	public interface IAsyncHandlersProvider
 	{
 		IAsyncHandler<TCommand> GetHandler<TCommand>();
 	}
 
-	public class AsyncHandlersProvider : IAsyncHandlersProvider
+	internal class AsyncHandlersProvider : IAsyncHandlersProvider
 	{
 		private readonly IServiceProvider services;
 

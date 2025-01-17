@@ -1,4 +1,4 @@
-﻿namespace MissAlise.Interfaces
+﻿namespace MissAlise.Application.Interfaces
 {
 	public interface IContextItems
 	{

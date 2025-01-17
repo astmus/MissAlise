@@ -1,18 +1,19 @@
-﻿using MissAlise.Interfaces;
+﻿using MissAlise.Application.Interfaces;
+using MissAlise.Interfaces;
 using MissAlise.Utils;
 
-namespace MissAlise.Bot
+namespace MissAlise.Application.Context
 {
 	internal class HandleContext : IHandleContext
 	{
-		private readonly IServiceProvider services;		
+		private readonly IServiceProvider services;
 		public IContextItems Items { get; } = new ContextItems();
 
 		public HandleContext(IServiceProvider services)
 		{
-			this.services = services;			
+			this.services = services;
 		}
-		
+
 		public T GetCurrent<T>(string id = null) where T : class
 			=> Items.Get<T>(id ?? Identity<T>.Name);
 	}

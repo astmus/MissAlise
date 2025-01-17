@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MissAlise.Application.Interfaces;
 using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
 using Telegram.Bot;
@@ -50,7 +51,7 @@ namespace MissAlise.Bot
 			async Task<UserProfile> Authorize(ITelegramBotClient botClient, Update update, CancellationToken cancel)
 			{
 				var sender = update.GetCurrentMessage().From;
-				var db = currentScope.ServiceProvider.GetRequiredService<IUsersRepository>();
+				var db = currentScope.ServiceProvider.GetRequiredService<IUserProfilesRepository>();
 				var profile = await db.FindAsync(sender.Id.ToString(), cancel);
 				if (profile == null)
 				{

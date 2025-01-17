@@ -14,8 +14,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\MissAlise.Application\MissAlise.Application.csproj" />
 		<ProjectReference Include="..\MissAlise.DataBase\MissAlise.DataBase.csproj" />
 		<ProjectReference Include="..\MissAlise.ServiceDefaults\MissAlise.Shared.csproj" />
-		<ProjectReference Include="..\MissAlise\MissAlise.csproj" />
 	</ItemGroup>
 </Project>

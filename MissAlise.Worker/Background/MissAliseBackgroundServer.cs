@@ -15,7 +15,6 @@ namespace MissAlise.Worker.Background
 
 		public override async Task StartAsync(CancellationToken cancellationToken)
 		{
-
 			using var scope = factory.CreateScope();
 
 			using var context = scope.ServiceProvider.GetRequiredService<UserMediaContext>();			
