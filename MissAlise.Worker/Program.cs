@@ -23,7 +23,7 @@ namespace MissAlise.Worker
 			var builder = WebApplication.CreateBuilder(args);
 			builder.AddServiceDefaults();
 
-			builder.Services.AddApplication(builder.Configuration).AddPersistanceService(builder.Configuration);
+			builder.Services.AddApplication(builder.Configuration).AddPersistance(builder.Configuration);
 
 			builder.Services.AddHttpLogging(opts => opts.LoggingFields = HttpLoggingFields.RequestProperties);
 			builder.Logging.AddFilter("Microsoft.AspNetCore.HttpLogging", LogLevel.Information);
@@ -39,9 +39,9 @@ namespace MissAlise.Worker
 				);
 
 			builder.Services
-			.AddBotService(builder.Configuration.GetSection("BotConfiguration"))
-			.AddOneDriveService(builder.Configuration.GetSection(nameof(AzureAd)))
-			.AddScoped<IAsyncHandler<SyncCommand>, SyncCommandHandler>();			
+				.AddOneDriveService(builder.Configuration.GetSection(nameof(AzureAd)))
+				.AddBotService(builder.Configuration.GetSection("BotConfiguration"));
+				//.AddScoped<IAsyncHandler<SyncCommand>, SyncCommandHandler>();
 
 			var host = builder.Build();
 
@@ -52,16 +52,16 @@ namespace MissAlise.Worker
 
 		static async Task<IResult> Signin([FromServices] AzureAd config, [FromServices] HttpClient client, [FromQuery] string code, [FromQuery] string state, HttpContext ctx, CancellationToken cancel)
 		{
-			if (ctx.Request.Headers.Referer.Any(refer => refer == config.Instance) == false)			
+			if (ctx.Request.Headers.Referer.Any(refer => refer == config.Instance || refer == "https://login.live.com/") == false)
 				return Results.Forbid();
-			
+
 			var response = await ctx.RequestServices.GetRequiredService<IOneDriveCredentialsService>().GetCredentialsByCode(config, code, cancel);
-			
-			if (!response.IsSuccessful)			
-				return Results.Problem(response.Error.ToString(),null, (int)response.StatusCode);
-			
-			_ = ctx.RequestServices.GetService<IAuthorizationCompleter>()?.AuthorizationCompleted(state, response.Content, cancel);			
-			return Results.Text("<html><body>Авторизация закончена успешно. Вы можете закрыть это окно</body></html>", "text/html", Encoding.UTF8,200);
+
+			if (!response.IsSuccessful)
+				return Results.Problem(response.Error.ToString(), null, (int)response.StatusCode);
+
+			_ = ctx.RequestServices.GetService<IAuthorizationCompleter>()?.AuthorizationCompleted(state, response.Content, cancel);
+			return Results.Text("<html><body>Авторизация закончена успешно. Вы можете закрыть это окно</body></html>", "text/html", Encoding.UTF8, 200);
 		}
 	}
 }

@@ -1,22 +1,11 @@
 {
-    "$schema": "https://json.schemastore.org/launchsettings.json",
+    "$schema": "http://json.schemastore.org/launchsettings.json",
     "profiles": {
-        "http": {
+        "BotService": {
             "commandName": "Project",
             "dotnetRunMessages": true,
-            "launchBrowser": false,
-            "applicationUrl": "http://alise.com:5329",
             "environmentVariables": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
-            }
-        },
-        "https": {
-            "commandName": "Project",
-            "dotnetRunMessages": true,
-            "launchBrowser": false,
-            "applicationUrl": "https://alise.com:5008;http://alise.com:5330",
-            "environmentVariables": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
+                "DOTNET_ENVIRONMENT": "Development"
             }
         }
     }

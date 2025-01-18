@@ -1,6 +1,9 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using MissAlise.Application;
+using MissAlise.DataBase;
 using MissAlise.Entities.OneDrive;
+using MissAlise.OneDrive;
 
 namespace MissAlise.WebApi;
 
@@ -21,7 +24,7 @@ public class Program
 		builder.Services.Configure<AzureAd>(builder.Configuration.GetSection("AzureAd"));
 		
 		builder.Services.AddProblemDetails();
-		
+		builder.Services.AddApplication(builder.Configuration).AddPersistance(builder.Configuration).AddOneDriveService(builder.Configuration.GetSection(nameof(AzureAd)));
 		//builder.Services.AddEndpointsApiExplorer(); это только для minimal api
 		builder.Services.AddSwaggerGen();
 

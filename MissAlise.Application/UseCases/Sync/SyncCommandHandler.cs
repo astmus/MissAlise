@@ -61,7 +61,7 @@ namespace MissAlise.Application.UseCases.Sync
 			if ((children.Value?.Count ?? 0) == 0)
 				yield return currentItem;
 			else
-				foreach (var item in children.Value)
+				foreach (var item in children.Value.OrderBy(ob=>ob.Folder != null))
 				{
 					yield return item;
 					await foreach (var subItem in ListFolderContentsWithPagination(graphClient, cancel, item))

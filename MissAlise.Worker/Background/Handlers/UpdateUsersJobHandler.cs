@@ -1,4 +1,5 @@
-﻿using MissAlise.Background;
+﻿using Microsoft.EntityFrameworkCore;
+using MissAlise.Background;
 using MissAlise.DataBase.Models;
 using MissAlise.Utils;
 
@@ -17,7 +18,8 @@ namespace MissAlise.Worker.Background.Handlers
 
 		public override async Task HandleAsync(UpdateUsersJob backgroundTask, CancellationToken cancel)
 		{
-			using var scope = factory.CreateScope();
+			logger.LogInformation(" Start task {task}", nameof(UpdateUsersJobHandler));
+			//using var scope = factory.CreateScope();
 			//using var db = scope.ServiceProvider.GetRequiredService<UserMediaContext>();
 			//var items = db.Files.Include(file => file.Folder).ToList();
 			//Folder f = new Folder() { Name = "Root", Path = "D:\\Images2" };
@@ -31,7 +33,7 @@ namespace MissAlise.Worker.Background.Handlers
 			//await db.SaveChangesAsync(cancel);
 			for (var i = 0; i < 1; i++)
 			{
-				logger.LogInformation("{i} {time}", i, Time.Now);
+				//logger.LogInformation("{i} {time}", i, Time.Now);
 				await Task.Delay(1000);
 			}
 		}

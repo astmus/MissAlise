@@ -10,7 +10,7 @@ namespace MissAlise.DataBase
 		
 		public UserProfilesRepository(IMongoDatabase database)
 		{
-			userProfiles = database.GetCollection<UserProfile>("Users");		
+			userProfiles = database.GetCollection<UserProfile>("UserProfiles");		
 		}
 
 		static ReplaceOptions options = new ReplaceOptions { IsUpsert = true };

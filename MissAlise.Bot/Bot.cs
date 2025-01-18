@@ -8,14 +8,14 @@ using Telegram.Bot.Types.Enums;
 
 namespace MissAlise.Bot
 {
-	internal partial class Bot
+	internal partial class BotWorker
 	{
 		public HttpClient HttpConnection { get; }		
 		public ITelegramBotClient Client { get; }
 
 		private User botInfo;
-		private IOptions<BotConfiguration> botOptions;		
-		private readonly ILogger<Bot> log;
+		private BotConfiguration botOptions;		
+		private readonly ILogger<BotWorker> log;
 		private ReceiverOptions receiveOptions;
 		private readonly Channel<Update> pendingUpdates = Channel.CreateUnbounded<Update>(
 			new()
@@ -26,12 +26,12 @@ namespace MissAlise.Bot
 		);
 
 		public IEnumerable<BotCommand> Commands => [new BotCommand() { Command = "sync", Description = "синхронизировать файлы" }];
-		public Bot(IOptions<BotConfiguration> options, IHttpClientFactory factory, ILogger<Bot> log)
+		public BotWorker(BotConfiguration options, ILogger<BotWorker> log)
 		{
 			botOptions = options;			
 			this.log = log;
-			HttpConnection = factory.CreateClient("bot");
-			Client = new TelegramBotClient(botOptions.Value.ApiKey, HttpConnection);
+			//HttpConnection = factory.CreateClient("bot");
+			Client = new TelegramBotClient(options.ApiKey, HttpConnection);
 			receiveOptions = new ReceiverOptions() { Limit = 100, AllowedUpdates = [UpdateType.Message, UpdateType.InlineQuery, UpdateType.CallbackQuery, UpdateType.ChosenInlineResult] };			
 		}
 

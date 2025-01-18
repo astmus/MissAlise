@@ -24,7 +24,7 @@ namespace MissAlise.OneDrive
 			services.AddRefitClient<IOneDriveCredentialsService>(settings).ConfigureHttpClient(client => client.BaseAddress = new Uri("https://login.microsoftonline.com"));
 			services.AddScoped(sp => sp.GetRequiredService<IHandleContext>().GetCurrent<UserProfile>());
 			services.AddScoped<TokenCredential, OAuthTokenCredentials>().AddScoped<IOneDriveService, OneDriveService>()
-						.AddSingleton<AzureAd>().Configure<AzureAd>(azureConfigurationSection);
+						.AddSingleton(sp=> azureConfigurationSection.Get<AzureAd>());
 
 			services.AddScoped(sp =>
 			{

@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using MissAlise.Background;
-using MissAlise.Utils;
+﻿using MissAlise.Background;
 
 namespace MissAlise.Worker.Background.Handlers
 {
@@ -21,17 +18,17 @@ namespace MissAlise.Worker.Background.Handlers
 		{
 			//var drive = await _graphServiceClient.Me.Drive.GetAsync();
 			//var root = await _graphServiceClient.Me.Drive.Root.Request().GetAsync();
-
+			logger.LogInformation("Start task {task}", nameof(SyncDataJob));
 			for (var i = 0; i < 5; i++)
 			{
-				logger.LogInformation("{i} {time} {job}", i, Time.Now, nameof(SyncDataJob));
+				//logger.LogInformation("{i} {time} {job}", i, Time.Now, nameof(SyncDataJob));
 				await Task.Delay(1000);
 			}
 		}
 
 		public override async Task EndAsync(BackgroundJob<SyncDataJob> job, CancellationToken cancel)
 		{
-			//_logger.LogInformation(" end task {task}", nameof(SyncDataJob));
+			logger.LogInformation("end task {task}", nameof(SyncDataJob));
 			await base.EndAsync(job, cancel);
 		}
 	}

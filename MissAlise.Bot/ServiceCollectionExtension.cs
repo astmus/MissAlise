@@ -10,14 +10,14 @@ namespace MissAlise.Bot
 	{
 		public static IServiceCollection AddBotService(this IServiceCollection services, IConfigurationSection botConfig)
 		{
-			services				
-				.AddSingleton<Bot>().Configure<BotConfiguration>(botConfig.GetSection(nameof(BotConfiguration)))				
+			services
+				.AddSingleton<BotWorker>().AddSingleton(sp => botConfig.Get<BotConfiguration>())
 				.AddTransient<IAuthorizationCompleter, AuthorizationCompleteHandler>()
-				.AddHostedService<Bot.UpdateReceiver>()
-				.AddHostedService<Bot.UpdateHandler>()
-				.AddHttpClient("bot")
-				.UseSocketsHttpHandler((handler, _) => handler.PooledConnectionLifetime = TimeSpan.FromMinutes(2)) // Recreate connection every 2 minutes
-				.SetHandlerLifetime(Timeout.InfiniteTimeSpan);
+				.AddHostedService<BotWorker.UpdateReceiver>()
+				.AddHostedService<BotWorker.UpdateHandler>();
+				//.AddHttpClient("bot")
+				//.UseSocketsHttpHandler((handler, _) => handler.PooledConnectionLifetime = TimeSpan.FromMinutes(2)) // Recreate connection every 2 minutes
+				//.SetHandlerLifetime(Timeout.InfiniteTimeSpan);
 
 			services.AddScoped<IAsyncHandler<Message>, ChatMessageHandler>();
 			return services;

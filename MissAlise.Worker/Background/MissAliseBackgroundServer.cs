@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MissAlise.Background;
-using MissAlise.DataBase.Models;
+﻿using MissAlise.Background;
 
 namespace MissAlise.Worker.Background
 {
@@ -15,10 +13,9 @@ namespace MissAlise.Worker.Background
 
 		public override async Task StartAsync(CancellationToken cancellationToken)
 		{
-			using var scope = factory.CreateScope();
-
-			using var context = scope.ServiceProvider.GetRequiredService<UserMediaContext>();			
-			await context.Database.MigrateAsync(cancellationToken);
+			//using var scope = factory.CreateScope();
+			// здесь всякие приготовления перед стартом фоновой обработки
+			
 
 			log.LogInformation("Start service {Name}", nameof(MissAliseBackgroundServer));
 			await base.StartAsync(cancellationToken);

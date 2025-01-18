@@ -10,8 +10,9 @@ namespace MissAlise.DataBase
 {
 	public static class ServiceCollectionExtension
 	{
-		public static IServiceCollection AddPersistanceService(this IServiceCollection services, IConfiguration appConfig)
+		public static IServiceCollection AddPersistance(this IServiceCollection services, IConfiguration appConfig)
 		{
+			services.AddHostedService<MigrateService>();
 			services.AddScoped<IBackgroundJobRepository, BackgroundJobRepository>();
 			services.AddScoped<IUserProfilesRepository, UserProfilesRepository>();
 
@@ -19,7 +20,7 @@ namespace MissAlise.DataBase
 			services.AddSingleton<IMongoDatabase>(sp =>
 			{
 				var client = sp.GetRequiredService<IMongoClient>();
-				return client.GetDatabase("Mongo");
+				return client.GetDatabase("missdb");
 			});
 			
 			services.AddDbContextPool<UserMediaContext>(options =>

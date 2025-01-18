@@ -1,4 +1,5 @@
 ﻿using System.Web;
+using Microsoft.Extensions.Options;
 using Microsoft.Graph;
 using MissAlise.Application.Interfaces;
 using MissAlise.Entities.OneDrive;
@@ -10,9 +11,9 @@ namespace MissAlise.OneDrive
 		private readonly AzureAd azureOptions;
 		private readonly GraphServiceClient client;
 
-		public OneDriveService(AzureAd azureOptions, GraphServiceClient client)
+		public OneDriveService(IOptions<AzureAd> azureOptions, GraphServiceClient client)
 		{
-			this.azureOptions = azureOptions;
+			this.azureOptions = azureOptions.Value;
 			this.client = client;
 		}
 
