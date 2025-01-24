@@ -10,7 +10,7 @@ public partial class Item
 
 	public int? Type { get; set; }
 
-	public DateTime? Createddatetime { get; set; }
+	public DateTimeOffset? Createddatetime { get; set; }
 
-	public DateTime? Modifiedatetime { get; set; }
+	public DateTimeOffset? Modifiedatetime { get; set; }
 }

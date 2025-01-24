@@ -23,7 +23,7 @@ namespace MissAlise.Worker
 			var builder = WebApplication.CreateBuilder(args);
 			builder.AddServiceDefaults();
 
-			builder.Services.AddApplication(builder.Configuration).AddPersistance(builder.Configuration);
+			builder.Services.AddApplication(builder.Configuration).AddPersistance(builder.Configuration, true);
 
 			builder.Services.AddHttpLogging(opts => opts.LoggingFields = HttpLoggingFields.RequestProperties);
 			builder.Logging.AddFilter("Microsoft.AspNetCore.HttpLogging", LogLevel.Information);
@@ -52,7 +52,7 @@ namespace MissAlise.Worker
 
 		static async Task<IResult> Signin([FromServices] AzureAd config, [FromServices] HttpClient client, [FromQuery] string code, [FromQuery] string state, HttpContext ctx, CancellationToken cancel)
 		{
-			if (ctx.Request.Headers.Referer.Any(refer => refer == config.Instance || refer == "https://login.live.com/") == false)
+			if (ctx.Request.Headers.Referer.Any(refer => refer == config.Instance || refer == "https://login.live.com/" || refer == "https://account.live.com/") == false)
 				return Results.Forbid();
 
 			var response = await ctx.RequestServices.GetRequiredService<IOneDriveCredentialsService>().GetCredentialsByCode(config, code, cancel);

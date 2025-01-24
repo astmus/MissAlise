@@ -22,8 +22,9 @@
         "https": {
             "commandName": "Project",
             "dotnetRunMessages": true,
-            "launchBrowser": false,
-            "applicationUrl": "https://localhost:5422;http://alise.com:5329",
+            "launchBrowser": true,
+            "launchUrl": "swagger",
+            "applicationUrl": "https://alise.com:5422;http://alise.com:5329",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development"
             }

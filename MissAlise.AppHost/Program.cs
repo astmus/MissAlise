@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var postgreServer = builder.AddPostgres("pgsrv").WithLifetime(ContainerLifetime.Persistent);
+var postgreServer = builder.AddPostgres("pgsrv").WithLifetime(ContainerLifetime.Persistent).WithHttpEndpoint(5432,5432);
 var db = postgreServer.AddDatabase("missdb");
 
 var api = builder.AddProject<Projects.MissAlise_WebApi>("webapi").WithExternalHttpEndpoints().WithReference(db).WaitFor(db);

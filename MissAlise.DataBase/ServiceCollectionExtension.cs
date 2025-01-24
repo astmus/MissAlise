@@ -10,11 +10,14 @@ namespace MissAlise.DataBase
 {
 	public static class ServiceCollectionExtension
 	{
-		public static IServiceCollection AddPersistance(this IServiceCollection services, IConfiguration appConfig)
+		public static IServiceCollection AddPersistance(this IServiceCollection services, IConfiguration appConfig, bool withMigrations)
 		{
-			services.AddHostedService<MigrateService>();
+			if (withMigrations)
+				services.AddHostedService<MigrateService>();
+
 			services.AddScoped<IBackgroundJobRepository, BackgroundJobRepository>();
-			services.AddScoped<IUserProfilesRepository, UserProfilesRepository>();
+			services.AddScoped<IUserProfilesRepository, UserProfilesRepository>()
+						.AddScoped<IUsersRepository, UsersRepository>();
 
 			services.AddSingleton<IMongoClient>(new MongoClient("mongodb://localhost:27017"));
 			services.AddSingleton<IMongoDatabase>(sp =>

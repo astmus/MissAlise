@@ -2,7 +2,6 @@
 using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
 using Telegram.Bot;
-using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 namespace MissAlise.Bot
@@ -26,7 +25,7 @@ namespace MissAlise.Bot
 			var chatId = int.Parse(state);			
 
 			await bot.Client.SendMessage(chatId, "Авторизация успешна", parseMode: ParseMode.MarkdownV2, cancellationToken: default);
-			await bot.Client.SetMyCommands(bot.Commands, BotCommandScope.Chat(chatId), cancellationToken: cancel);
+			//await bot.Client.SetMyCommands(bot.Commands, BotCommandScope.Chat(chatId), cancellationToken: cancel);
 		}
 	}
 }

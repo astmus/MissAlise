@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using MissAlise.Application;
@@ -24,9 +25,13 @@ public class Program
 		builder.Services.Configure<AzureAd>(builder.Configuration.GetSection("AzureAd"));
 		
 		builder.Services.AddProblemDetails();
-		builder.Services.AddApplication(builder.Configuration).AddPersistance(builder.Configuration).AddOneDriveService(builder.Configuration.GetSection(nameof(AzureAd)));
+		builder.Services.AddApplication(builder.Configuration).AddPersistance(builder.Configuration, false).AddOneDriveService(builder.Configuration.GetSection(nameof(AzureAd)));
 		//builder.Services.AddEndpointsApiExplorer(); это только для minimal api
-		builder.Services.AddSwaggerGen();
+		builder.Services.AddSwaggerGen(options=> {
+			var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+			options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+		}
+		);
 
 		var app = builder.Build();
 
@@ -36,8 +41,6 @@ public class Program
 			app.UseSwagger();
 			app.UseSwaggerUI();
 		}		
-		else
-			app.UseExceptionHandler();
 		
 		app.UseHttpsRedirection();
 		app.UseRouting();
@@ -47,15 +50,6 @@ public class Program
 		app.MapControllers();
 		app.MapDefaultEndpoints();
 
-		//// Configure the HTTP request pipeline.
-
-		//app.UseHttpsRedirection();
-
-		//app.UseAuthentication();
-		//app.UseAuthorization();
-
-		//app.MapControllers();
-		
 		app.Run();
 	}
 }

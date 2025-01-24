@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace MissAlise.Entities.OneDrive;
+﻿namespace MissAlise.Entities.OneDrive;
 
 public partial class Folder : Item
 {
-	public int Folderid { get; set; }
-
 	public int? Parentfolderid { get; set; }
 
 	public string? Name { get; set; }

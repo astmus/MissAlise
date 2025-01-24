@@ -4,8 +4,7 @@ using System.Collections.Generic;
 namespace MissAlise.Entities.OneDrive;
 
 public partial class Video : File
-{
-	public int Videoid { get; set; }
+{	
 
 	public int? Audiobitspersample { get; set; }
 
@@ -26,6 +25,4 @@ public partial class Video : File
 	public int? Height { get; set; }
 
 	public int? Width { get; set; }
-
-	public override int Fileid { get; set; }
 }

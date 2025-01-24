@@ -2,8 +2,8 @@ using MissAlise.Entities.OneDrive;
 
 namespace MissAlise.Interfaces
 {
-	public interface IUsersRepository : IRepository<User>
+	public interface IUsersRepository
 	{
-		
+		Task<IUserStorage> GetUserStorageAsync(User user, CancellationToken cancel);
 	}
 }

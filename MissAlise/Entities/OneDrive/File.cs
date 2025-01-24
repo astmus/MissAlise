@@ -6,8 +6,6 @@ namespace MissAlise.Entities.OneDrive;
 
 public partial class File : Item
 {
-	public virtual int Fileid { get; set; }
-
 	public string? Name { get; set; }
 
 	public int? Size { get; set; }
@@ -15,6 +13,6 @@ public partial class File : Item
 	public string? Mimetype { get; set; }
 
 	public string? Extension { get; set; }
-
+	public virtual int Folderid { get; set; }
 	public Folder? Folder { get; set; }
 }

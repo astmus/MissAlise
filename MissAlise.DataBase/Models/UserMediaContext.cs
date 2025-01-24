@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MissAlise.Entities.OneDrive;
+using File = MissAlise.Entities.OneDrive.File;
 
 namespace MissAlise.DataBase.Models;
 
@@ -28,7 +30,7 @@ public partial class UserMediaContext : DbContext
 	public virtual DbSet<User> Users { get; set; }
 
 	//protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-	//	=> optionsBuilder.UseNpgsql("Host=192.168.0.3;Database=missdb;Username=docker;Password=docker");
+	//	=> optionsBuilder.UseNpgsql("Host=localhost;Database=missdb;Username=docker;Password=docker");
 	//protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	//=> optionsBuilder.UseNpgsql("Host=192.168.0.3;Database=files;Username=docker;Password=docker");
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -37,10 +39,16 @@ public partial class UserMediaContext : DbContext
 		modelBuilder.Entity<Item>().UseTptMappingStrategy();
 		modelBuilder.Entity<File>().UseTptMappingStrategy();
 
-		modelBuilder.Entity<Folder>(folder => folder.HasOne(c => c.Parent)
-			  .WithMany(c => c.Folders)
-			  .HasForeignKey(c => c.Parentfolderid)
-			  .OnDelete(DeleteBehavior.Restrict));
+		modelBuilder.Entity<Folder>(
+			folder => {
+				folder.HasOne(c => c.Parent)
+				  .WithMany(c => c.Folders)
+				  .HasForeignKey(c => c.Parentfolderid)
+				  .OnDelete(DeleteBehavior.Restrict);
+
+				folder.HasMany(file => file.Files).WithOne(f => f.Folder);
+			  }
+			  );
 
 		modelBuilder.Entity<Audio>();
 
@@ -49,7 +57,8 @@ public partial class UserMediaContext : DbContext
 		modelBuilder.Entity<Video>();
 
 		modelBuilder.Entity<User>(user
-			=> { 
+			=> 
+			{ 
 				user.HasKey(nameof(User.Id));			
 			});
 	}

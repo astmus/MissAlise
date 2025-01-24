@@ -26,5 +26,11 @@ namespace MissAlise.DataBase
 			var _filter = Builders<UserProfile>.Filter.Eq(r => r.Id, user.Id);
 			var res = await userProfiles.ReplaceOneAsync(_filter, user, options, cancel);		
 		}
+
+		public async Task<IEnumerable<UserProfile>> AllAsync(CancellationToken cancel)
+		{
+			var profiles = await userProfiles.Find(_ => true).ToListAsync();
+			return profiles;
+		}
 	}
 }

@@ -2,8 +2,6 @@
 
 public partial class Photo : File
 {
-	public int Photoid { get; set; }
-
 	public string? Cameramake { get; set; }
 
 	public string? Cameramodel { get; set; }
@@ -25,6 +23,4 @@ public partial class Photo : File
 	public int? Height { get; set; }
 
 	public int? Width { get; set; }
-
-	public override int Fileid { get; set; }
 }

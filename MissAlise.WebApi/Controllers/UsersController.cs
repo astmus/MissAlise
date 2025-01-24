@@ -1,56 +1,51 @@
+using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Graph;
+using MissAlise.Application.Dto;
+using MissAlise.Interfaces;
 
 namespace MissAlise.WebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Produces(MediaTypeNames.Application.Json)]
 public class UsersController : ControllerBase
 {
 	private readonly ILogger<UsersController> logger;
-	private readonly GraphServiceClient graphServiceClient;
-	public UsersController(ILogger<UsersController> logger, GraphServiceClient graphServiceClient)
+	private readonly IUserProfilesRepository usersProfiles;
+
+	public UsersController(ILogger<UsersController> logger, IUserProfilesRepository usersProfiles)
 	{
 		this.logger = logger;
-		this.graphServiceClient = graphServiceClient;		
+		this.usersProfiles = usersProfiles;
 	}
 
-	//[HttpGet("[action]")]
-	//public async Task<IActionResult> All(IUsersRepository users,CancellationToken cancel)
-	//{
-	//	try
-	//	{
-	//		var me = await graphServiceClient.Me.GetAsync();			
-	//		return Ok(me);
-	//	}
-	//	catch (ServiceException ex)
-	//	{
-	//		return StatusCode(ex.ResponseStatusCode, ex.Message);
-	//	}
-	//	catch (Exception error)
-	//	{
-	//		int i = 0;
-	//		return StatusCode(error.HResult, error.Message);
-	//	}
-	//}
+	/// <summary>
+	/// Список всех пользователей
+	/// </summary>
+	/// <returns></returns>
+	[HttpGet]
+	public async Task<IEnumerable<UserDto>> Get(CancellationToken cancel)
+	{
+		var users = await usersProfiles.AllAsync(cancel);
+		Thread.Sleep(100000);
+		cancel.ThrowIfCancellationRequested();
+		return users.Select(user => new UserDto() { Id = user.Telegram.Id, DisplayName = user.Telegram.DisplayName }).ToArray();		
+	}
 
-	//[HttpPost("upload")]
-	//public async Task<IActionResult> UploadFile([FromForm] IFormFile file)
-	//{
-	//	try
-	//	{
-	//		using var stream = file.OpenReadStream();
-	//		var uploadedFile = await _graphServiceClient.Me.Drive.Root
-	//			.ItemWithPath(file.FileName)
-	//			.Content
-	//			.Request()
-	//			.PutAsync<DriveItem>(stream);
+	/// <summary>
+	/// Поиск пользователя по id
+	/// </summary>
+	/// <returns></returns>
+	[HttpGet("{id}", Name ="deruser")]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+	[ProducesDefaultResponseType]
+	public async Task<ActionResult<UserDto>> GetUser(string id, CancellationToken cancel)
+	{
+		var user = await usersProfiles.FindAsync(id, cancel);
+		if (user != null)
+			return Ok(user);
 
-	//		return Ok(uploadedFile);
-	//	}
-	//	catch (ServiceException ex)
-	//	{
-	//		return StatusCode((int)ex.StatusCode, ex.Message);
-	//	}
-	//}
+		return NotFound(id);
+	}
 }

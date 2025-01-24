@@ -4,8 +4,6 @@ namespace MissAlise.Entities.OneDrive;
 
 public partial class Audio : File
 {
-	public int Audioid { get; set; }
-
 	public string? TrackTitle { get; set; }
 
 	public int? Track { get; set; }
