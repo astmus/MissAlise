@@ -23,7 +23,7 @@ namespace MissAlise.Worker
 			var builder = WebApplication.CreateBuilder(args);
 			builder.AddServiceDefaults();
 
-			builder.Services.AddApplication(builder.Configuration).AddPersistance(builder.Configuration, true);
+			builder.Services.AddApplication().AddPersistance(builder.Configuration, true);
 
 			builder.Services.AddHttpLogging(opts => opts.LoggingFields = HttpLoggingFields.RequestProperties);
 			builder.Logging.AddFilter("Microsoft.AspNetCore.HttpLogging", LogLevel.Information);
@@ -40,6 +40,7 @@ namespace MissAlise.Worker
 
 			builder.Services
 				.AddOneDriveService(builder.Configuration.GetSection(nameof(AzureAd)))
+				.AddOneDriveHandling()
 				.AddBotService(builder.Configuration.GetSection("BotConfiguration"));
 				//.AddScoped<IAsyncHandler<SyncCommand>, SyncCommandHandler>();
 

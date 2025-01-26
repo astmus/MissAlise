@@ -17,7 +17,9 @@ namespace MissAlise.DataBase
 
 			services.AddScoped<IBackgroundJobRepository, BackgroundJobRepository>();
 			services.AddScoped<IUserProfilesRepository, UserProfilesRepository>()
-						.AddScoped<IUsersRepository, UsersRepository>();
+						.AddScoped<IUserRepository, UserRepository>()
+						.AddScoped<IPhotoRepository, PhotoRepository>()
+						.AddScoped<IVideoRepository, VideoRepository>();
 
 			services.AddSingleton<IMongoClient>(new MongoClient("mongodb://localhost:27017"));
 			services.AddSingleton<IMongoDatabase>(sp =>

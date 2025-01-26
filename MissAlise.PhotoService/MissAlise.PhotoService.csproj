@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>$(MSBuildProjectName.Replace(" ", "_").Replace("PhotoService", "Services.Photos"))</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.0.0" />
+		<PackageReference Include="Aspire.StackExchange.Redis.OutputCaching" Version="9.0.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\MissAlise.Application\MissAlise.Application.csproj" />
+		<ProjectReference Include="..\MissAlise.DataBase\MissAlise.DataBase.csproj" />
+		<ProjectReference Include="..\MissAlise.ServiceDefaults\MissAlise.Shared.csproj" />
+		<ProjectReference Include="..\MissAlise.Services.Common\_MissAlise.Services.Common.csproj" />
+	</ItemGroup>
+
+</Project>

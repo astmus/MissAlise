@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using LinqToDB.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -25,6 +26,7 @@ namespace MissAlise.DataBase
 
 				using var context = scope.ServiceProvider.GetRequiredService<UserMediaContext>();
 				await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
+				LinqToDBForEFTools.Initialize();
 			}
 			catch (Exception error)
 			{

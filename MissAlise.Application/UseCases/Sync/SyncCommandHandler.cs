@@ -12,9 +12,9 @@ namespace MissAlise.Application.UseCases.Sync
 		// не забыть перенести в OneDrive библиотеку, клиент и прочее что касается OneDrive
 		private readonly GraphServiceClient client;
 		private readonly ILogger<SyncCommandHandler> log;
-		private readonly IUsersRepository usersRepository;
+		private readonly IUserRepository usersRepository;
 		const string ROOT_SYNC_PATH = @"M:\Sync\"; // и вот это барахло тоже убрать
-		public SyncCommandHandler(GraphServiceClient client, ILogger<SyncCommandHandler> log, IUsersRepository usersRepository)
+		public SyncCommandHandler(GraphServiceClient client, ILogger<SyncCommandHandler> log, IUserRepository usersRepository)
 		{
 			this.client = client;
 			this.log = log;

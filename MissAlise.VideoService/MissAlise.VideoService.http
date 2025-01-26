@@ -1,0 +1,6 @@
+@MissAlise.VideoService_HostAddress = http://localhost:5156
+
+GET {{MissAlise.VideoService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

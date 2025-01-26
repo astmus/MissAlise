@@ -8,11 +8,11 @@ using User = MissAlise.Entities.OneDrive.User;
 
 namespace MissAlise.DataBase
 {
-	internal class UsersRepository : IUsersRepository
+	internal class UserRepository : IUserRepository
 	{
 		private readonly UserMediaContext ctx;
 		const string defPath = @"m:\Sync\";
-		public UsersRepository(UserMediaContext ctx)
+		public UserRepository(UserMediaContext ctx)
 		{
 			this.ctx = ctx;
 		}
