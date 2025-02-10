@@ -1,16 +1,19 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MissAlise.Entities.OneDrive;
 
 public partial class Item
 {
-	public virtual int Itemid { get; set; }
+	[Key]
+	[Column("Itemid")]
+	public int Id { get; set; }
 
-	public string? Title { get; set; }
+	public string? Name { get; set; }
 
-	public int? Type { get; set; }
+	public string? MimeType { get; set; }
 
-	public DateTimeOffset? Createddatetime { get; set; }
+	public DateTimeOffset? CreatedDateTime { get; set; }
 
-	public DateTimeOffset? Modifiedatetime { get; set; }
+	public DateTimeOffset? ModifieDateTime { get; set; }
 }

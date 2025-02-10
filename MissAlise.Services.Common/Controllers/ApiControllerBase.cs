@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,8 @@ namespace MissAlise.Services.Controllers
 {
 	[ApiController]
 	[Route("api/[controller]")]
+	[Produces(MediaTypeNames.Application.Json)]
+	[Consumes(MediaTypeNames.Application.Json)]
 	public class ApiControllerBase : ControllerBase
 	{
 		protected void AddLinksHeaders(IPageInfo info, [CallerMemberName] string actionName = default)

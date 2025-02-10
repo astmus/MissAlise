@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using MissAlise.Application.Context;
 using MissAlise.Application.Interfaces;
 using MissAlise.Application.Providers;
@@ -12,8 +13,9 @@ namespace MissAlise.Application
 	{
 		public static IServiceCollection AddApplication(this IServiceCollection services)
 		{
-			services.AddScoped<IHandleContext, HandleContext>().AddScoped<IContextItems, ContextItems>();
-			services.AddScoped(sp => sp.GetRequiredService<IHandleContext>().GetCurrent<UserProfile>());
+			services.TryAddScoped<IHandleContext, HandleContext>();
+			services.TryAddScoped<IContextItems, ContextItems>();
+			services.TryAddScoped(sp => sp.GetRequiredService<IHandleContext>().GetCurrent<UserProfile>(throwIfNull: true));
 			
 			return services;
 		}

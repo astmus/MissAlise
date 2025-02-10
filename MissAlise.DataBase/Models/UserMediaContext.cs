@@ -28,38 +28,46 @@ public partial class UserMediaContext : DbContext
 	public virtual DbSet<Video> Videos { get; set; }
 
 	public virtual DbSet<User> Users { get; set; }
-
-	//protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-	//	=> optionsBuilder.UseNpgsql("Host=localhost;Database=missdb;Username=docker;Password=docker");
-	//protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-	//=> optionsBuilder.UseNpgsql("Host=192.168.0.3;Database=files;Username=docker;Password=docker");
+	
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
-		
 		modelBuilder.Entity<Item>().UseTptMappingStrategy();
-		modelBuilder.Entity<File>().UseTptMappingStrategy();
+		modelBuilder.Entity<Item>(item =>
+		{
+			item.HasKey(p => p.Id).HasName("Itemid");
+			item.Property(p => p.MimeType).HasColumnName("Mimetype");
+			item.Property(p => p.CreatedDateTime).HasColumnName("Createddatetime");
+			item.Property(p => p.ModifieDateTime).HasColumnName("Modifiedatetime");
+		});
 
-		modelBuilder.Entity<Folder>(
-			folder => {
+		modelBuilder.Entity<File>().UseTptMappingStrategy();
+		//modelBuilder.Entity<File>(file =>
+		//{
+		//	file.HasKey(p => p.Id).HasName("Itemid");			
+		//});
+
+		modelBuilder.Entity<Folder>(folder => {
 				folder.HasOne(c => c.Parent)
 				  .WithMany(c => c.Folders)
 				  .HasForeignKey(c => c.Parentfolderid)
-				  .OnDelete(DeleteBehavior.Restrict);
+				  .OnDelete(DeleteBehavior.Cascade);
+				folder.HasMany(file => file.Files).WithOne(f => f.Folder);				
+			});
 
-				folder.HasMany(file => file.Files).WithOne(f => f.Folder);
-			  }
-			  );
-
-		modelBuilder.Entity<Audio>();
+		modelBuilder.Entity<Audio>(audio=> {			
+			audio.Property(p => p.TrackCount).HasColumnName("Trackcount");			
+		});
+		
 
 		modelBuilder.Entity<Photo>();
 
 		modelBuilder.Entity<Video>();
 
-		modelBuilder.Entity<User>(user
-			=> 
-			{ 
-				user.HasKey(nameof(User.Id));			
-			});
+		modelBuilder.Entity<User>(user => user.HasKey(nameof(User.Id)));
 	}
+
+	//protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+	//	=> optionsBuilder.UseNpgsql("Host=192.168.0.3;Database=missdb;Username=postgres;Password=postgres");
+	//protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+	//=> optionsBuilder.UseNpgsql("Host=192.168.0.3;Database=files;Username=docker;Password=docker");
 }

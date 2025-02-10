@@ -1,4 +1,5 @@
 ﻿using Azure.Core;
+using MissAlise.Application.Interfaces;
 using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
 
@@ -10,13 +11,15 @@ namespace MissAlise.OneDrive
 		private readonly IOneDriveCredentialsService credentialService;
 		private readonly AzureAd config;
 		private readonly IUserProfilesRepository repository;
+		private readonly IHandleContext ctx;
 
-		public OAuthTokenCredentials(UserProfile profile, IOneDriveCredentialsService credentialService, AzureAd config, IUserProfilesRepository repository)
+		public OAuthTokenCredentials(UserProfile profile, IOneDriveCredentialsService credentialService, AzureAd config, IUserProfilesRepository repository, IHandleContext ctx)
 		{
-			this.profile = profile;
+			ArgumentNullException.ThrowIfNull(this.profile = profile);
 			this.credentialService = credentialService;
 			this.config = config;
 			this.repository = repository;
+			this.ctx = ctx;
 		}
 
 		public override async ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)

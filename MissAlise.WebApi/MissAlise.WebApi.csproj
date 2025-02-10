@@ -13,6 +13,7 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+		<ProjectReference Include="..\MissAlise.Bot\MissAlise.Bot.csproj" />
 		<ProjectReference Include="..\MissAlise.DataBase\MissAlise.DataBase.csproj" />
 		<ProjectReference Include="..\MissAlise.OneDrive\MissAlise.OneDrive.csproj" />
 		<ProjectReference Include="..\MissAlise.ServiceDefaults\MissAlise.Shared.csproj" />

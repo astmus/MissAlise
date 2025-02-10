@@ -20,7 +20,7 @@ public partial class Audio : File
 
 	public int? Disc { get; set; }
 
-	public int? Trackcount { get; set; }
+	public int? TrackCount { get; set; }
 
 	public int? Year { get; set; }
 }

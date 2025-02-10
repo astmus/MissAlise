@@ -30,6 +30,7 @@ namespace MissAlise.Bot.Handlers
 				var handler = provider.GetHandler<SyncCommand>();
 				await handler.InvokeAsync(new SyncCommand(), cancel);
 			}
+			//var infoIt = await storage.GetRootItems(cancel);
 			var info = await storage.GetOwnerInfo(cancel);
 		}
 	}

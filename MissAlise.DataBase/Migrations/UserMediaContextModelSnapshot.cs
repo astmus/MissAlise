@@ -33,14 +33,14 @@ namespace MissAlise.DataBase.Migrations
                     b.Property<DateTimeOffset?>("Createddatetime")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("MimeType")
+                        .HasColumnType("text");
+
                     b.Property<DateTimeOffset?>("Modifiedatetime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Title")
+                    b.Property<string>("Name")
                         .HasColumnType("text");
-
-                    b.Property<int?>("Type")
-                        .HasColumnType("integer");
 
                     b.HasKey("Itemid");
 
@@ -75,7 +75,7 @@ namespace MissAlise.DataBase.Migrations
                         .HasMaxLength(8)
                         .HasColumnType("character varying(8)");
 
-                    b.Property<int?>("StorageFolderItemid")
+                    b.Property<int?>("StorageFolderId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Surname")
@@ -90,7 +90,7 @@ namespace MissAlise.DataBase.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StorageFolderItemid");
+                    b.HasIndex("StorageFolderId");
 
                     b.ToTable("Users");
                 });
@@ -99,20 +99,18 @@ namespace MissAlise.DataBase.Migrations
                 {
                     b.HasBaseType("MissAlise.Entities.OneDrive.Item");
 
+                    b.Property<string>("Caption")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Extension")
                         .HasColumnType("text");
 
                     b.Property<int>("Folderid")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Mimetype")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
-                    b.Property<int?>("Size")
-                        .HasColumnType("integer");
+                    b.Property<long?>("Size")
+                        .HasColumnType("bigint");
 
                     b.HasIndex("Folderid");
 
@@ -123,13 +121,15 @@ namespace MissAlise.DataBase.Migrations
                 {
                     b.HasBaseType("MissAlise.Entities.OneDrive.Item");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
                     b.Property<int?>("Parentfolderid")
                         .HasColumnType("integer");
 
                     b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasIndex("Parentfolderid");
@@ -255,7 +255,7 @@ namespace MissAlise.DataBase.Migrations
                 {
                     b.HasOne("MissAlise.Entities.OneDrive.Folder", "StorageFolder")
                         .WithMany()
-                        .HasForeignKey("StorageFolderItemid");
+                        .HasForeignKey("StorageFolderId");
 
                     b.Navigation("StorageFolder");
                 });
@@ -288,7 +288,7 @@ namespace MissAlise.DataBase.Migrations
                     b.HasOne("MissAlise.Entities.OneDrive.Folder", "Parent")
                         .WithMany("Folders")
                         .HasForeignKey("Parentfolderid")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Parent");
                 });

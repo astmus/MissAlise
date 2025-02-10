@@ -29,21 +29,26 @@ namespace MissAlise.Bot
 			{
 				while (!cancel.IsCancellationRequested)
 				{
+					currentScope = factory.CreateScope();
 					try
 					{
-						currentScope = factory.CreateScope();
-						bot = (services = currentScope.ServiceProvider).GetRequiredService<BotWorker>();
+						services = currentScope.ServiceProvider;
+						bot = services.GetRequiredService<BotWorker>();
 						//azure = currentScope.ServiceProvider.GetRequiredService<AzureAd>();
 
 						await foreach (var update in bot.pendingUpdates.Reader.ReadAllAsync(cancel))
 						{
 							logger.LogInformation("Got update {Id}", update.Id);
-							await HandleUpdateAsync(bot.Client, update, cancel).ConfigureAwait(false);
+							await HandleUpdateAsync(bot.Client, update, cancel);
 						}
 					}
 					catch (Exception error)
 					{
 						logger.LogError(error, error.Message);
+					}
+					finally
+					{
+						currentScope.Dispose();
 					}
 				}
 			}
@@ -51,7 +56,7 @@ namespace MissAlise.Bot
 			async Task<UserProfile> Authorize(ITelegramBotClient botClient, Update update, CancellationToken cancel)
 			{
 				var sender = update.GetCurrentMessage().From;
-				var db = currentScope.ServiceProvider.GetRequiredService<IUserProfilesRepository>();
+				var db = services.GetRequiredService<IUserProfilesRepository>();
 				var profile = await db.FindAsync(sender.Id.ToString(), cancel);
 				if (profile == null)
 				{
@@ -79,19 +84,22 @@ namespace MissAlise.Bot
 				if (await Authorize(botClient, update, cancel) is not UserProfile profile)
 					return;
 
-				await bot.Client.SetMyCommands(bot.Commands, BotCommandScope.Chat(update.GetCurrentChat().Id), cancellationToken: cancel).ConfigureAwait(false);
-				using (var handleScope = currentScope.ServiceProvider.CreateScope())
+				//await bot.Client.SetMyCommands(bot.Commands, BotCommandScope.Chat(update.GetCurrentChat().Id), cancellationToken: cancel).ConfigureAwait(false);
+				try
 				{
+					using var handleScope = factory.CreateScope();
+
 					var items = handleScope.ServiceProvider.GetRequiredService<IHandleContext>().Items;
 					items.Set(profile);
 					items.Set(update);
-
+					var srv = handleScope.ServiceProvider.GetServices<UserProfile>();
+					var handler = handleScope.ServiceProvider.GetRequiredService<IAsyncHandler<Message>>();
 					Task currentTask = update switch
 					{
 						//{ Command: not null } => HandleUpdateAsync(update, update.Command, stoppingToken),
 						{ CallbackQuery: not null } => HandleCallbackAsync(update, update.CallbackQuery, cancel),
 						{ InlineQuery: not null } => HandleSearchAsync(update, update.InlineQuery, cancel),
-						{ Message: not null } => handleScope.ServiceProvider.GetService<IAsyncHandler<Message>>().InvokeAsync(update.GetCurrentMessage(), cancel),
+						{ Message: not null } => handler.InvokeAsync(update.GetCurrentMessage(), cancel),
 						//{ ChosenInlineResult: not null } => Task.CompletedTask,
 						_ => Task.CompletedTask
 						//{ EditedMessage: not null } => UpdateType.EditedMessage,
@@ -111,11 +119,16 @@ namespace MissAlise.Bot
 					};
 					await currentTask.ConfigureAwait(false);
 				}
+				catch (Exception error)
+				{
+
+					throw;
+				}
 			}
 
-			
-			private  Task HandleSearchAsync(Update update, InlineQuery inlineQuery, object stoppingToken) => throw new NotImplementedException();
-			private  Task HandleCallbackAsync(Update update, CallbackQuery callbackQuery, object stoppingToken) => throw new NotImplementedException();
+
+			private Task HandleSearchAsync(Update update, InlineQuery inlineQuery, object stoppingToken) => throw new NotImplementedException();
+			private Task HandleCallbackAsync(Update update, CallbackQuery callbackQuery, object stoppingToken) => throw new NotImplementedException();
 		}
 	}
 }

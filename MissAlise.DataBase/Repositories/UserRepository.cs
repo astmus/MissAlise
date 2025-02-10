@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MissAlise.DataBase.Models;
-using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
 using MongoDB.Driver;
 using Folder = MissAlise.Entities.OneDrive.Folder;
@@ -32,9 +31,9 @@ namespace MissAlise.DataBase
 					UserPrincipalName = string.Empty,
 					StorageFolder = new Folder() { 
 						Title = user.DisplayName,
-						Createddatetime = DateTime.UtcNow,
-						Modifiedatetime = DateTime.UtcNow,
-						Name = user.DisplayName,
+						CreatedDateTime = DateTime.UtcNow,
+						ModifieDateTime = DateTime.UtcNow,
+						Name = user.GivenName,
 						Path = Path.Combine(defPath, user.DisplayName)
 					}
 				};
@@ -55,8 +54,8 @@ namespace MissAlise.DataBase
 
 	internal class UserStorage : IUserStorage
 	{
-		public IOneDriveUser Owner { get; internal set; }
-		public Folder RootFolder { get; set; }
-		public Func<Task<int>> SaveAsync { get; internal set; }
+		public required User Owner { get; internal set; }
+		public required Folder RootFolder { get; set; }
+		public required Func<Task<int>> SaveAsync { get; internal set; }
 	}
 }

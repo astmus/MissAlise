@@ -1,9 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using MissAlise.Application.Common;
-using MissAlise.Background;
-using MissAlise.DataBase.Models;
 using MissAlise.Interfaces;
 using MongoDB.Driver;
 

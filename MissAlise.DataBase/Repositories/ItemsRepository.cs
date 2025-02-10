@@ -4,11 +4,14 @@ using MissAlise.Entities.OneDrive;
 
 namespace MissAlise.DataBase
 {
-	internal abstract class ItemsRepository
-	{
+	internal abstract class ItemsRepository : IDisposable
+	{		
 		protected UserMediaContext ctx;
 
 		public Task<TItem?> GetItemById<TItem>(int itemId, CancellationToken cancel) where TItem : Item
-			=> ctx.Set<TItem>().FirstOrDefaultAsyncEF(item => item.Itemid == itemId, cancel);
+			=> ctx.Set<TItem>().FirstOrDefaultAsyncEF(item => item.Id == itemId, cancel);
+		
+		public void Dispose() 
+			=> ctx.SaveChanges();
 	}
 }

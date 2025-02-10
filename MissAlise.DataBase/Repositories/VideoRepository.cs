@@ -29,17 +29,12 @@ namespace MissAlise.DataBase
 
 		public async Task DeleteAsync(Expression<Func<Video, bool>> predicate, CancellationToken cancel)
 		{
-			try
-			{
-				var delete = await ctx.Videos.Where(predicate).DeleteAsync(cancel).ConfigureAwait(false);
-			}
-			catch (Exception error)
-			{
-				logger.LogError(error, "Delete videos from db error {message}", error.Message);
-			}
+			await ctx.Videos.Where(predicate).DeleteAsync(cancel).ConfigureAwait(false);			
 		}
 
-		public   Task<bool> IsExistsAsync(Expression<Func<Video, bool>> predicate, CancellationToken cancel) 
-			=> ctx.Videos.AnyAsyncEF(predicate, cancel);
+		public   async Task<bool> IsExistsAsync(Expression<Func<Video, bool>> predicate, CancellationToken cancel) 
+			=> await ctx.Videos.AnyAsyncEF(predicate, cancel);
+		public Task<Video> AddAsync(Video item, CancellationToken cancel) 
+			=> throw new NotImplementedException();
 	}
 }

@@ -1,20 +1,23 @@
 ﻿using MissAlise.Application.Interfaces;
-using MissAlise.Interfaces;
 using MissAlise.Utils;
 
 namespace MissAlise.Application.Context
 {
 	internal class HandleContext : IHandleContext
 	{
-		private readonly IServiceProvider services;
-		public IContextItems Items { get; } = new ContextItems();
+		public IContextItems Items { get; init; }
 
-		public HandleContext(IServiceProvider services)
+		public HandleContext(IContextItems items)
 		{
-			this.services = services;
+			Items = items;
 		}
 
-		public T GetCurrent<T>(string id = null) where T : class
-			=> Items.Get<T>(id ?? Identity<T>.Name);
+		public T GetCurrent<T>(string id = null, bool throwIfNull = false) where T : class
+		{
+			var result =	Items.Get<T>(id ?? Identity<T>.Name);
+			if (throwIfNull)
+				ArgumentNullException.ThrowIfNull(result);
+			return result;
+		}
 	}
 }

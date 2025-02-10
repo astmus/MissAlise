@@ -100,7 +100,4 @@ public class MediaStreamInfo
 
 	[JsonPropertyName("nb_frames")]
 	public string NbFrames { get; set; }
-
-	[JsonPropertyName("disposition")]
-	public MediaDispositionInfo Disposition { get; set; }
 }

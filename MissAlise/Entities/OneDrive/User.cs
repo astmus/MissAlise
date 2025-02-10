@@ -2,7 +2,7 @@
 
 namespace MissAlise.Entities.OneDrive
 {
-	public class User : IOneDriveUser
+	public class User
 	{
 		[MaxLength(32)]
 		public string Id { get; set; }
@@ -18,7 +18,7 @@ namespace MissAlise.Entities.OneDrive
 		public string Surname { get; set; }
 		[MaxLength(64)]
 		public string UserPrincipalName { get; set; }
-
+		public int storagefolderid { get; set; }
 		public Folder? StorageFolder { get; set; }
 	}
 }

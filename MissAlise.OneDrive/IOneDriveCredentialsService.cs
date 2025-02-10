@@ -4,6 +4,7 @@ using Refit;
 
 namespace MissAlise.OneDrive
 {
+
 	public interface IOneDriveCredentialsService
 	{
 		Task<ApiResponse<Credentials>> GetCredentialsByCode(AzureAd azure, string code, CancellationToken cancel)

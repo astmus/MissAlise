@@ -22,18 +22,20 @@ namespace MissAlise.Services.Photos
 				options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 				options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 				options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+				options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 			});
 			builder.Services.AddScoped<IMediaService, FFProbeService>();
-			builder.Services.AddEndpointsApiExplorer();
-			builder.Services.AddSwaggerGen();
+			//builder.Services.AddEndpointsApiExplorer();
+			//builder.Services.AddSwaggerGen();
 			
 			var app = builder.Build();
 			app.UseOutputCache();
 			// Configure the HTTP request pipeline.
 			if (app.Environment.IsDevelopment())
 			{				
-				app.UseSwagger();
-				app.UseSwaggerUI();
+				app.UseDeveloperExceptionPage();
+				//app.UseSwagger();
+				//app.UseSwaggerUI();
 			}
 
 			app.UseHttpsRedirection();

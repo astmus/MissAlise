@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Mvc;
 using MissAlise.Application;
 using MissAlise.Application.Interfaces;
-using MissAlise.Application.UseCases.Sync;
 using MissAlise.Background;
 using MissAlise.Bot;
 using MissAlise.DataBase;
@@ -36,14 +35,13 @@ namespace MissAlise.Worker
 					builder => builder.SetDescription("Синхронизация данных").AddTrigger(new SyncDataJob(64), "Полуминутно").SetDelay(Time.Minute / 2)
 				).AddBackgroundJob<SyncOneDriveFolderJob, SyncOneDriveFolderJobHandler>(
 					builder => builder.SetDescription("Синхронизация папки OneDrive")//.AddTrigger(new SyncOneDriveFolderJob(default,default), "1 min").SetDelay(Time.Minute)
-				);
+				);			
 
-			builder.Services
-				.AddOneDriveService(builder.Configuration.GetSection(nameof(AzureAd)))
+			 builder.Services
+				.AddOneDriveService(builder.Configuration)
 				.AddOneDriveHandling()
 				.AddBotService(builder.Configuration.GetSection("BotConfiguration"));
-				//.AddScoped<IAsyncHandler<SyncCommand>, SyncCommandHandler>();
-
+			//.AddScoped<IAsyncHandler<SyncCommand>, SyncCommandHandler>();
 			var host = builder.Build();
 
 			host.MapGet("/signin-oidc", Signin);

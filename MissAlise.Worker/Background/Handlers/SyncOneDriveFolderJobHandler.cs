@@ -1,6 +1,5 @@
 ﻿using Microsoft.Graph;
 using MissAlise.Background;
-using MissAlise.Utils;
 
 namespace MissAlise.Worker.Background.Handlers
 {
@@ -9,10 +8,10 @@ namespace MissAlise.Worker.Background.Handlers
 		private readonly ILogger<SyncBackgroundTaskHandler> logger;
 		private readonly GraphServiceClient graphServiceClient;		
 
-		public SyncOneDriveFolderJobHandler(ILogger<SyncBackgroundTaskHandler> logger, GraphServiceClient graphServiceClient)
+		public SyncOneDriveFolderJobHandler(ILogger<SyncBackgroundTaskHandler> logger/*, GraphServiceClient graphServiceClient*/)
 		{
 			this.logger = logger;
-			this.graphServiceClient = graphServiceClient;
+			//this.graphServiceClient = graphServiceClient;
 		}
 
 		public override async Task HandleAsync(SyncOneDriveFolderJob backgroundTask, CancellationToken cancel)
