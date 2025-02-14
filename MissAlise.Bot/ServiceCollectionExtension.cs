@@ -11,13 +11,11 @@ namespace MissAlise.Bot
 		public static IServiceCollection AddBotService(this IServiceCollection services, IConfigurationSection botConfig)
 		{
 			services
-				.AddSingleton<BotWorker>().AddSingleton(sp => botConfig.Get<BotConfiguration>())
+				.AddSingleton<BotWorker>()
 				.AddTransient<IAuthorizationCompleter, AuthorizationCompleteHandler>()
 				.AddHostedService<BotWorker.UpdateReceiver>()
-				.AddHostedService<BotWorker.UpdateHandler>();
-				//.AddHttpClient("bot")
-				//.UseSocketsHttpHandler((handler, _) => handler.PooledConnectionLifetime = TimeSpan.FromMinutes(2)) // Recreate connection every 2 minutes
-				//.SetHandlerLifetime(Timeout.InfiniteTimeSpan);
+				.AddHostedService<BotWorker.UpdateHandler>()
+				.Configure<BotConfiguration>(botConfig);
 
 			services.AddScoped<IAsyncHandler<Message>, ChatMessageHandler>();
 			return services;

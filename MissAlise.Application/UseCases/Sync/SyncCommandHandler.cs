@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 using MissAlise.Application.Interfaces;
+using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
 
 namespace MissAlise.Application.UseCases.Sync
@@ -26,6 +27,8 @@ namespace MissAlise.Application.UseCases.Sync
 			try
 			{
 				var items = await oneDrive.GetRootItems(cancel);
+				var sync = oneDrive.GetSynchronizator().ToBlockingEnumerable().Where(w=> w is Photo).ToList();
+				int i = 0;
 				//var user = await client.Me.GetAsync();
 				//var drive = await client.Me.Drive.GetAsync().ConfigureAwait(false);
 				////var driveItems = await client.Me.Drive.GetAsync().ConfigureAwait(false);

@@ -52,7 +52,6 @@ namespace MissAlise.Bot
 			catch (Exception error)
 			{
 				logger.LogError(error,error.Message);
-				throw;
 			}
 			//await bot.Client.SetMyCommands(bot.Commands, BotCommandScope.Chat(chatId), cancellationToken: cancel);
 		}

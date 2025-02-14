@@ -1,11 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MissAlise.Application.Context;
 using MissAlise.Application.Interfaces;
 using MissAlise.Application.Providers;
 using MissAlise.Application.UseCases.Sync;
-using MissAlise.Entities.OneDrive;
 
 namespace MissAlise.Application
 {

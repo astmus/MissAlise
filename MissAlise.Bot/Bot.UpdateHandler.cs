@@ -18,7 +18,7 @@ namespace MissAlise.Bot
 		{
 			private readonly ILogger<UpdateHandler> logger;
 			private readonly IServiceScopeFactory factory;
-			private BotWorker bot;			
+			private readonly BotWorker bot;			
 			public UpdateHandler(ILogger<UpdateHandler> logger, IServiceScopeFactory factory, BotWorker bot)
 			{
 				this.logger = logger;
@@ -43,41 +43,12 @@ namespace MissAlise.Bot
 						logger.LogError(error, error.Message);
 					}					
 				}
-			}
-
-			//async Task<UserProfile> Authorize(ITelegramBotClient botClient, Update update, CancellationToken cancel)
-			//{
-			//	var sender = update.GetCurrentMessage().From;
-			//	var db = services.GetRequiredService<IUserProfilesRepository>();
-			//	var profile = await db.FindAsync(sender.Id.ToString(), cancel);
-			//	if (profile == null)
-			//	{
-			//		profile = new UserProfile()
-			//		{
-			//			Id = sender.Id.ToString(),
-			//			Telegram = new() { Id = sender.Id.ToString() }
-			//		};
-			//		await db.AddOrReplaceAsync(profile, cancel);
-			//	}
-
-			//	if (profile.AccessData == null)
-			//	{
-			//		var link = services.GetRequiredService<AzureAd>().AuthorizeLink(update.Message.Chat.Id.ToString());
-			//		await bot.Client.DeleteMyCommands().ConfigureAwait(false);
-			//		await bot.Client.SetChatMenuButton(update.Message.Chat.Id, new MenuButtonWebApp() { Text = "Авторизоваться", WebApp = new WebAppInfo(link.ToString()) }, cancel).ConfigureAwait(false); ;
-			//		await bot.Client.SendMessage(update.Message.Chat, "Необходима авторизация", parseMode: ParseMode.MarkdownV2, cancellationToken: cancel).ConfigureAwait(false); ;
-			//		return null;
-			//	}
-			//	return profile;
-			//}
+			}			
 
 			public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancel)
 			{
 				try
 				{
-					//if (await Authorize(botClient, update, cancel) is not UserProfile profile)
-					//	return;
-
 					using var handleScope = factory.CreateScope();
 					var services = handleScope.ServiceProvider;
 					var manager = services.GetRequiredService<UserManager<AppUser>>();
