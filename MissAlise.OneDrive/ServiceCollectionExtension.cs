@@ -3,8 +3,11 @@ using System.Text.Json;
 using Azure.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MissAlise.Application.Interfaces;
+using MissAlise.Application.Models;
 using MissAlise.Entities.OneDrive;
+using MissAlise.Interfaces;
 using Refit;
 
 namespace MissAlise.OneDrive
@@ -15,20 +18,20 @@ namespace MissAlise.OneDrive
 		{
 			var settings = new RefitSettings()
 			{
-
 				ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions()
 				{
-					PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-
-				})
+					PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+					PropertyNameCaseInsensitive = true
+				})				
 			};
 
-			services.AddRefitClient<IOneDriveCredentialsService>().ConfigureHttpClient(client => client.BaseAddress = new Uri("https://login.microsoftonline.com"));
-			services.AddRefitClient<IOneDriveClient>().ConfigureHttpClient(client => client.BaseAddress = new Uri("https://graph.microsoft.com/v1.0/me/drive")).AddHttpMessageHandler<AuthHeaderHandler>();
-			//services.AddScoped(sp => sp.GetRequiredService<IHandleContext>().GetCurrent<UserProfile>());
 			services.AddScoped<TokenCredential, OAuthTokenCredentials>().AddScoped<IOneDriveService, OneDriveService>()
 						.AddSingleton(sp => appConfiguration.Get<AzureAd>())
 						.AddTransient<AuthHeaderHandler>();
+
+			services.AddRefitClient<IOneDriveCredentialsService>(settings).ConfigureHttpClient(client => client.BaseAddress = new Uri("https://login.microsoftonline.com"));
+			services.AddRefitClient<IOneDriveClient>(settings).ConfigureHttpClient(client => client.BaseAddress = new Uri("https://graph.microsoft.com/v1.0/me/drive")).AddHttpMessageHandler<AuthHeaderHandler>();
+			//services.AddScoped(sp => sp.GetRequiredService<IHandleContext>().GetCurrent<UserProfile>());
 			//.AddScoped<GraphServiceClient>();
 			
 			//services.AddScoped(sp =>
@@ -46,11 +49,18 @@ namespace MissAlise.OneDrive
 	class AuthHeaderHandler : DelegatingHandler
 	{
 		private readonly TokenCredential tokenCredential;
+		private readonly AzureAd config;
+		private readonly IOneDriveCredentialsService credentialService;
+		private readonly IUserProfilesRepository profiles;
+		private readonly ILogger<AuthHeaderHandler> logger;
 
-
-		public AuthHeaderHandler(TokenCredential tokenProvider)
+		public AuthHeaderHandler(AzureAd config, IOneDriveCredentialsService credentialService, IUserProfilesRepository profiles, ILogger<AuthHeaderHandler> logger)
 		{
-			this.tokenCredential = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
+			//this.tokenCredential = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
+			this.config = config;
+			this.credentialService = credentialService;
+			this.profiles = profiles;
+			this.logger = logger;
 			// InnerHandler must be left as null when using DI, but must be assigned a value when
 			// using RestService.For<IMyApi>
 			// InnerHandler = new HttpClientHandler();
@@ -58,12 +68,33 @@ namespace MissAlise.OneDrive
 
 		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
 		{
-			var token = await tokenCredential.GetTokenAsync(default, cancellationToken);
+			try
+			{
+				if (request.Options.TryGetValue(new("ctx"), out IHandleContext ctx))
+				{
+					request.Options.Set(new HttpRequestOptionsKey<string>("ctx"), default);
+					//var token = await tokenCredential.GetTokenAsync(default, cancellationToken);
+					var profile = await profiles.FindAsync(ctx.GetCurrent<AppUser>().Id, cancellationToken);
 
-			//potentially refresh token here if it has expired etc.
-			var auth = AuthenticationHeaderValue.Parse(token.Token);
-			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
-			//request.Headers.Add("X-Tenant-Id", tokenCredential.GetTenantId());
+					if (DateTimeOffset.UtcNow > profile.AccessData.ExpiredAfter)
+					{
+						var response = await credentialService.RefreshCredentials(config, profile.AccessData.RefreshToken, cancellationToken).ConfigureAwait(false);
+						if (response.IsSuccessful)
+						{
+							profile.AccessData = response.Content;
+							profile.AccessData.ExpiredAfter = DateTimeOffset.UtcNow.AddSeconds(response.Content.ExpiresIn);
+							await profiles.AddOrReplaceAsync(profile, cancellationToken);
+						}
+					}
+					var access = new AccessToken(profile.AccessData.AccessToken, profile.AccessData.ExpiredAfter);					
+					request.Headers.Add("Authorization", "Bearer "+ profile.AccessData.AccessToken);
+				}
+
+			}
+			catch (Exception error)
+			{
+				logger.LogError(error, error.Message);
+			}
 
 			return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 		}

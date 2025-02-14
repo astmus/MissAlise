@@ -11,14 +11,12 @@ namespace MissAlise.Entities.OneDrive
 		[MaxLength(64)]
 		public string GivenName { get; set; }
 		[MaxLength(64)]
-		public string Mail { get; set; }
+		public string? Mail { get; set; }
 		[MaxLength(8)]
-		public string PreferredLanguage { get; set; }
+		public string? PreferredLanguage { get; set; }
 		[MaxLength(64)]
 		public string Surname { get; set; }
 		[MaxLength(64)]
-		public string UserPrincipalName { get; set; }
-		public int storagefolderid { get; set; }
-		public Folder? StorageFolder { get; set; }
+		public string? UserPrincipalName { get; set; }
 	}
 }

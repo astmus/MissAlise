@@ -16,7 +16,7 @@ namespace MissAlise.Services.Photos
 			{				
 			});
 			builder.Services.AddApplication().AddPersistance(builder.Configuration, false);
-
+			
 			builder.Services.AddControllers().AddJsonOptions(options =>
 			{
 				options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
@@ -39,9 +39,8 @@ namespace MissAlise.Services.Photos
 			}
 
 			app.UseHttpsRedirection();
-
+			app.UseAuthentication();
 			app.UseAuthorization();
-
 
 			app.MapControllers();
 

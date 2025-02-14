@@ -4,14 +4,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using MissAlise.DataBase.Models;
+using MissAlise.DataBase.Contexts;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace MissAlise.DataBase.Migrations
 {
-    [DbContext(typeof(UserMediaContext))]
+	[DbContext(typeof(UserMediaContext))]
     [Migration("20250202123025_SizeTypeFix")]
     partial class SizeTypeFix
     {

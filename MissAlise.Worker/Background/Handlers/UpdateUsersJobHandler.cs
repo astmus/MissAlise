@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MissAlise.Background;
-using MissAlise.DataBase.Models;
-using MissAlise.Utils;
+﻿using MissAlise.Background;
 
 namespace MissAlise.Worker.Background.Handlers
 {

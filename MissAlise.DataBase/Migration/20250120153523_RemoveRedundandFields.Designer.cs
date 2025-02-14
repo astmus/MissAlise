@@ -2,18 +2,21 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using MissAlise.DataBase.Models;
+using MissAlise.DataBase.Contexts;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace MissAlise.DataBase.Migrations
 {
-    [DbContext(typeof(UserMediaContext))]
-    partial class UserMediaContextModelSnapshot : ModelSnapshot
+	[DbContext(typeof(UserMediaContext))]
+    [Migration("20250120153523_RemoveRedundandFields")]
+    partial class RemoveRedundandFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,14 +36,14 @@ namespace MissAlise.DataBase.Migrations
                     b.Property<DateTimeOffset?>("Createddatetime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("MimeType")
-                        .HasColumnType("text");
-
                     b.Property<DateTimeOffset?>("Modifiedatetime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Title")
                         .HasColumnType("text");
+
+                    b.Property<int?>("Type")
+                        .HasColumnType("integer");
 
                     b.HasKey("Itemid");
 
@@ -75,7 +78,7 @@ namespace MissAlise.DataBase.Migrations
                         .HasMaxLength(8)
                         .HasColumnType("character varying(8)");
 
-                    b.Property<int?>("StorageFolderId")
+                    b.Property<int?>("StorageFolderItemid")
                         .HasColumnType("integer");
 
                     b.Property<string>("Surname")
@@ -90,7 +93,7 @@ namespace MissAlise.DataBase.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StorageFolderId");
+                    b.HasIndex("StorageFolderItemid");
 
                     b.ToTable("Users");
                 });
@@ -99,18 +102,20 @@ namespace MissAlise.DataBase.Migrations
                 {
                     b.HasBaseType("MissAlise.Entities.OneDrive.Item");
 
-                    b.Property<string>("Caption")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Extension")
                         .HasColumnType("text");
 
                     b.Property<int>("Folderid")
                         .HasColumnType("integer");
 
-                    b.Property<long?>("Size")
-                        .HasColumnType("bigint");
+                    b.Property<string>("Mimetype")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("Size")
+                        .HasColumnType("integer");
 
                     b.HasIndex("Folderid");
 
@@ -121,15 +126,13 @@ namespace MissAlise.DataBase.Migrations
                 {
                     b.HasBaseType("MissAlise.Entities.OneDrive.Item");
 
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
                     b.Property<int?>("Parentfolderid")
                         .HasColumnType("integer");
 
                     b.Property<string>("Path")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasIndex("Parentfolderid");
@@ -255,7 +258,7 @@ namespace MissAlise.DataBase.Migrations
                 {
                     b.HasOne("MissAlise.Entities.OneDrive.Folder", "StorageFolder")
                         .WithMany()
-                        .HasForeignKey("StorageFolderId");
+                        .HasForeignKey("StorageFolderItemid");
 
                     b.Navigation("StorageFolder");
                 });
@@ -288,7 +291,7 @@ namespace MissAlise.DataBase.Migrations
                     b.HasOne("MissAlise.Entities.OneDrive.Folder", "Parent")
                         .WithMany("Folders")
                         .HasForeignKey("Parentfolderid")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Parent");
                 });

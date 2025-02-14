@@ -7,5 +7,6 @@ namespace MissAlise.Application.Interfaces
 		//Task<DeltaGetResponse> GetRootItems(CancellationToken cancel);
 		Task<User> GetOwnerInfo(CancellationToken cancel);
 		Uri CreateAuthorizeLink(string stateIdentifier);
-	}
+		Task<IEnumerable<Item>> GetRootItems(CancellationToken cancel);
+	}	
 }

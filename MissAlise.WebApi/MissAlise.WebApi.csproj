@@ -8,8 +8,12 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
 	</PropertyGroup>
-	<ItemGroup>		
+	<ItemGroup>				
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11" Condition="'$(Configuration)' == 'Debug'">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 	</ItemGroup>
 	
 	<ItemGroup>

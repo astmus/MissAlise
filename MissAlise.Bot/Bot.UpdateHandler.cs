@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MissAlise.Application.Interfaces;
+using MissAlise.Application.Models;
 using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
 using Telegram.Bot;
@@ -16,84 +18,94 @@ namespace MissAlise.Bot
 		{
 			private readonly ILogger<UpdateHandler> logger;
 			private readonly IServiceScopeFactory factory;
-			private BotWorker bot;
-			private IServiceScope currentScope;
-			private IServiceProvider services;
-			public UpdateHandler(ILogger<UpdateHandler> logger, IServiceScopeFactory factory)
+			private BotWorker bot;			
+			public UpdateHandler(ILogger<UpdateHandler> logger, IServiceScopeFactory factory, BotWorker bot)
 			{
 				this.logger = logger;
 				this.factory = factory;
+				this.bot = bot;
 			}
 
 			protected override async Task ExecuteAsync(CancellationToken cancel)
 			{
 				while (!cancel.IsCancellationRequested)
 				{
-					currentScope = factory.CreateScope();
 					try
 					{
-						services = currentScope.ServiceProvider;
-						bot = services.GetRequiredService<BotWorker>();
-						//azure = currentScope.ServiceProvider.GetRequiredService<AzureAd>();
-
 						await foreach (var update in bot.pendingUpdates.Reader.ReadAllAsync(cancel))
 						{
 							logger.LogInformation("Got update {Id}", update.Id);
-							await HandleUpdateAsync(bot.Client, update, cancel);
+							_ = HandleUpdateAsync(bot.Client, update, cancel);
 						}
 					}
 					catch (Exception error)
 					{
 						logger.LogError(error, error.Message);
-					}
-					finally
-					{
-						currentScope.Dispose();
-					}
+					}					
 				}
 			}
 
-			async Task<UserProfile> Authorize(ITelegramBotClient botClient, Update update, CancellationToken cancel)
-			{
-				var sender = update.GetCurrentMessage().From;
-				var db = services.GetRequiredService<IUserProfilesRepository>();
-				var profile = await db.FindAsync(sender.Id.ToString(), cancel);
-				if (profile == null)
-				{
-					profile = new UserProfile()
-					{
-						Id = sender.Id.ToString(),
-						Telegram = new() { Id = sender.Id.ToString() }
-					};
-					await db.AddOrReplaceAsync(profile, cancel);
-				}
+			//async Task<UserProfile> Authorize(ITelegramBotClient botClient, Update update, CancellationToken cancel)
+			//{
+			//	var sender = update.GetCurrentMessage().From;
+			//	var db = services.GetRequiredService<IUserProfilesRepository>();
+			//	var profile = await db.FindAsync(sender.Id.ToString(), cancel);
+			//	if (profile == null)
+			//	{
+			//		profile = new UserProfile()
+			//		{
+			//			Id = sender.Id.ToString(),
+			//			Telegram = new() { Id = sender.Id.ToString() }
+			//		};
+			//		await db.AddOrReplaceAsync(profile, cancel);
+			//	}
 
-				if (profile.AccessData == null)
-				{
-					var link = services.GetRequiredService<AzureAd>().AuthorizeLink(update.Message.Chat.Id.ToString());
-					await bot.Client.DeleteMyCommands().ConfigureAwait(false);
-					await bot.Client.SetChatMenuButton(update.Message.Chat.Id, new MenuButtonWebApp() { Text = "Авторизоваться", WebApp = new WebAppInfo(link.ToString()) }, cancel).ConfigureAwait(false); ;
-					await bot.Client.SendMessage(update.Message.Chat, "Необходима авторизация", parseMode: ParseMode.MarkdownV2, cancellationToken: cancel).ConfigureAwait(false); ;
-					return null;
-				}
-				return profile;
-			}
+			//	if (profile.AccessData == null)
+			//	{
+			//		var link = services.GetRequiredService<AzureAd>().AuthorizeLink(update.Message.Chat.Id.ToString());
+			//		await bot.Client.DeleteMyCommands().ConfigureAwait(false);
+			//		await bot.Client.SetChatMenuButton(update.Message.Chat.Id, new MenuButtonWebApp() { Text = "Авторизоваться", WebApp = new WebAppInfo(link.ToString()) }, cancel).ConfigureAwait(false); ;
+			//		await bot.Client.SendMessage(update.Message.Chat, "Необходима авторизация", parseMode: ParseMode.MarkdownV2, cancellationToken: cancel).ConfigureAwait(false); ;
+			//		return null;
+			//	}
+			//	return profile;
+			//}
 
 			public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancel)
 			{
-				if (await Authorize(botClient, update, cancel) is not UserProfile profile)
-					return;
-
-				//await bot.Client.SetMyCommands(bot.Commands, BotCommandScope.Chat(update.GetCurrentChat().Id), cancellationToken: cancel).ConfigureAwait(false);
 				try
 				{
-					using var handleScope = factory.CreateScope();
+					//if (await Authorize(botClient, update, cancel) is not UserProfile profile)
+					//	return;
 
-					var items = handleScope.ServiceProvider.GetRequiredService<IHandleContext>().Items;
-					items.Set(profile);
-					items.Set(update);
-					var srv = handleScope.ServiceProvider.GetServices<UserProfile>();
-					var handler = handleScope.ServiceProvider.GetRequiredService<IAsyncHandler<Message>>();
+					using var handleScope = factory.CreateScope();
+					var services = handleScope.ServiceProvider;
+					var manager = services.GetRequiredService<UserManager<AppUser>>();
+					var user = await manager.FindByIdAsync(update.GetCurrentMessage().From.Id.ToString());
+
+					if (user == null)
+					{
+						var profiles = services.GetRequiredService<IUserProfilesRepository>();
+						var tmpUser = update.GetCurrentMessage().From;
+						await profiles.AddPendingUser(new Entities.OneDrive.User()
+						{
+							Id = tmpUser.Id.ToString(),
+							DisplayName = tmpUser.Username,
+							GivenName = tmpUser.FirstName,
+							Surname = tmpUser.LastName ?? string.Empty
+						}, cancel);
+
+						var link = services.GetRequiredService<AzureAd>().AuthorizeLink(update.Message.Chat.Id.ToString());
+						await bot.Client.DeleteMyCommands().ConfigureAwait(false);
+						await bot.Client.SetChatMenuButton(update.Message.Chat.Id, new MenuButtonWebApp() { Text = "Авторизоваться", WebApp = new WebAppInfo(link.ToString()) }, cancel).ConfigureAwait(false); 
+						await bot.Client.SendMessage(update.Message.Chat, "Необходима авторизация", parseMode: ParseMode.MarkdownV2, cancellationToken: cancel).ConfigureAwait(false);
+						return;
+					}
+
+					var items = services.GetRequiredService<IHandleContext>().Items;
+					items.Set(user);
+					items.Set(update);					
+					var handler = services.GetRequiredService<IAsyncHandler<Message>>();
 					Task currentTask = update switch
 					{
 						//{ Command: not null } => HandleUpdateAsync(update, update.Command, stoppingToken),
@@ -121,8 +133,7 @@ namespace MissAlise.Bot
 				}
 				catch (Exception error)
 				{
-
-					throw;
+					logger.LogError(error, error.Message);
 				}
 			}
 

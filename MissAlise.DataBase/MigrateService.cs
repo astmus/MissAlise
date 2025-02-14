@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MissAlise.DataBase.Models;
+using MissAlise.DataBase.Contexts;
 
 namespace MissAlise.DataBase
 {

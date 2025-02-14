@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MissAlise.DataBase.Models;
+using MissAlise.DataBase.Contexts;
 using MissAlise.Interfaces;
 using MongoDB.Driver;
 using Folder = MissAlise.Entities.OneDrive.Folder;
@@ -28,25 +28,24 @@ namespace MissAlise.DataBase
 					Mail = user.Mail,
 					PreferredLanguage = user.PreferredLanguage,
 					Surname = user.Surname,
-					UserPrincipalName = string.Empty,
-					StorageFolder = new Folder() { 
-						Title = user.DisplayName,
-						CreatedDateTime = DateTime.UtcNow,
-						ModifieDateTime = DateTime.UtcNow,
-						Name = user.GivenName,
-						Path = Path.Combine(defPath, user.DisplayName)
-					}
+					UserPrincipalName = string.Empty					
 				};
 				var result = await ctx.Users.AddAsync(owner, cancel);
 				await ctx.SaveChangesAsync(cancel).ConfigureAwait(false);
 			}
-			var userStroage = await ctx.Users.Include(u => u.StorageFolder).ThenInclude(u=>u.Folders).ThenInclude(u=>u.Files).AsSplitQuery()
-			.FirstOrDefaultAsync(u => u.Id == user.Id).ConfigureAwait(false);
+			var userStroage = await ctx.Folders.Include(u => u.Files).ThenInclude(u=>u.Folder).AsSplitQuery()
+			.FirstOrDefaultAsync(u => u.Id.ToString() == user.Id).ConfigureAwait(false);
 
 			return new UserStorage()
 			{
-				Owner = userStroage,
-				RootFolder = userStroage.StorageFolder,
+				RootFolder = new Folder()
+				{
+					Title = user.DisplayName,
+					CreatedDateTime = DateTime.UtcNow,
+					ModifieDateTime = DateTime.UtcNow,
+					Name = user.GivenName,
+					Path = Path.Combine(defPath, user.DisplayName)
+				},
 				SaveAsync = () => ctx.SaveChangesAsync(cancel)
 			};
 		}
@@ -54,7 +53,7 @@ namespace MissAlise.DataBase
 
 	internal class UserStorage : IUserStorage
 	{
-		public required User Owner { get; internal set; }
+		public User? Owner { get; internal set; }
 		public required Folder RootFolder { get; set; }
 		public required Func<Task<int>> SaveAsync { get; internal set; }
 	}

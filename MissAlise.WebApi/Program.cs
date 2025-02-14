@@ -1,7 +1,10 @@
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
 using MissAlise.Application;
+using MissAlise.Application.Interfaces;
 using MissAlise.Bot;
 using MissAlise.DataBase;
 using MissAlise.Entities.OneDrive;
@@ -11,7 +14,7 @@ namespace MissAlise.WebApi;
 
 public class Program
 {
-	public static void Main(string[] args)
+	public static async Task Main(string[] args)
 	{
 		var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(args);
 		builder.AddServiceDefaults();
@@ -20,15 +23,18 @@ public class Program
 		{
 			options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 			options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-			options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+			options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;			
 		});
 	
 		builder.Services.Configure<AzureAd>(builder.Configuration.GetSection("AzureAd"));		
-		builder.Services.AddProblemDetails();
+		builder.Services.AddProblemDetails();		
+
+		builder.Services.AddApplication()
+			.AddPersistance(builder.Configuration, false)
+			.AddOneDriveService(builder.Configuration.GetSection(nameof(AzureAd)))
+			.AddOneDriveHandling()
+			.AddBotService(builder.Configuration.GetSection("BotConfiguration")); 
 		
-		builder.Services.AddApplication().AddPersistance(builder.Configuration, false)
-					.AddOneDriveService(builder.Configuration.GetSection(nameof(AzureAd)))
-					.AddOneDriveHandling().AddBotService(builder.Configuration.GetSection("BotConfiguration")); ;
 		//builder.Services.AddEndpointsApiExplorer(); это только для minimal api
 		builder.Services.AddSwaggerGen(options=> {
 			var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -37,6 +43,8 @@ public class Program
 		);
 
 		var app = builder.Build();
+		
+		app.MapGet("/signin-oidc", Signin);
 
 		if (app.Environment.IsDevelopment())
 		{
@@ -48,11 +56,23 @@ public class Program
 		app.UseHttpsRedirection();
 		app.UseRouting();
 		app.UseAuthentication();
-		app.UseAuthorization();		
-
+		app.UseAuthorization();
 		app.MapControllers();
-		app.MapDefaultEndpoints();
+		
+		await app.RunAsync();
+	}
 
-		app.Run();
+	static async Task<IResult> Signin([FromServices] AzureAd config, [FromServices] HttpClient client, [FromQuery] string code, [FromQuery] string state, HttpContext ctx, CancellationToken cancel)
+	{
+		if (ctx.Request.Headers.Referer.Any(refer => refer == config.Instance || refer == "https://login.live.com/" || refer == "https://account.live.com/") == false)
+			return Results.Forbid();
+		//var response2 = await ctx.RequestServices.GetRequiredService<IOneDriveCredentialsService>().GetCredentialsByCode2(config, code, cancel);
+		var response = await ctx.RequestServices.GetRequiredService<IOneDriveCredentialsService>().GetCredentialsByCode(config, code, cancel);
+
+		if (!response.IsSuccessful)
+			return Results.Problem(response.Error.ToString(), null, (int)response.StatusCode);
+
+		await ctx.RequestServices.GetService<IAuthorizationCompleter>()?.AuthorizationCompleted(state, response.Content, cancel);
+		return Results.Text("<html><body>Авторизация закончена успешно. Вы можете закрыть это окно</body></html>", "text/html", Encoding.UTF8, 200);
 	}
 }

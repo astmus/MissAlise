@@ -1,9 +1,8 @@
 ﻿namespace MissAlise.Entities.OneDrive
 {
-	public class UserProfile : User
-	{
-		public User OneDrive { get; set; }
+	public class UserProfile
+	{		
 		public User Telegram { get; set; }
-		public Credentials AccessData { get; set; }
-	}
+		public UserCredentials AccessData { get; set; }
+	}	
 }

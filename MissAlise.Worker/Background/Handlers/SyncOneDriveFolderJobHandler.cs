@@ -1,12 +1,11 @@
-﻿using Microsoft.Graph;
-using MissAlise.Background;
+﻿using MissAlise.Background;
 
 namespace MissAlise.Worker.Background.Handlers
 {
 	public class SyncOneDriveFolderJobHandler : BackgroundJobHandler<SyncOneDriveFolderJob>
 	{
 		private readonly ILogger<SyncBackgroundTaskHandler> logger;
-		private readonly GraphServiceClient graphServiceClient;		
+		//private readonly GraphServiceClient graphServiceClient;		
 
 		public SyncOneDriveFolderJobHandler(ILogger<SyncBackgroundTaskHandler> logger/*, GraphServiceClient graphServiceClient*/)
 		{

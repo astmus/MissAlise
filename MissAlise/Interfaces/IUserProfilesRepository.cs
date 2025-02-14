@@ -7,5 +7,7 @@ namespace MissAlise.Interfaces
 		Task<IEnumerable<UserProfile>> AllAsync(CancellationToken cancel);
 		Task AddOrReplaceAsync(UserProfile user, CancellationToken cancel);
 		Task<UserProfile> FindAsync(string id, CancellationToken cancel);
+		Task AddPendingUser(User user, CancellationToken cancel);
+		Task<User?> PopPendingUser(string identifier, CancellationToken cancel);
 	}
 }

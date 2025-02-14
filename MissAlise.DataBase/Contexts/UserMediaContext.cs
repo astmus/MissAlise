@@ -2,7 +2,7 @@
 using MissAlise.Entities.OneDrive;
 using File = MissAlise.Entities.OneDrive.File;
 
-namespace MissAlise.DataBase.Models;
+namespace MissAlise.DataBase.Contexts;
 
 public partial class UserMediaContext : DbContext
 {
@@ -28,7 +28,7 @@ public partial class UserMediaContext : DbContext
 	public virtual DbSet<Video> Videos { get; set; }
 
 	public virtual DbSet<User> Users { get; set; }
-	
+
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		modelBuilder.Entity<Item>().UseTptMappingStrategy();
@@ -46,18 +46,20 @@ public partial class UserMediaContext : DbContext
 		//	file.HasKey(p => p.Id).HasName("Itemid");			
 		//});
 
-		modelBuilder.Entity<Folder>(folder => {
-				folder.HasOne(c => c.Parent)
-				  .WithMany(c => c.Folders)
-				  .HasForeignKey(c => c.Parentfolderid)
-				  .OnDelete(DeleteBehavior.Cascade);
-				folder.HasMany(file => file.Files).WithOne(f => f.Folder);				
-			});
-
-		modelBuilder.Entity<Audio>(audio=> {			
-			audio.Property(p => p.TrackCount).HasColumnName("Trackcount");			
+		modelBuilder.Entity<Folder>(folder =>
+		{
+			folder.HasOne(c => c.Parent)
+			  .WithMany(c => c.Folders)
+			  .HasForeignKey(c => c.Parentfolderid)
+			  .OnDelete(DeleteBehavior.Cascade);
+			folder.HasMany(file => file.Files).WithOne(f => f.Folder);
 		});
-		
+
+		modelBuilder.Entity<Audio>(audio =>
+		{
+			audio.Property(p => p.TrackCount).HasColumnName("Trackcount");
+		});
+
 
 		modelBuilder.Entity<Photo>();
 

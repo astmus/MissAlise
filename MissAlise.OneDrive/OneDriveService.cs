@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Options;
 using MissAlise.Application.Interfaces;
 using MissAlise.Entities.OneDrive;
-using MissAlise.OneDrive.Drives.Item.Items.Item.Delta;
+
 namespace MissAlise.OneDrive
 {
 	public class OneDriveService : IOneDriveService
@@ -10,12 +10,14 @@ namespace MissAlise.OneDrive
 		private readonly AzureAd azureOptions;
 		//private readonly GraphServiceClient client;
 		private readonly IOneDriveClient oneClient;
+		private readonly IHandleContext ctx;
 
-		public OneDriveService(IOptions<AzureAd> azureOptions, /*GraphServiceClient client,*/ IOneDriveClient oneClient)
+		public OneDriveService(IOptions<AzureAd> azureOptions, /*GraphServiceClient client,*/ IOneDriveClient oneClient, IHandleContext ctx)
 		{
 			this.azureOptions = azureOptions.Value;
 			//this.client = client;
-			this.oneClient = oneClient;			
+			this.oneClient = oneClient;
+			this.ctx = ctx;
 		}
 
 		public Uri CreateAuthorizeLink(string stateIdentifier)
@@ -34,7 +36,7 @@ namespace MissAlise.OneDrive
 
 		public async Task<User> GetOwnerInfo(CancellationToken cancel)
 		{
-			var items = await oneClient.RootItems(cancel);
+			var items = await oneClient.RootItems(ctx, cancel);
 			//var me = await client.Me.GetAsync(cancellationToken: cancel);
 			//if (me != null)
 			//	return new User() { Id = me.Id, DisplayName = me.DisplayName, GivenName = me.GivenName, Mail = me.Mail, PreferredLanguage = me.PreferredLanguage, Surname = me.Surname };
@@ -42,12 +44,14 @@ namespace MissAlise.OneDrive
 			return null;
 		}
 
-		public async Task<DeltaGetResponse> GetRootItems(CancellationToken cancel)
+		public async Task<IEnumerable<Item>> GetRootItems(CancellationToken cancel)
 		{
 			//var resp = await client.Drives["ff"].Items[""].Delta.GetAsDeltaGetResponseAsync();
-			var items = await oneClient.RootItems(cancel);
-			var res =  await oneClient.RootDelta(cancel);
-			return res.Content;
+			var items = await oneClient.RootItems(ctx, cancel);
+			var res =  await oneClient.RootDelta(ctx, cancel);
+			//if (res.Content != null)
+			
+			return default;
 		}
 	}
 }

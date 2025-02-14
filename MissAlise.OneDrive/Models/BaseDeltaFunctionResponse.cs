@@ -5,6 +5,7 @@ using Microsoft.Kiota.Abstractions.Serialization;
 using System.Collections.Generic;
 using System.IO;
 using System;
+using System.Text.Json.Serialization;
 namespace MissAlise.OneDrive.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
@@ -15,15 +16,17 @@ namespace MissAlise.OneDrive.Models
         /// <summary>The OdataDeltaLink property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
+        [JsonPropertyName("@odata.deltaLink")]
         public string? OdataDeltaLink { get; set; }
 #nullable restore
 #else
         public string OdataDeltaLink { get; set; }
 #endif
-        /// <summary>The OdataNextLink property</summary>
+		/// <summary>The OdataNextLink property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public string? OdataNextLink { get; set; }
+		[JsonPropertyName("@odata.nextLink")]
+		public string? OdataNextLink { get; set; }
 #nullable restore
 #else
         public string OdataNextLink { get; set; }

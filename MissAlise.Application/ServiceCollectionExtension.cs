@@ -15,7 +15,7 @@ namespace MissAlise.Application
 		{
 			services.TryAddScoped<IHandleContext, HandleContext>();
 			services.TryAddScoped<IContextItems, ContextItems>();
-			services.TryAddScoped(sp => sp.GetRequiredService<IHandleContext>().GetCurrent<UserProfile>(throwIfNull: true));
+			//services.TryAddTransient(sp => sp.GetRequiredService<IHandleContext>().GetCurrent<UserProfile>(throwIfNull: false));
 			
 			return services;
 		}

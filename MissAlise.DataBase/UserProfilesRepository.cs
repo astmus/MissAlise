@@ -1,4 +1,7 @@
-﻿using MissAlise.Entities.OneDrive;
+﻿using Microsoft.EntityFrameworkCore;
+using MissAlise.DataBase.Contexts;
+using MissAlise.DataBase.Models;
+using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
 using MongoDB.Driver;
 
@@ -6,25 +9,34 @@ namespace MissAlise.DataBase
 {
 	internal class UserProfilesRepository : IUserProfilesRepository
 	{
-		private readonly IMongoCollection<UserProfile> userProfiles;
-		
-		public UserProfilesRepository(IMongoDatabase database)
+		private readonly IMongoCollection<DbUserProfile> userProfiles;
+		private readonly IdentityContext identity;
+		static ReplaceOptions options = new ReplaceOptions { IsUpsert = true };
+
+		public UserProfilesRepository(IMongoDatabase database, IdentityContext identity)
 		{
-			userProfiles = database.GetCollection<UserProfile>("UserProfiles");		
+			userProfiles = database.GetCollection<DbUserProfile>("UserProfiles");
+			this.identity = identity;
 		}
 
-		static ReplaceOptions options = new ReplaceOptions { IsUpsert = true };
 
 		public async Task<UserProfile> FindAsync(string id, CancellationToken cancel)
 		{
-			var _filter = Builders<UserProfile>.Filter.Eq(r => r.Id, id);	
-			return await userProfiles.Find(_filter).FirstOrDefaultAsync(cancel);			
+			var filter = Builders<DbUserProfile>.Filter.Eq(r => r.Telegram.Id, id);
+			var projection = Builders<UserProfile>.Projection.Exclude("_id");
+			return await userProfiles.Find(filter)/*.Project<DbUserProfile>(projection)*/.FirstOrDefaultAsync(cancel);
 		}
 
 		public async Task AddOrReplaceAsync(UserProfile user, CancellationToken cancel)
 		{
-			var _filter = Builders<UserProfile>.Filter.Eq(r => r.Id, user.Id);
-			var res = await userProfiles.ReplaceOneAsync(_filter, user, options, cancel);		
+			var filter = Builders<DbUserProfile>.Filter.Eq(r => r.Telegram.Id, user.Telegram.Id);
+			var projection = Builders<UserProfile>.Projection.Combine();
+			var profile = await userProfiles.Find(filter)/*.Project<DbUserProfile>(projection)*/.FirstOrDefaultAsync(cancel);
+			profile ??= new() {
+				AccessData = user.AccessData,
+				Telegram = user.Telegram
+			};
+			var res = await userProfiles.ReplaceOneAsync(filter, profile, options, cancel);
 		}
 
 		public async Task<IEnumerable<UserProfile>> AllAsync(CancellationToken cancel)
@@ -32,5 +44,24 @@ namespace MissAlise.DataBase
 			var profiles = await userProfiles.Find(_ => true).ToListAsync();
 			return profiles;
 		}
+
+		public async Task AddPendingUser(User user, CancellationToken cancel)
+		{
+			await identity.PendingUsers.AddAsync(user, cancel).ConfigureAwait(false);
+			await identity.SaveChangesAsync(cancel);
+		}
+
+		public async Task<User?> PopPendingUser(string identifier, CancellationToken cancel)
+		{
+			var user = await identity.PendingUsers.FirstOrDefaultAsync(user => user.Id == identifier, cancel).ConfigureAwait(false);
+			if (user != null)
+			{
+				identity.PendingUsers.Remove(user);
+				await identity.SaveChangesAsync(cancel);
+			}
+
+			return user;
+		}
 	}
+
 }
