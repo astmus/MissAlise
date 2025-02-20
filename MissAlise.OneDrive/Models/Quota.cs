@@ -9,9 +9,11 @@ namespace MissAlise.OneDrive.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class Quota : IParsable
+    public partial class Quota : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
+        /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
+        public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>Total space consumed by files in the recycle bin, in bytes. Read-only.</summary>
         public long? Deleted { get; set; }
         /// <summary>The OdataType property</summary>
@@ -32,18 +34,17 @@ namespace MissAlise.OneDrive.Models
 #else
         public string State { get; set; }
 #endif
-        /// <summary>Information about the drive&apos;s storage quota plans. Only in Personal OneDrive.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.StoragePlanInformation? StoragePlanInformation { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.StoragePlanInformation StoragePlanInformation { get; set; }
-#endif
         /// <summary>Total allowed storage space, in bytes. Read-only.</summary>
         public long? Total { get; set; }
         /// <summary>Total space used, in bytes. Read-only.</summary>
         public long? Used { get; set; }
+        /// <summary>
+        /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.Quota"/> and sets the default values.
+        /// </summary>
+        public Quota()
+        {
+            AdditionalData = new Dictionary<string, object>();
+        }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
@@ -66,7 +67,6 @@ namespace MissAlise.OneDrive.Models
                 { "@odata.type", n => { OdataType = n.GetStringValue(); } },
                 { "remaining", n => { Remaining = n.GetLongValue(); } },
                 { "state", n => { State = n.GetStringValue(); } },
-                { "storagePlanInformation", n => { StoragePlanInformation = n.GetObjectValue<global::MissAlise.OneDrive.Models.StoragePlanInformation>(global::MissAlise.OneDrive.Models.StoragePlanInformation.CreateFromDiscriminatorValue); } },
                 { "total", n => { Total = n.GetLongValue(); } },
                 { "used", n => { Used = n.GetLongValue(); } },
             };
@@ -82,9 +82,9 @@ namespace MissAlise.OneDrive.Models
             writer.WriteStringValue("@odata.type", OdataType);
             writer.WriteLongValue("remaining", Remaining);
             writer.WriteStringValue("state", State);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.StoragePlanInformation>("storagePlanInformation", StoragePlanInformation);
             writer.WriteLongValue("total", Total);
             writer.WriteLongValue("used", Used);
+            writer.WriteAdditionalData(AdditionalData);
         }
     }
 }

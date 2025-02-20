@@ -11,15 +11,7 @@ namespace MissAlise.OneDrive.Models
     #pragma warning disable CS1591
     public partial class ListItem : global::MissAlise.OneDrive.Models.BaseItem, IParsable
     #pragma warning restore CS1591
-    {
-        /// <summary>Analytics about the view activities that took place on this item.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.ItemAnalytics? Analytics { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.ItemAnalytics Analytics { get; set; }
-#endif
+    {        
         /// <summary>The content type of this list item</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -28,14 +20,6 @@ namespace MissAlise.OneDrive.Models
 #else
         public global::MissAlise.OneDrive.Models.ContentTypeInfo ContentType { get; set; }
 #endif
-        /// <summary>Version information for a document set version created by a user.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.DocumentSetVersion>? DocumentSetVersions { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.DocumentSetVersion> DocumentSetVersions { get; set; }
-#endif
         /// <summary>For document libraries, the driveItem relationship exposes the listItem as a driveItem</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -43,30 +27,6 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public global::MissAlise.OneDrive.Models.DriveItem DriveItem { get; set; }
-#endif
-        /// <summary>The values of the columns set on this list item.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.FieldValueSet? Fields { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.FieldValueSet Fields { get; set; }
-#endif
-        /// <summary>Returns identifiers useful for SharePoint REST compatibility. Read-only.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.SharepointIds? SharepointIds { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.SharepointIds SharepointIds { get; set; }
-#endif
-        /// <summary>The list of previous versions of the list item.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.ListItemVersion>? Versions { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.ListItemVersion> Versions { get; set; }
 #endif
         /// <summary>
         /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.ListItem"/> and sets the default values.
@@ -93,13 +53,8 @@ namespace MissAlise.OneDrive.Models
         {
             return new Dictionary<string, Action<IParseNode>>(base.GetFieldDeserializers())
             {
-                { "analytics", n => { Analytics = n.GetObjectValue<global::MissAlise.OneDrive.Models.ItemAnalytics>(global::MissAlise.OneDrive.Models.ItemAnalytics.CreateFromDiscriminatorValue); } },
                 { "contentType", n => { ContentType = n.GetObjectValue<global::MissAlise.OneDrive.Models.ContentTypeInfo>(global::MissAlise.OneDrive.Models.ContentTypeInfo.CreateFromDiscriminatorValue); } },
-                { "documentSetVersions", n => { DocumentSetVersions = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DocumentSetVersion>(global::MissAlise.OneDrive.Models.DocumentSetVersion.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "driveItem", n => { DriveItem = n.GetObjectValue<global::MissAlise.OneDrive.Models.DriveItem>(global::MissAlise.OneDrive.Models.DriveItem.CreateFromDiscriminatorValue); } },
-                { "fields", n => { Fields = n.GetObjectValue<global::MissAlise.OneDrive.Models.FieldValueSet>(global::MissAlise.OneDrive.Models.FieldValueSet.CreateFromDiscriminatorValue); } },
-                { "sharepointIds", n => { SharepointIds = n.GetObjectValue<global::MissAlise.OneDrive.Models.SharepointIds>(global::MissAlise.OneDrive.Models.SharepointIds.CreateFromDiscriminatorValue); } },
-                { "versions", n => { Versions = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ListItemVersion>(global::MissAlise.OneDrive.Models.ListItemVersion.CreateFromDiscriminatorValue)?.AsList(); } },
             };
         }
         /// <summary>
@@ -110,13 +65,8 @@ namespace MissAlise.OneDrive.Models
         {
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
             base.Serialize(writer);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.ItemAnalytics>("analytics", Analytics);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.ContentTypeInfo>("contentType", ContentType);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DocumentSetVersion>("documentSetVersions", DocumentSetVersions);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.DriveItem>("driveItem", DriveItem);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.FieldValueSet>("fields", Fields);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.SharepointIds>("sharepointIds", SharepointIds);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ListItemVersion>("versions", Versions);
         }
     }
 }

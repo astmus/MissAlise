@@ -10,9 +10,11 @@ namespace MissAlise.OneDrive.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class Identity : IParsable
+    public partial class Identity : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
+        /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
+        public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>The display name of the identity.For drive items, the display name might not always be available or up to date. For example, if a user changes their display name the API might show the new value in a future response, but the items associated with the user don&apos;t show up as changed when using delta.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -38,6 +40,13 @@ namespace MissAlise.OneDrive.Models
         public string OdataType { get; set; }
 #endif
         /// <summary>
+        /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.Identity"/> and sets the default values.
+        /// </summary>
+        public Identity()
+        {
+            AdditionalData = new Dictionary<string, object>();
+        }
+        /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
         /// <returns>A <see cref="global::MissAlise.OneDrive.Models.Identity"/></returns>
@@ -48,26 +57,6 @@ namespace MissAlise.OneDrive.Models
             var mappingValue = parseNode.GetChildNode("@odata.type")?.GetStringValue();
             return mappingValue switch
             {
-                "#microsoft.graph.azureCommunicationServicesUserIdentity" => new global::MissAlise.OneDrive.Models.AzureCommunicationServicesUserIdentity(),
-                "#microsoft.graph.callRecords.userIdentity" => new global::MissAlise.OneDrive.Models.CallRecords.UserIdentity(),
-                "#microsoft.graph.communicationsApplicationIdentity" => new global::MissAlise.OneDrive.Models.CommunicationsApplicationIdentity(),
-                "#microsoft.graph.communicationsApplicationInstanceIdentity" => new global::MissAlise.OneDrive.Models.CommunicationsApplicationInstanceIdentity(),
-                "#microsoft.graph.communicationsEncryptedIdentity" => new global::MissAlise.OneDrive.Models.CommunicationsEncryptedIdentity(),
-                "#microsoft.graph.communicationsGuestIdentity" => new global::MissAlise.OneDrive.Models.CommunicationsGuestIdentity(),
-                "#microsoft.graph.communicationsPhoneIdentity" => new global::MissAlise.OneDrive.Models.CommunicationsPhoneIdentity(),
-                "#microsoft.graph.communicationsUserIdentity" => new global::MissAlise.OneDrive.Models.CommunicationsUserIdentity(),
-                "#microsoft.graph.emailIdentity" => new global::MissAlise.OneDrive.Models.EmailIdentity(),
-                "#microsoft.graph.initiator" => new global::MissAlise.OneDrive.Models.Initiator(),
-                "#microsoft.graph.provisionedIdentity" => new global::MissAlise.OneDrive.Models.ProvisionedIdentity(),
-                "#microsoft.graph.provisioningServicePrincipal" => new global::MissAlise.OneDrive.Models.ProvisioningServicePrincipal(),
-                "#microsoft.graph.provisioningSystem" => new global::MissAlise.OneDrive.Models.ProvisioningSystem(),
-                "#microsoft.graph.servicePrincipalIdentity" => new global::MissAlise.OneDrive.Models.ServicePrincipalIdentity(),
-                "#microsoft.graph.sharePointIdentity" => new global::MissAlise.OneDrive.Models.SharePointIdentity(),
-                "#microsoft.graph.teamworkApplicationIdentity" => new global::MissAlise.OneDrive.Models.TeamworkApplicationIdentity(),
-                "#microsoft.graph.teamworkConversationIdentity" => new global::MissAlise.OneDrive.Models.TeamworkConversationIdentity(),
-                "#microsoft.graph.teamworkTagIdentity" => new global::MissAlise.OneDrive.Models.TeamworkTagIdentity(),
-                "#microsoft.graph.teamworkUserIdentity" => new global::MissAlise.OneDrive.Models.TeamworkUserIdentity(),
-                "#microsoft.graph.userIdentity" => new global::MissAlise.OneDrive.Models.UserIdentity(),
                 _ => new global::MissAlise.OneDrive.Models.Identity(),
             };
         }
@@ -94,6 +83,7 @@ namespace MissAlise.OneDrive.Models
             writer.WriteStringValue("displayName", DisplayName);
             writer.WriteStringValue("id", Id);
             writer.WriteStringValue("@odata.type", OdataType);
+            writer.WriteAdditionalData(AdditionalData);
         }
     }
 }

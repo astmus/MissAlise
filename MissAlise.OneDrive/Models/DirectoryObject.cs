@@ -24,37 +24,7 @@ namespace MissAlise.OneDrive.Models
             _ = parseNode ?? throw new ArgumentNullException(nameof(parseNode));
             var mappingValue = parseNode.GetChildNode("@odata.type")?.GetStringValue();
             return mappingValue switch
-            {
-                "#microsoft.graph.activityBasedTimeoutPolicy" => new global::MissAlise.OneDrive.Models.ActivityBasedTimeoutPolicy(),
-                "#microsoft.graph.administrativeUnit" => new global::MissAlise.OneDrive.Models.AdministrativeUnit(),
-                "#microsoft.graph.application" => new global::MissAlise.OneDrive.Models.Application(),
-                "#microsoft.graph.appManagementPolicy" => new global::MissAlise.OneDrive.Models.AppManagementPolicy(),
-                "#microsoft.graph.appRoleAssignment" => new global::MissAlise.OneDrive.Models.AppRoleAssignment(),
-                "#microsoft.graph.authorizationPolicy" => new global::MissAlise.OneDrive.Models.AuthorizationPolicy(),
-                "#microsoft.graph.claimsMappingPolicy" => new global::MissAlise.OneDrive.Models.ClaimsMappingPolicy(),
-                "#microsoft.graph.contract" => new global::MissAlise.OneDrive.Models.Contract(),
-                "#microsoft.graph.crossTenantAccessPolicy" => new global::MissAlise.OneDrive.Models.CrossTenantAccessPolicy(),
-                "#microsoft.graph.device" => new global::MissAlise.OneDrive.Models.Device(),
-                "#microsoft.graph.directoryObjectPartnerReference" => new global::MissAlise.OneDrive.Models.DirectoryObjectPartnerReference(),
-                "#microsoft.graph.directoryRole" => new global::MissAlise.OneDrive.Models.DirectoryRole(),
-                "#microsoft.graph.directoryRoleTemplate" => new global::MissAlise.OneDrive.Models.DirectoryRoleTemplate(),
-                "#microsoft.graph.endpoint" => new global::MissAlise.OneDrive.Models.Endpoint(),
-                "#microsoft.graph.extensionProperty" => new global::MissAlise.OneDrive.Models.ExtensionProperty(),
-                "#microsoft.graph.group" => new global::MissAlise.OneDrive.Models.Group(),
-                "#microsoft.graph.groupSettingTemplate" => new global::MissAlise.OneDrive.Models.GroupSettingTemplate(),
-                "#microsoft.graph.homeRealmDiscoveryPolicy" => new global::MissAlise.OneDrive.Models.HomeRealmDiscoveryPolicy(),
-                "#microsoft.graph.identitySecurityDefaultsEnforcementPolicy" => new global::MissAlise.OneDrive.Models.IdentitySecurityDefaultsEnforcementPolicy(),
-                "#microsoft.graph.multiTenantOrganizationMember" => new global::MissAlise.OneDrive.Models.MultiTenantOrganizationMember(),
-                "#microsoft.graph.organization" => new global::MissAlise.OneDrive.Models.Organization(),
-                "#microsoft.graph.orgContact" => new global::MissAlise.OneDrive.Models.OrgContact(),
-                "#microsoft.graph.permissionGrantPolicy" => new global::MissAlise.OneDrive.Models.PermissionGrantPolicy(),
-                "#microsoft.graph.policyBase" => new global::MissAlise.OneDrive.Models.PolicyBase(),
-                "#microsoft.graph.resourceSpecificPermissionGrant" => new global::MissAlise.OneDrive.Models.ResourceSpecificPermissionGrant(),
-                "#microsoft.graph.servicePrincipal" => new global::MissAlise.OneDrive.Models.ServicePrincipal(),
-                "#microsoft.graph.stsPolicy" => new global::MissAlise.OneDrive.Models.StsPolicy(),
-                "#microsoft.graph.tenantAppManagementPolicy" => new global::MissAlise.OneDrive.Models.TenantAppManagementPolicy(),
-                "#microsoft.graph.tokenIssuancePolicy" => new global::MissAlise.OneDrive.Models.TokenIssuancePolicy(),
-                "#microsoft.graph.tokenLifetimePolicy" => new global::MissAlise.OneDrive.Models.TokenLifetimePolicy(),
+            {               
                 "#microsoft.graph.user" => new global::MissAlise.OneDrive.Models.User(),
                 _ => new global::MissAlise.OneDrive.Models.DirectoryObject(),
             };

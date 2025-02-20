@@ -9,9 +9,11 @@ namespace MissAlise.OneDrive.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class FileObject : IParsable
+    public partial class FileObject : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
+        /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
+        public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>Hashes of the file&apos;s binary content, if available. Read-only.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -38,6 +40,13 @@ namespace MissAlise.OneDrive.Models
 #endif
         /// <summary>The processingMetadata property</summary>
         public bool? ProcessingMetadata { get; set; }
+        /// <summary>
+        /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.FileObject"/> and sets the default values.
+        /// </summary>
+        public FileObject()
+        {
+            AdditionalData = new Dictionary<string, object>();
+        }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
@@ -73,6 +82,7 @@ namespace MissAlise.OneDrive.Models
             writer.WriteStringValue("mimeType", MimeType);
             writer.WriteStringValue("@odata.type", OdataType);
             writer.WriteBoolValue("processingMetadata", ProcessingMetadata);
+            writer.WriteAdditionalData(AdditionalData);
         }
     }
 }

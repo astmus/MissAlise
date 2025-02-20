@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MissAlise.Entities.OneDrive;
-using File = MissAlise.Entities.OneDrive.File;
+using FsFile = MissAlise.Entities.OneDrive.FsFile;
 
 namespace MissAlise.DataBase.Contexts;
 
@@ -13,15 +13,16 @@ public partial class UserMediaContext : DbContext
 	public UserMediaContext(DbContextOptions<UserMediaContext> options)
 		: base(options)
 	{
+		
 	}
 
 	public virtual DbSet<Audio> Audios { get; set; }
 
-	public virtual DbSet<File> Files { get; set; }
+	public virtual DbSet<FsFile> Files { get; set; }
 
 	public virtual DbSet<Folder> Folders { get; set; }
 
-	public virtual DbSet<Item> Items { get; set; }
+	public virtual DbSet<ItemInfo> Items { get; set; }
 
 	public virtual DbSet<Photo> Photos { get; set; }
 
@@ -31,8 +32,8 @@ public partial class UserMediaContext : DbContext
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
-		modelBuilder.Entity<Item>().UseTptMappingStrategy();
-		modelBuilder.Entity<Item>(item =>
+		modelBuilder.Entity<ItemInfo>().UseTptMappingStrategy();
+		modelBuilder.Entity<ItemInfo>(item =>
 		{
 			item.HasKey(p => p.Id).HasName("Itemid");
 			item.Property(p => p.MimeType).HasColumnName("Mimetype");
@@ -40,7 +41,7 @@ public partial class UserMediaContext : DbContext
 			item.Property(p => p.ModifieDateTime).HasColumnName("Modifiedatetime");
 		});
 
-		modelBuilder.Entity<File>().UseTptMappingStrategy();
+		modelBuilder.Entity<FsFile>().UseTptMappingStrategy();
 		//modelBuilder.Entity<File>(file =>
 		//{
 		//	file.HasKey(p => p.Id).HasName("Itemid");			

@@ -68,7 +68,7 @@ namespace MissAlise.OneDrive.Models.Search
 #endif
         /// <summary>The state property</summary>
         public global::MissAlise.OneDrive.Models.Search.AnswerState? State { get; set; }
-        /// <summary>Variations of a bookmark for different countries or devices. Use when you need to show different content to users based on their device, country/region, or both. The date and group settings apply to all variations.</summary>
+        /// <summary>Variations of a bookmark for different countries/regions or devices. Use when you need to show different content to users based on their device, country/region, or both. The date and group settings apply to all variations.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public List<global::MissAlise.OneDrive.Models.Search.AnswerVariant>? TargetedVariations { get; set; }

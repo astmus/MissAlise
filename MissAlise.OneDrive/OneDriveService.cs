@@ -1,5 +1,13 @@
-﻿using System.Web;
+﻿using System.Collections;
+using System.Collections.Specialized;
+using System.Linq.Expressions;
+using System.Text;
+using System.Web;
+using Azure.Core;
 using Microsoft.Extensions.Options;
+using Microsoft.Graph;
+using Microsoft.Kiota.Authentication.Azure;
+using Microsoft.Kiota.Http.HttpClientLibrary;
 using MissAlise.Application.Interfaces;
 using MissAlise.Entities.OneDrive;
 using MissAlise.OneDrive.Drives.Item.Items.Item.Delta;
@@ -8,36 +16,70 @@ using User = MissAlise.Entities.OneDrive.User;
 
 namespace MissAlise.OneDrive
 {
-	public class OneDriveService : IOneDriveService
+	public class DriveDataContext : OneDriveQueryable<DriveItem>
 	{
-		private readonly AzureAd azureOptions;
-		private readonly IOneDriveClient oneClient;
-		private readonly IHandleContext ctx;
-
-		public OneDriveService(IOptions<AzureAd> azureOptions, IOneDriveClient oneClient, IHandleContext ctx)
+		public DriveDataContext(ODataQueryProvider provider) : base(provider)
 		{
-			this.azureOptions = azureOptions.Value;
-			this.oneClient = oneClient;
-			this.ctx = ctx;
 		}
 
-		public Uri CreateAuthorizeLink(string stateIdentifier)
+		public DriveDataContext(ODataQueryProvider provider, Expression? expression = null) : base(provider, expression)
 		{
-			UriBuilder b = new UriBuilder(azureOptions.AuthPath);
-			var query = HttpUtility.ParseQueryString(b.Query);
-			query["scope"] = azureOptions.Scopes;
-			query["client_id"] = azureOptions.ClientId;
-			query["response_type"] = "code";
-			query["redirect_uri"] = azureOptions.RedirectUri + azureOptions.CallbackPath;
-			query["prompt"] = "select_account";
-			query["state"] = stateIdentifier;
-			b.Query = query.ToString();
-			return b.Uri;
+		}
+	}
+
+	public class OneDriveService : IOneDriveService
+	{
+		private readonly AzureAd azure;
+		private readonly IOneDriveClient oneDrive;
+		private readonly IHandleContext ctx;
+		private readonly TokenCredential tkn;
+		private readonly IHttpClientFactory fac;
+
+		public OneDriveService(IOptions<AzureAd> azure, IOneDriveClient oneDrive, IHandleContext ctx, TokenCredential tkn, IHttpClientFactory fac)
+		{
+			this.azure = azure.Value;
+			this.oneDrive = oneDrive;
+			this.ctx = ctx;
+			this.tkn = tkn;
+			this.fac = fac;
 		}
 
 		public async Task<User> GetOwnerInfo(CancellationToken cancel)
 		{
-			var items = await oneClient.RootItems(ctx, cancel);
+			var allowedHosts = new[] { "graph.microsoft.com" };
+			var graphScopes = azure.Scopes.Split(" ");
+			var credential = tkn;
+			var authProvider = new AzureIdentityAuthenticationProvider(credential, allowedHosts, scopes: graphScopes);
+
+			using var http = fac.CreateClient("onedrive");
+			var requestAdapter = new HttpClientRequestAdapter(authProvider, httpClient: http);
+			var client = new ApiClient(requestAdapter);
+			
+			var childrenRequest = client.Drives["Me"].Items["Root"].Delta; //client.Drives[root.ParentReference.DriveId].Items[root.Id].Delta;
+			
+			var items = await childrenRequest.GetAsDeltaGetResponseAsync(cancellationToken: cancel);
+						
+			PageIterator<DriveItem, DeltaGetResponse> iterator = null;
+			
+			int varo = 0;
+			StringBuilder sb = new StringBuilder();
+			try
+			{
+				iterator = PageIterator<DriveItem, DeltaGetResponse>.CreatePageIterator(requestAdapter, items,
+				item =>
+				{
+					varo++;
+					sb.AppendLine(item.Name+"state"+item.Deleted?.State);					
+					return true;
+				});
+			}
+			catch (Exception er)
+			{
+				int i = 0;
+			}
+			await iterator.IterateAsync(cancel);
+			string str = sb.ToString();
+			//var items = await oneDrive.RootChildren(ctx, cancel);
 			//var me = await client.Me.GetAsync(cancellationToken: cancel);
 			//if (me != null)
 			//	return new User() { Id = me.Id, DisplayName = me.DisplayName, GivenName = me.GivenName, Mail = me.Mail, PreferredLanguage = me.PreferredLanguage, Surname = me.Surname };
@@ -45,12 +87,13 @@ namespace MissAlise.OneDrive
 			return null;
 		}
 
-		public async Task<IEnumerable<Item>> GetRootItems(CancellationToken cancel)
+		public async Task<IEnumerable<ItemInfo>> GetRootItems(CancellationToken cancel)
 		{
 			//var resp = await client.Drives["ff"].Items[""].Delta.GetAsDeltaGetResponseAsync();
 			//var items = await oneClient.RootItems(ctx, cancel);
-			var res = await oneClient.RootDelta(ctx, cancel);
-			List<Item> Items = new List<Item>();
+
+			var res = await oneDrive.RootDelta(ctx, cancel);
+			List<ItemInfo> Items = new List<ItemInfo>();
 			await foreach (var item in GetSynchronizator().WithCancellation(cancel))
 			{
 				Items.Add(item);
@@ -60,104 +103,177 @@ namespace MissAlise.OneDrive
 			return default;
 		}
 
+		public Uri CreateAuthorizeLink(string stateIdentifier)
+		{
+			UriBuilder b = new UriBuilder(azure.AuthPath);
+			var query = HttpUtility.ParseQueryString(b.Query);
+			query["scope"] = azure.Scopes;
+			query["client_id"] = azure.ClientId;
+			query["response_type"] = "code";
+			query["redirect_uri"] = azure.RedirectUri + azure.CallbackPath;
+			query["prompt"] = "select_account";
+			query["state"] = stateIdentifier;
+			b.Query = query.ToString();
+			return b.Uri;
+		}
 		public DataSynchronizator GetSynchronizator()
 		{
-			return new OneDriveDataSynchronizator(oneClient, ctx);
+			return new OneDriveDataSynchronizator(oneDrive, ctx);
 		}
 	}
 
-	public class OneDriveDataSynchronizator : DataSynchronizator
+	public class OneDriveQueryable<T> : IOrderedQueryable<T>
 	{
-		private DriveItemDeltaGetResponse driveDelta;
-		private readonly IOneDriveClient client;
-		private readonly IHandleContext ctx;
-
-		public OneDriveDataSynchronizator(IOneDriveClient client, IHandleContext ctx)
+		protected readonly Expression expression;
+		protected ODataQueryProvider provider;
+		public OneDriveQueryable(ODataQueryProvider provider)
 		{
-			this.client = client;
-			this.ctx = ctx;
+			this.provider = provider;
+			this.expression = Expression.Constant(this);
 		}
 
-		public override async IAsyncEnumerator<Item> GetAsyncEnumerator(CancellationToken cancellationToken = default)
+		public OneDriveQueryable(ODataQueryProvider provider, Expression? expression = null)
 		{
-			var deltaResponse = await client.RootDelta(ctx, cancellationToken).ConfigureAwait(false);			
-			driveDelta = deltaResponse.Content;
+			this.provider = provider;
+			this.expression = expression ?? Expression.Constant(this);
+		}
 
-			while (driveDelta != null && driveDelta.Value.Any() && !cancellationToken.IsCancellationRequested)
+		public Type ElementType => typeof(T);
+		public Expression Expression => expression;
+		public IQueryProvider Provider => provider;
+		public IEnumerator<T> GetEnumerator()
+		{
+			return provider.Execute<IEnumerable<T>>(Expression).GetEnumerator();
+		}
+		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+	}
+
+	public class ODataVisitor : ExpressionVisitor
+	{
+		public string QueryString
+		{
+			get
 			{
-				foreach (var item in driveDelta.Value)
-					yield return CreateItem(item);
-									
-				if (Uri.TryCreate(driveDelta.OdataNextLink, default, out var nextUrl) == false)
-					yield break;
-
-				string token = HttpUtility.ParseQueryString(nextUrl.Query).Get("token");
-
-				var response = await client.DeltaShift(token, ctx, cancellationToken).ConfigureAwait(false);			
-				driveDelta = response.Content;			
+				var query = new StringBuilder(128);
+				foreach (string key in oData.Keys)
+				{
+					query.Append(key + "=");
+					query.AppendJoin(",", oData.GetValues(key));
+					query.Append("&");
+				}
+				query.Length -= 1;
+				return query.ToString();
 			}
 		}
+		NameValueCollection oData = new NameValueCollection();
 
-		static Item CreateItem(DriveItem item)
+		protected override Expression VisitMember(MemberExpression node)
 		{
-			Item result = item switch
-			{
-				{ Folder: not null } => new Entities.OneDrive.Folder()
-				{
-					Name = item.Name,
-					Title = $"[{item.Name}]",
-					Path = item.ParentReference.Path,
-					MimeType = "folder"
-				},
-				{ Image: not null } => new Entities.OneDrive.Photo()
-				{
-					Width = item.Image.Width,
-					Height = item.Image.Height,
-					Orientation = item.Photo.Orientation,
-					Fnumber = item.Photo.FNumber,
-					Iso = item.Photo.Iso,
-					Cameramake = item.Photo.CameraMake,
-					Cameramodel = item.Photo.CameraModel,
-					Takendatetime = item.Photo.TakenDateTime?.DateTime
-				},
-				{ Video: not null } => new Entities.OneDrive.Video()
-				{
-					Width = item.Video.Width,
-					Height = item.Video.Height,
-					Duration = TimeSpan.FromMilliseconds(item.Video.Duration ?? 0),
-					Audiochannels = item.Video.AudioChannels,
-					Audiosamplespersecond = item.Video.AudioSamplesPerSecond,
-					Bitrate = item.Video.Bitrate,
-					Fourcc = item.Video.FourCC,
-					Framerate = item.Video.FrameRate
-				},
-				{ Audio: not null } => new Entities.OneDrive.Audio()
-				{
-					Duration = item.Audio.Duration,
-					Album = item.Audio.Album,
-					Artist = item.Audio.Artist,
-					Track = item.Audio.Track,
-					TrackTitle = item.Audio.Title,
-					TrackCount = item.Audio.TrackCount,
-					Year = item.Audio.Year,
-					Genre = item.Audio.Genre
-				},
-				{ File: not null } => new Entities.OneDrive.File()				
-			};
+			oData.Add("$" + node.Expression.ToString(), node.Member.Name);
+			return base.VisitMember(node);
+		}
+		protected override Expression VisitNew(NewExpression node)
+			=> base.VisitNew(node);
 
-			result.Name = item.Name;
-			result.MimeType = item.File?.MimeType;
-			result.CreatedDateTime = item.FileSystemInfo.CreatedDateTime;
-			result.ModifieDateTime = item.FileSystemInfo.LastModifiedDateTime;
+		protected override Expression VisitParameter(ParameterExpression node)
+			=> base.VisitParameter(node);
+		protected override Expression VisitLabel(LabelExpression node)
+			=> base.VisitLabel(node);
+		protected override Expression VisitExtension(Expression node)
+			=> base.VisitExtension(node);
+		protected override Expression VisitUnary(UnaryExpression node)
+			=> base.VisitUnary(node);
+		protected override Expression VisitConditional(ConditionalExpression node)
+			=> base.VisitConditional(node);
+		protected override Expression VisitLambda<T>(Expression<T> node)
+			=> base.VisitLambda(node);
+		protected override MemberBinding VisitMemberBinding(MemberBinding node)
+			=> base.VisitMemberBinding(node);
+		protected override MemberMemberBinding VisitMemberMemberBinding(MemberMemberBinding node)
+			=> base.VisitMemberMemberBinding(node);
+		protected override Expression VisitMethodCall(MethodCallExpression node)
+			=> base.VisitMethodCall(node);		
 
-			if (result is not Entities.OneDrive.File file)
-				return result;
+		protected override Expression VisitBlock(BlockExpression node)
+			=> base.VisitBlock(node);
+		protected override Expression VisitConstant(ConstantExpression node)
+			=> base.VisitConstant(node);
+		protected override Expression VisitDebugInfo(DebugInfoExpression node)
+			=> base.VisitDebugInfo(node);
+		protected override Expression VisitDefault(DefaultExpression node)
+			=> base.VisitDefault(node);
+		protected override Expression VisitGoto(GotoExpression node)
+			=> base.VisitGoto(node);
+		protected override Expression VisitInvocation(InvocationExpression node)
+			=> base.VisitInvocation(node);
+		protected override LabelTarget? VisitLabelTarget(LabelTarget? node)
+			=> base.VisitLabelTarget(node);
+		protected override Expression VisitLoop(LoopExpression node)
+			=> base.VisitLoop(node);
+		protected override Expression VisitIndex(IndexExpression node)
+			=> base.VisitIndex(node);
+		protected override Expression VisitNewArray(NewArrayExpression node)
+			=> base.VisitNewArray(node);
+		protected override Expression VisitRuntimeVariables(RuntimeVariablesExpression node)
+			=> base.VisitRuntimeVariables(node);
+		protected override SwitchCase VisitSwitchCase(SwitchCase node)
+			=> base.VisitSwitchCase(node);
+		protected override Expression VisitSwitch(SwitchExpression node)
+			=> base.VisitSwitch(node);
+		protected override CatchBlock VisitCatchBlock(CatchBlock node)
+			=> base.VisitCatchBlock(node);
+		protected override Expression VisitTry(TryExpression node)
+			=> base.VisitTry(node);
+		protected override Expression VisitTypeBinary(TypeBinaryExpression node)
+			=> base.VisitTypeBinary(node);
+		protected override Expression VisitMemberInit(MemberInitExpression node)
+			=> base.VisitMemberInit(node);
+		protected override Expression VisitListInit(ListInitExpression node)
+			=> base.VisitListInit(node);
+		protected override ElementInit VisitElementInit(ElementInit node)
+			=> base.VisitElementInit(node);
+		protected override MemberAssignment VisitMemberAssignment(MemberAssignment node)
+			=> base.VisitMemberAssignment(node);
+		protected override MemberListBinding VisitMemberListBinding(MemberListBinding node)
+			=> base.VisitMemberListBinding(node);
+		protected override Expression VisitDynamic(DynamicExpression node)
+			=> base.VisitDynamic(node);
+	}
 
-			file.Size = item.Size;			
-			file.Caption = Path.GetFileNameWithoutExtension(item.Name);
-			file.Extension = Path.GetExtension(item.Name);
+	public class ODataQueryProvider : IQueryProvider
+	{
+		private readonly IOneDriveClient client;
 
-			return file;
+		public ODataQueryProvider(IOneDriveClient client)
+		{
+			this.client = client;
+		}
+
+		public IQueryable CreateQuery(Expression expression)
+		{
+			return new DriveDataContext(this, expression);
+		}
+
+		public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
+		{
+			ArgumentNullException.ThrowIfNull(expression);
+
+			if (!typeof(IQueryable<TElement>).IsAssignableFrom(expression.Type))
+				throw new ArgumentException(nameof(expression));
+			return new OneDriveQueryable<TElement>(this, expression);
+		}
+
+		public object Execute(Expression expression)
+		{
+			return Execute<DriveItem>(expression);
+		}
+
+		public TElement Execute<TElement>(Expression expression)
+		{
+			ODataVisitor vv = new ODataVisitor();
+			vv.Visit(expression);
+			var q = vv.QueryString;
+			return default; //Activator.CreateInstance<TElement>();
 		}
 	}
 }

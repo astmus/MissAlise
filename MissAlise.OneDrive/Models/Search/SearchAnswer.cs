@@ -9,7 +9,7 @@ namespace MissAlise.OneDrive.Models.Search
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class SearchAnswer : global::MissAlise.OneDrive.Models.Entity, IParsable
+    public partial class SearchAnswer2 : global::MissAlise.OneDrive.Models.Entity, IParsable
     #pragma warning restore CS1591
     {
         /// <summary>The search answer description that is shown on the search results page.</summary>
@@ -58,7 +58,6 @@ namespace MissAlise.OneDrive.Models.Search
             return mappingValue switch
             {
                 "#microsoft.graph.search.acronym" => new global::MissAlise.OneDrive.Models.Search.Acronym(),
-                "#microsoft.graph.search.bookmark" => new global::MissAlise.OneDrive.Models.Search.Bookmark(),
                 "#microsoft.graph.search.qna" => new global::MissAlise.OneDrive.Models.Search.Qna(),
                 _ => new global::MissAlise.OneDrive.Models.Search.SearchAnswer(),
             };

@@ -9,9 +9,11 @@ namespace MissAlise.OneDrive.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class ItemReference : IParsable
+    public partial class ItemReference : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
+        /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
+        public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>Unique identifier of the drive instance that contains the driveItem. Only returned if the item is located in a drive. Read-only.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -68,14 +70,6 @@ namespace MissAlise.OneDrive.Models
 #else
         public string ShareId { get; set; }
 #endif
-        /// <summary>Returns identifiers useful for SharePoint REST compatibility. Read-only.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.SharepointIds? SharepointIds { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.SharepointIds SharepointIds { get; set; }
-#endif
         /// <summary>For OneDrive for Business and SharePoint, this property represents the ID of the site that contains the parent document library of the driveItem resource or the parent list of the listItem resource. The value is the same as the id property of that site resource. It is an opaque string that consists of three identifiers of the site. For OneDrive, this property is not populated.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -84,6 +78,13 @@ namespace MissAlise.OneDrive.Models
 #else
         public string SiteId { get; set; }
 #endif
+        /// <summary>
+        /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.ItemReference"/> and sets the default values.
+        /// </summary>
+        public ItemReference()
+        {
+            AdditionalData = new Dictionary<string, object>();
+        }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
@@ -109,7 +110,6 @@ namespace MissAlise.OneDrive.Models
                 { "@odata.type", n => { OdataType = n.GetStringValue(); } },
                 { "path", n => { Path = n.GetStringValue(); } },
                 { "shareId", n => { ShareId = n.GetStringValue(); } },
-                { "sharepointIds", n => { SharepointIds = n.GetObjectValue<global::MissAlise.OneDrive.Models.SharepointIds>(global::MissAlise.OneDrive.Models.SharepointIds.CreateFromDiscriminatorValue); } },
                 { "siteId", n => { SiteId = n.GetStringValue(); } },
             };
         }
@@ -127,8 +127,8 @@ namespace MissAlise.OneDrive.Models
             writer.WriteStringValue("@odata.type", OdataType);
             writer.WriteStringValue("path", Path);
             writer.WriteStringValue("shareId", ShareId);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.SharepointIds>("sharepointIds", SharepointIds);
             writer.WriteStringValue("siteId", SiteId);
+            writer.WriteAdditionalData(AdditionalData);
         }
     }
 }

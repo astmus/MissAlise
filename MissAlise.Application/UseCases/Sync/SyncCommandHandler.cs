@@ -3,19 +3,25 @@ using Microsoft.Extensions.Logging;
 using MissAlise.Application.Interfaces;
 using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
+using MissAlise.OneDrive.Models;
+using System.Linq;
+using Microsoft.Kiota.Serialization;
 
 namespace MissAlise.Application.UseCases.Sync
 {
 	public class SyncCommandHandler : AsyncHandlerBase<SyncCommand>
 	{
+		private readonly IHttpClientFactory factory;
+
 		// не забыть перенести в OneDrive библиотеку, клиент и прочее что касается OneDrive
 		//private readonly GraphServiceClient client;
 		private readonly ILogger<SyncCommandHandler> log;
 		private readonly IUserRepository usersRepository;
 		private readonly IOneDriveService oneDrive;
 		const string ROOT_SYNC_PATH = @"M:\Sync\"; // и вот это барахло тоже убрать
-		public SyncCommandHandler(/*GraphServiceClient client, */ILogger<SyncCommandHandler> log, IUserRepository usersRepository, IOneDriveService oneDrive)
+		public SyncCommandHandler(IHttpClientFactory factory, ILogger<SyncCommandHandler> log, IUserRepository usersRepository, IOneDriveService oneDrive)
 		{
+			this.factory = factory;
 			//this.client = client;
 			this.log = log;
 			this.usersRepository = usersRepository;
@@ -26,9 +32,12 @@ namespace MissAlise.Application.UseCases.Sync
 		{
 			try
 			{
-				var items = await oneDrive.GetRootItems(cancel);
-				var sync = oneDrive.GetSynchronizator().ToBlockingEnumerable().Where(w=> w is Photo).ToList();
+				await Task.Delay(50);
+				
+			//	var items = await oneDrive.GetRootItems(cancel);				
+				//var sync = oneDrive.GetSynchronizator().ToBlockingEnumerable().Where(w=> w is Photo).ToList();
 				int i = 0;
+				using var http = factory.CreateClient("onecredentials");
 				//var user = await client.Me.GetAsync();
 				//var drive = await client.Me.Drive.GetAsync().ConfigureAwait(false);
 				////var driveItems = await client.Me.Drive.GetAsync().ConfigureAwait(false);
@@ -78,7 +87,7 @@ namespace MissAlise.Application.UseCases.Sync
 				//	//await System.IO.File.WriteAllTextAsync(Path.Combine(folderPath, item.Name), "filePath").ConfigureAwait(false);
 				//}
 				//int i = 0;
-				//await Task.WhenAll(tasks).ConfigureAwait(false);
+				//await Task.WhenAll(tasks).ConfigureAwait(false);0
 				//await stroage.SaveAsync();
 			}
 			catch (Exception error)

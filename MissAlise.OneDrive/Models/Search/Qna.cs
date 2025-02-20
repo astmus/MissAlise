@@ -42,17 +42,10 @@ namespace MissAlise.OneDrive.Models.Search
 #else
         public List<string> LanguageTags { get; set; }
 #endif
-        /// <summary>List of devices and operating systems that are able to view this QnA. Possible values are: android, androidForWork, ios, macOS, windowsPhone81, windowsPhone81AndLater, windows10AndLater, androidWorkProfile, unknown, androidASOP, androidMobileApplicationManagement, iOSMobileApplicationManagement, unknownFutureValue.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.DevicePlatformType?>? Platforms { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.DevicePlatformType?> Platforms { get; set; }
-#endif
+
         /// <summary>The state property</summary>
         public global::MissAlise.OneDrive.Models.Search.AnswerState? State { get; set; }
-        /// <summary>Variations of a QnA for different countries or devices. Use when you need to show different content to users based on their device, country/region, or both. The date and group settings apply to all variations.</summary>
+        /// <summary>Variations of a QnA for different countries/regions or devices. Use when you need to show different content to users based on their device, country/region, or both. The date and group settings apply to all variations.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public List<global::MissAlise.OneDrive.Models.Search.AnswerVariant>? TargetedVariations { get; set; }
@@ -84,7 +77,6 @@ namespace MissAlise.OneDrive.Models.Search
                 { "isSuggested", n => { IsSuggested = n.GetBoolValue(); } },
                 { "keywords", n => { Keywords = n.GetObjectValue<global::MissAlise.OneDrive.Models.Search.AnswerKeyword>(global::MissAlise.OneDrive.Models.Search.AnswerKeyword.CreateFromDiscriminatorValue); } },
                 { "languageTags", n => { LanguageTags = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
-                { "platforms", n => { Platforms = n.GetCollectionOfEnumValues<global::MissAlise.OneDrive.Models.DevicePlatformType>()?.AsList(); } },
                 { "state", n => { State = n.GetEnumValue<global::MissAlise.OneDrive.Models.Search.AnswerState>(); } },
                 { "targetedVariations", n => { TargetedVariations = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Search.AnswerVariant>(global::MissAlise.OneDrive.Models.Search.AnswerVariant.CreateFromDiscriminatorValue)?.AsList(); } },
             };
@@ -103,7 +95,6 @@ namespace MissAlise.OneDrive.Models.Search
             writer.WriteBoolValue("isSuggested", IsSuggested);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Search.AnswerKeyword>("keywords", Keywords);
             writer.WriteCollectionOfPrimitiveValues<string>("languageTags", LanguageTags);
-            writer.WriteCollectionOfEnumValues<global::MissAlise.OneDrive.Models.DevicePlatformType>("platforms", Platforms);
             writer.WriteEnumValue<global::MissAlise.OneDrive.Models.Search.AnswerState>("state", State);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Search.AnswerVariant>("targetedVariations", TargetedVariations);
         }

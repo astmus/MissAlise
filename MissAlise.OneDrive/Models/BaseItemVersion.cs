@@ -41,9 +41,7 @@ namespace MissAlise.OneDrive.Models
             var mappingValue = parseNode.GetChildNode("@odata.type")?.GetStringValue();
             return mappingValue switch
             {
-                "#microsoft.graph.documentSetVersion" => new global::MissAlise.OneDrive.Models.DocumentSetVersion(),
                 "#microsoft.graph.driveItemVersion" => new global::MissAlise.OneDrive.Models.DriveItemVersion(),
-                "#microsoft.graph.listItemVersion" => new global::MissAlise.OneDrive.Models.ListItemVersion(),
                 _ => new global::MissAlise.OneDrive.Models.BaseItemVersion(),
             };
         }

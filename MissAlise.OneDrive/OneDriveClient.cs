@@ -7,52 +7,37 @@ namespace MissAlise.OneDrive
 	/// The main entry point of the SDK, exposes the configuration and the fluent API.
 	/// </summary>
 	[global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-    public partial class OneDriveClient : BaseRequestBuilder
-    {
-        /// <summary>The drives property</summary>
-        public global::MissAlise.OneDrive.Drives.DrivesRequestBuilder Drives
-        {
-            get => new global::MissAlise.OneDrive.Drives.DrivesRequestBuilder(PathParameters, RequestAdapter);
-        }
-        /// <summary>The groups property</summary>
-        public global::MissAlise.OneDrive.Groups.GroupsRequestBuilder Groups
-        {
-            get => new global::MissAlise.OneDrive.Groups.GroupsRequestBuilder(PathParameters, RequestAdapter);
-        }
-        /// <summary>The me property</summary>
-        public global::MissAlise.OneDrive.Me.MeRequestBuilder Me
-        {
-            get => new global::MissAlise.OneDrive.Me.MeRequestBuilder(PathParameters, RequestAdapter);
-        }
-        /// <summary>The sites property</summary>
-        public global::MissAlise.OneDrive.Sites.SitesRequestBuilder Sites
-        {
-            get => new global::MissAlise.OneDrive.Sites.SitesRequestBuilder(PathParameters, RequestAdapter);
-        }
-        /// <summary>The users property</summary>
-        public global::MissAlise.OneDrive.Users.UsersRequestBuilder Users
-        {
-            get => new global::MissAlise.OneDrive.Users.UsersRequestBuilder(PathParameters, RequestAdapter);
-        }
-        /// <summary>
-        /// Instantiates a new <see cref="global::MissAlise.OneDrive.OneDriveClient"/> and sets the default values.
-        /// </summary>
-        /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public OneDriveClient(IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}", new Dictionary<string, object>())
-        {
-            //ApiClientBuilder.RegisterDefaultSerializer<JsonSerializationWriterFactory>();
-            //ApiClientBuilder.RegisterDefaultSerializer<TextSerializationWriterFactory>();
-            //ApiClientBuilder.RegisterDefaultSerializer<FormSerializationWriterFactory>();
-            //ApiClientBuilder.RegisterDefaultSerializer<MultipartSerializationWriterFactory>();
-            //ApiClientBuilder.RegisterDefaultDeserializer<JsonParseNodeFactory>();
-            //ApiClientBuilder.RegisterDefaultDeserializer<TextParseNodeFactory>();
-            //ApiClientBuilder.RegisterDefaultDeserializer<FormParseNodeFactory>();
-            if (string.IsNullOrEmpty(RequestAdapter.BaseUrl))
-            {
-                RequestAdapter.BaseUrl = "https://graph.microsoft.com/v1.0";
-            }
-            PathParameters.TryAdd("baseurl", RequestAdapter.BaseUrl);            
-        }
-    }
+	public partial class OneDriveClient : BaseRequestBuilder
+	{
+		/// <summary>The drives property</summary>
+		public global::MissAlise.OneDrive.Drives.DrivesRequestBuilder Drives
+		{
+			get => new global::MissAlise.OneDrive.Drives.DrivesRequestBuilder(PathParameters, RequestAdapter);
+		}
+		/// <summary>The me property</summary>
+		public global::MissAlise.OneDrive.Me.MeRequestBuilder Me
+		{
+			get => new global::MissAlise.OneDrive.Me.MeRequestBuilder(PathParameters, RequestAdapter);
+		}
+		/// <summary>
+		/// Instantiates a new <see cref="global::MissAlise.OneDrive.OneDriveClient"/> and sets the default values.
+		/// </summary>
+		/// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
+		public OneDriveClient(IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}", new Dictionary<string, object>())
+		{
+			//ApiClientBuilder.RegisterDefaultSerializer<JsonSerializationWriterFactory>();
+			//ApiClientBuilder.RegisterDefaultSerializer<TextSerializationWriterFactory>();
+			//ApiClientBuilder.RegisterDefaultSerializer<FormSerializationWriterFactory>();
+			//ApiClientBuilder.RegisterDefaultSerializer<MultipartSerializationWriterFactory>();
+			//ApiClientBuilder.RegisterDefaultDeserializer<JsonParseNodeFactory>();
+			//ApiClientBuilder.RegisterDefaultDeserializer<TextParseNodeFactory>();
+			//ApiClientBuilder.RegisterDefaultDeserializer<FormParseNodeFactory>();
+			if (string.IsNullOrEmpty(RequestAdapter.BaseUrl))
+			{
+				RequestAdapter.BaseUrl = "https://graph.microsoft.com/v1.0";
+			}
+			PathParameters.TryAdd("baseurl", RequestAdapter.BaseUrl);            
+		}
+	}
 }
 #pragma warning restore CS0618

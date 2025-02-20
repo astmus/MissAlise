@@ -1,6 +1,6 @@
 ﻿namespace MissAlise.Entities.OneDrive;
 
-public partial class Folder : Item
+public partial class Folder : ItemInfo
 {
 	public int? Parentfolderid { get; set; }
 
@@ -12,5 +12,5 @@ public partial class Folder : Item
 
 	public ICollection<Folder> Folders { get; set; } = new List<Folder>();
 
-	public virtual ICollection<File> Files { get; set; } = new List<File>();
+	public virtual ICollection<FsFile> Files { get; set; } = new List<FsFile>();
 }

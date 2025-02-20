@@ -12,14 +12,6 @@ namespace MissAlise.OneDrive.Models
     public partial class ListItemVersion : global::MissAlise.OneDrive.Models.BaseItemVersion, IParsable
     #pragma warning restore CS1591
     {
-        /// <summary>A collection of the fields and values for this version of the list item.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.FieldValueSet? Fields { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.FieldValueSet Fields { get; set; }
-#endif
         /// <summary>
         /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.ListItemVersion"/> and sets the default values.
         /// </summary>

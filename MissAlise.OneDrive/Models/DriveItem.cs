@@ -11,15 +11,7 @@ namespace MissAlise.OneDrive.Models
     #pragma warning disable CS1591
     public partial class DriveItem : global::MissAlise.OneDrive.Models.BaseItem, IParsable
     #pragma warning restore CS1591
-    {
-        /// <summary>Analytics about the view activities that took place on this item.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.ItemAnalytics? Analytics { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.ItemAnalytics Analytics { get; set; }
-#endif
+    {       
         /// <summary>Audio metadata, if the item is an audio file. Read-only. Read-only. Only on OneDrive Personal.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -140,14 +132,6 @@ namespace MissAlise.OneDrive.Models
 #else
         public global::MissAlise.OneDrive.Models.PendingOperations PendingOperations { get; set; }
 #endif
-        /// <summary>The set of permissions for the item. Read-only. Nullable.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.Permission>? Permissions { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.Permission> Permissions { get; set; }
-#endif
         /// <summary>Photo metadata, if the item is a photo. Read-only.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -156,14 +140,6 @@ namespace MissAlise.OneDrive.Models
 #else
         public global::MissAlise.OneDrive.Models.Photo Photo { get; set; }
 #endif
-        /// <summary>Provides information about the published or checked-out state of an item, in locations that support such actions. This property isn&apos;t returned by default. Read-only.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.PublicationFacet? Publication { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.PublicationFacet Publication { get; set; }
-#endif
         /// <summary>Remote item data, if the item is shared from a drive other than the one being accessed. Read-only.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -171,14 +147,6 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public global::MissAlise.OneDrive.Models.RemoteItem RemoteItem { get; set; }
-#endif
-        /// <summary>Information about retention label and settings enforced on the driveItem. Read-write.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.ItemRetentionLabel? RetentionLabel { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.ItemRetentionLabel RetentionLabel { get; set; }
 #endif
         /// <summary>If this property is non-null, it indicates that the driveItem is the top-most driveItem in the drive.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -203,14 +171,6 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public global::MissAlise.OneDrive.Models.Shared Shared { get; set; }
-#endif
-        /// <summary>Returns identifiers useful for SharePoint REST compatibility. Read-only.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.SharepointIds? SharepointIds { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.SharepointIds SharepointIds { get; set; }
 #endif
         /// <summary>Size of the item in bytes. Read-only.</summary>
         public long? Size { get; set; }
@@ -261,15 +221,7 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public string WebDavUrl { get; set; }
-#endif
-        /// <summary>For files that are Excel spreadsheets, access to the workbook API to work with the spreadsheet&apos;s contents. Nullable.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.Workbook? Workbook { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.Workbook Workbook { get; set; }
-#endif
+#endif        
         /// <summary>
         /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.DriveItem"/> and sets the default values.
         /// </summary>
@@ -295,7 +247,6 @@ namespace MissAlise.OneDrive.Models
         {
             return new Dictionary<string, Action<IParseNode>>(base.GetFieldDeserializers())
             {
-                { "analytics", n => { Analytics = n.GetObjectValue<global::MissAlise.OneDrive.Models.ItemAnalytics>(global::MissAlise.OneDrive.Models.ItemAnalytics.CreateFromDiscriminatorValue); } },
                 { "audio", n => { Audio = n.GetObjectValue<global::MissAlise.OneDrive.Models.Audio>(global::MissAlise.OneDrive.Models.Audio.CreateFromDiscriminatorValue); } },
                 { "bundle", n => { Bundle = n.GetObjectValue<global::MissAlise.OneDrive.Models.Bundle>(global::MissAlise.OneDrive.Models.Bundle.CreateFromDiscriminatorValue); } },
                 { "cTag", n => { CTag = n.GetStringValue(); } },
@@ -311,23 +262,18 @@ namespace MissAlise.OneDrive.Models
                 { "malware", n => { Malware = n.GetObjectValue<global::MissAlise.OneDrive.Models.Malware>(global::MissAlise.OneDrive.Models.Malware.CreateFromDiscriminatorValue); } },
                 { "package", n => { Package = n.GetObjectValue<global::MissAlise.OneDrive.Models.Package>(global::MissAlise.OneDrive.Models.Package.CreateFromDiscriminatorValue); } },
                 { "pendingOperations", n => { PendingOperations = n.GetObjectValue<global::MissAlise.OneDrive.Models.PendingOperations>(global::MissAlise.OneDrive.Models.PendingOperations.CreateFromDiscriminatorValue); } },
-                { "permissions", n => { Permissions = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Permission>(global::MissAlise.OneDrive.Models.Permission.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "photo", n => { Photo = n.GetObjectValue<global::MissAlise.OneDrive.Models.Photo>(global::MissAlise.OneDrive.Models.Photo.CreateFromDiscriminatorValue); } },
-                { "publication", n => { Publication = n.GetObjectValue<global::MissAlise.OneDrive.Models.PublicationFacet>(global::MissAlise.OneDrive.Models.PublicationFacet.CreateFromDiscriminatorValue); } },
                 { "remoteItem", n => { RemoteItem = n.GetObjectValue<global::MissAlise.OneDrive.Models.RemoteItem>(global::MissAlise.OneDrive.Models.RemoteItem.CreateFromDiscriminatorValue); } },
-                { "retentionLabel", n => { RetentionLabel = n.GetObjectValue<global::MissAlise.OneDrive.Models.ItemRetentionLabel>(global::MissAlise.OneDrive.Models.ItemRetentionLabel.CreateFromDiscriminatorValue); } },
                 { "root", n => { Root = n.GetObjectValue<global::MissAlise.OneDrive.Models.Root>(global::MissAlise.OneDrive.Models.Root.CreateFromDiscriminatorValue); } },
                 { "searchResult", n => { SearchResult = n.GetObjectValue<global::MissAlise.OneDrive.Models.SearchResult>(global::MissAlise.OneDrive.Models.SearchResult.CreateFromDiscriminatorValue); } },
                 { "shared", n => { Shared = n.GetObjectValue<global::MissAlise.OneDrive.Models.Shared>(global::MissAlise.OneDrive.Models.Shared.CreateFromDiscriminatorValue); } },
-                { "sharepointIds", n => { SharepointIds = n.GetObjectValue<global::MissAlise.OneDrive.Models.SharepointIds>(global::MissAlise.OneDrive.Models.SharepointIds.CreateFromDiscriminatorValue); } },
                 { "size", n => { Size = n.GetLongValue(); } },
                 { "specialFolder", n => { SpecialFolder = n.GetObjectValue<global::MissAlise.OneDrive.Models.SpecialFolder>(global::MissAlise.OneDrive.Models.SpecialFolder.CreateFromDiscriminatorValue); } },
                 { "subscriptions", n => { Subscriptions = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Subscription>(global::MissAlise.OneDrive.Models.Subscription.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "thumbnails", n => { Thumbnails = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ThumbnailSet>(global::MissAlise.OneDrive.Models.ThumbnailSet.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "versions", n => { Versions = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DriveItemVersion>(global::MissAlise.OneDrive.Models.DriveItemVersion.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "video", n => { Video = n.GetObjectValue<global::MissAlise.OneDrive.Models.Video>(global::MissAlise.OneDrive.Models.Video.CreateFromDiscriminatorValue); } },
-                { "webDavUrl", n => { WebDavUrl = n.GetStringValue(); } },
-                { "workbook", n => { Workbook = n.GetObjectValue<global::MissAlise.OneDrive.Models.Workbook>(global::MissAlise.OneDrive.Models.Workbook.CreateFromDiscriminatorValue); } },
+                { "webDavUrl", n => { WebDavUrl = n.GetStringValue(); } },                
             };
         }
         /// <summary>
@@ -338,7 +284,6 @@ namespace MissAlise.OneDrive.Models
         {
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
             base.Serialize(writer);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.ItemAnalytics>("analytics", Analytics);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Audio>("audio", Audio);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Bundle>("bundle", Bundle);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DriveItem>("children", Children);
@@ -354,23 +299,18 @@ namespace MissAlise.OneDrive.Models
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Malware>("malware", Malware);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Package>("package", Package);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.PendingOperations>("pendingOperations", PendingOperations);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Permission>("permissions", Permissions);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Photo>("photo", Photo);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.PublicationFacet>("publication", Publication);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.RemoteItem>("remoteItem", RemoteItem);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.ItemRetentionLabel>("retentionLabel", RetentionLabel);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Root>("root", Root);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.SearchResult>("searchResult", SearchResult);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Shared>("shared", Shared);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.SharepointIds>("sharepointIds", SharepointIds);
             writer.WriteLongValue("size", Size);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.SpecialFolder>("specialFolder", SpecialFolder);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Subscription>("subscriptions", Subscriptions);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ThumbnailSet>("thumbnails", Thumbnails);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DriveItemVersion>("versions", Versions);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Video>("video", Video);
-            writer.WriteStringValue("webDavUrl", WebDavUrl);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Workbook>("workbook", Workbook);
+            writer.WriteStringValue("webDavUrl", WebDavUrl);            
         }
     }
 }

@@ -46,8 +46,6 @@ namespace MissAlise.OneDrive.Models
             var mappingValue = parseNode.GetChildNode("@odata.type")?.GetStringValue();
             return mappingValue switch
             {
-                "#microsoft.graph.attackSimulationOperation" => new global::MissAlise.OneDrive.Models.AttackSimulationOperation(),
-                "#microsoft.graph.engagementAsyncOperation" => new global::MissAlise.OneDrive.Models.EngagementAsyncOperation(),
                 "#microsoft.graph.richLongRunningOperation" => new global::MissAlise.OneDrive.Models.RichLongRunningOperation(),
                 _ => new global::MissAlise.OneDrive.Models.LongRunningOperation(),
             };

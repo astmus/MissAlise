@@ -12,11 +12,9 @@ namespace MissAlise.Services.Photos
 			var builder = WebApplication.CreateBuilder(args);
 			builder.AddServiceDefaults();
 			builder.AddRedisDistributedCache(connectionName: "cache");
-			builder.AddRedisOutputCache(connectionName: "cache", configureOptions: options =>
-			{				
-			});
-			builder.Services.AddApplication().AddPersistance(builder.Configuration, false);
-			
+			builder.AddRedisOutputCache(connectionName: "cache", configureOptions: options => {});
+
+			builder.Services.AddApplication().AddPersistance(builder.Configuration);			
 			builder.Services.AddControllers().AddJsonOptions(options =>
 			{
 				options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
@@ -41,7 +39,6 @@ namespace MissAlise.Services.Photos
 			app.UseHttpsRedirection();
 			app.UseAuthentication();
 			app.UseAuthorization();
-
 			app.MapControllers();
 
 			app.Run();

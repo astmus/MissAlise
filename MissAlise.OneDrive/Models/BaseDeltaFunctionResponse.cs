@@ -5,32 +5,38 @@ using Microsoft.Kiota.Abstractions.Serialization;
 using System.Collections.Generic;
 using System.IO;
 using System;
-using System.Text.Json.Serialization;
 namespace MissAlise.OneDrive.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class BaseDeltaFunctionResponse : IParsable
+    public partial class BaseDeltaFunctionResponse : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
+        /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
+        public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>The OdataDeltaLink property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        [JsonPropertyName("@odata.deltaLink")]
         public string? OdataDeltaLink { get; set; }
 #nullable restore
 #else
         public string OdataDeltaLink { get; set; }
 #endif
-		/// <summary>The OdataNextLink property</summary>
+        /// <summary>The OdataNextLink property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-		[JsonPropertyName("@odata.nextLink")]
-		public string? OdataNextLink { get; set; }
+        public string? OdataNextLink { get; set; }
 #nullable restore
 #else
         public string OdataNextLink { get; set; }
 #endif
+        /// <summary>
+        /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.BaseDeltaFunctionResponse"/> and sets the default values.
+        /// </summary>
+        public BaseDeltaFunctionResponse()
+        {
+            AdditionalData = new Dictionary<string, object>();
+        }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
@@ -62,6 +68,7 @@ namespace MissAlise.OneDrive.Models
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
             writer.WriteStringValue("@odata.deltaLink", OdataDeltaLink);
             writer.WriteStringValue("@odata.nextLink", OdataNextLink);
+            writer.WriteAdditionalData(AdditionalData);
         }
     }
 }

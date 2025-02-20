@@ -11,31 +11,7 @@ namespace MissAlise.OneDrive.Models
     #pragma warning disable CS1591
     public partial class ColumnDefinition : global::MissAlise.OneDrive.Models.Entity, IParsable
     #pragma warning restore CS1591
-    {
-        /// <summary>This column stores Boolean values.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.BooleanColumn? Boolean { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.BooleanColumn Boolean { get; set; }
-#endif
-        /// <summary>This column&apos;s data is calculated based on other columns.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.CalculatedColumn? Calculated { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.CalculatedColumn Calculated { get; set; }
-#endif
-        /// <summary>This column stores data from a list of choices.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.ChoiceColumn? Choice { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.ChoiceColumn Choice { get; set; }
-#endif
+    {       
         /// <summary>For site columns, the name of the group this column belongs to. Helps organize related columns.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -43,39 +19,7 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public string ColumnGroup { get; set; }
-#endif
-        /// <summary>This column stores content approval status.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.ContentApprovalStatusColumn? ContentApprovalStatus { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.ContentApprovalStatusColumn ContentApprovalStatus { get; set; }
-#endif
-        /// <summary>This column stores currency values.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.CurrencyColumn? Currency { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.CurrencyColumn Currency { get; set; }
-#endif
-        /// <summary>This column stores DateTime values.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.DateTimeColumn? DateTime { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.DateTimeColumn DateTime { get; set; }
-#endif
-        /// <summary>The default value for this column.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.DefaultColumnValue? DefaultValue { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.DefaultColumnValue DefaultValue { get; set; }
-#endif
+#endif        
         /// <summary>The user-facing description of the column.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -93,25 +37,9 @@ namespace MissAlise.OneDrive.Models
         public string DisplayName { get; set; }
 #endif
         /// <summary>If true, no two list items may have the same value for this column.</summary>
-        public bool? EnforceUniqueValues { get; set; }
-        /// <summary>This column stores a geolocation.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.GeolocationColumn? Geolocation { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.GeolocationColumn Geolocation { get; set; }
-#endif
+        public bool? EnforceUniqueValues { get; set; }     
         /// <summary>Specifies whether the column is displayed in the user interface.</summary>
-        public bool? Hidden { get; set; }
-        /// <summary>This column stores hyperlink or picture values.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.HyperlinkOrPictureColumn? HyperlinkOrPicture { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.HyperlinkOrPictureColumn HyperlinkOrPicture { get; set; }
-#endif
+        public bool? Hidden { get; set; }      
         /// <summary>Specifies whether the column values can be used for sorting and searching.</summary>
         public bool? Indexed { get; set; }
         /// <summary>Indicates whether this column can be deleted.</summary>
@@ -120,14 +48,7 @@ namespace MissAlise.OneDrive.Models
         public bool? IsReorderable { get; set; }
         /// <summary>Specifies whether the column can be changed.</summary>
         public bool? IsSealed { get; set; }
-        /// <summary>This column&apos;s data is looked up from another source in the site.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.LookupColumn? Lookup { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.LookupColumn Lookup { get; set; }
-#endif
+   
         /// <summary>The API-facing name of the column as it appears in the fields on a listItem. For the user-facing name, see displayName.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -135,22 +56,6 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public string Name { get; set; }
-#endif
-        /// <summary>This column stores number values.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.NumberColumn? Number { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.NumberColumn Number { get; set; }
-#endif
-        /// <summary>This column stores Person or Group values.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.PersonOrGroupColumn? PersonOrGroup { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.PersonOrGroupColumn PersonOrGroup { get; set; }
 #endif
         /// <summary>If &apos;true&apos;, changes to this column will be propagated to lists that implement the column.</summary>
         public bool? PropagateChanges { get; set; }
@@ -174,22 +79,7 @@ namespace MissAlise.OneDrive.Models
 #else
         public global::MissAlise.OneDrive.Models.ContentTypeInfo SourceContentType { get; set; }
 #endif
-        /// <summary>This column stores taxonomy terms.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.TermColumn? Term { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.TermColumn Term { get; set; }
-#endif
-        /// <summary>This column stores text values.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.TextColumn? Text { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.TextColumn Text { get; set; }
-#endif
+       
         /// <summary>This column stores thumbnail values.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -198,16 +88,7 @@ namespace MissAlise.OneDrive.Models
 #else
         public global::MissAlise.OneDrive.Models.ThumbnailColumn Thumbnail { get; set; }
 #endif
-        /// <summary>For site columns, the type of column. Read-only.</summary>
-        public global::MissAlise.OneDrive.Models.ColumnTypes? Type { get; set; }
-        /// <summary>This column stores validation formula and message for the column.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.ColumnValidation? Validation { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.ColumnValidation Validation { get; set; }
-#endif
+     
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
@@ -226,38 +107,22 @@ namespace MissAlise.OneDrive.Models
         {
             return new Dictionary<string, Action<IParseNode>>(base.GetFieldDeserializers())
             {
-                { "boolean", n => { Boolean = n.GetObjectValue<global::MissAlise.OneDrive.Models.BooleanColumn>(global::MissAlise.OneDrive.Models.BooleanColumn.CreateFromDiscriminatorValue); } },
-                { "calculated", n => { Calculated = n.GetObjectValue<global::MissAlise.OneDrive.Models.CalculatedColumn>(global::MissAlise.OneDrive.Models.CalculatedColumn.CreateFromDiscriminatorValue); } },
-                { "choice", n => { Choice = n.GetObjectValue<global::MissAlise.OneDrive.Models.ChoiceColumn>(global::MissAlise.OneDrive.Models.ChoiceColumn.CreateFromDiscriminatorValue); } },
                 { "columnGroup", n => { ColumnGroup = n.GetStringValue(); } },
-                { "contentApprovalStatus", n => { ContentApprovalStatus = n.GetObjectValue<global::MissAlise.OneDrive.Models.ContentApprovalStatusColumn>(global::MissAlise.OneDrive.Models.ContentApprovalStatusColumn.CreateFromDiscriminatorValue); } },
-                { "currency", n => { Currency = n.GetObjectValue<global::MissAlise.OneDrive.Models.CurrencyColumn>(global::MissAlise.OneDrive.Models.CurrencyColumn.CreateFromDiscriminatorValue); } },
-                { "dateTime", n => { DateTime = n.GetObjectValue<global::MissAlise.OneDrive.Models.DateTimeColumn>(global::MissAlise.OneDrive.Models.DateTimeColumn.CreateFromDiscriminatorValue); } },
-                { "defaultValue", n => { DefaultValue = n.GetObjectValue<global::MissAlise.OneDrive.Models.DefaultColumnValue>(global::MissAlise.OneDrive.Models.DefaultColumnValue.CreateFromDiscriminatorValue); } },
                 { "description", n => { Description = n.GetStringValue(); } },
                 { "displayName", n => { DisplayName = n.GetStringValue(); } },
                 { "enforceUniqueValues", n => { EnforceUniqueValues = n.GetBoolValue(); } },
-                { "geolocation", n => { Geolocation = n.GetObjectValue<global::MissAlise.OneDrive.Models.GeolocationColumn>(global::MissAlise.OneDrive.Models.GeolocationColumn.CreateFromDiscriminatorValue); } },
                 { "hidden", n => { Hidden = n.GetBoolValue(); } },
-                { "hyperlinkOrPicture", n => { HyperlinkOrPicture = n.GetObjectValue<global::MissAlise.OneDrive.Models.HyperlinkOrPictureColumn>(global::MissAlise.OneDrive.Models.HyperlinkOrPictureColumn.CreateFromDiscriminatorValue); } },
                 { "indexed", n => { Indexed = n.GetBoolValue(); } },
                 { "isDeletable", n => { IsDeletable = n.GetBoolValue(); } },
                 { "isReorderable", n => { IsReorderable = n.GetBoolValue(); } },
                 { "isSealed", n => { IsSealed = n.GetBoolValue(); } },
-                { "lookup", n => { Lookup = n.GetObjectValue<global::MissAlise.OneDrive.Models.LookupColumn>(global::MissAlise.OneDrive.Models.LookupColumn.CreateFromDiscriminatorValue); } },
                 { "name", n => { Name = n.GetStringValue(); } },
-                { "number", n => { Number = n.GetObjectValue<global::MissAlise.OneDrive.Models.NumberColumn>(global::MissAlise.OneDrive.Models.NumberColumn.CreateFromDiscriminatorValue); } },
-                { "personOrGroup", n => { PersonOrGroup = n.GetObjectValue<global::MissAlise.OneDrive.Models.PersonOrGroupColumn>(global::MissAlise.OneDrive.Models.PersonOrGroupColumn.CreateFromDiscriminatorValue); } },
                 { "propagateChanges", n => { PropagateChanges = n.GetBoolValue(); } },
                 { "readOnly", n => { ReadOnly = n.GetBoolValue(); } },
                 { "required", n => { Required = n.GetBoolValue(); } },
                 { "sourceColumn", n => { SourceColumn = n.GetObjectValue<global::MissAlise.OneDrive.Models.ColumnDefinition>(global::MissAlise.OneDrive.Models.ColumnDefinition.CreateFromDiscriminatorValue); } },
                 { "sourceContentType", n => { SourceContentType = n.GetObjectValue<global::MissAlise.OneDrive.Models.ContentTypeInfo>(global::MissAlise.OneDrive.Models.ContentTypeInfo.CreateFromDiscriminatorValue); } },
-                { "term", n => { Term = n.GetObjectValue<global::MissAlise.OneDrive.Models.TermColumn>(global::MissAlise.OneDrive.Models.TermColumn.CreateFromDiscriminatorValue); } },
-                { "text", n => { Text = n.GetObjectValue<global::MissAlise.OneDrive.Models.TextColumn>(global::MissAlise.OneDrive.Models.TextColumn.CreateFromDiscriminatorValue); } },
                 { "thumbnail", n => { Thumbnail = n.GetObjectValue<global::MissAlise.OneDrive.Models.ThumbnailColumn>(global::MissAlise.OneDrive.Models.ThumbnailColumn.CreateFromDiscriminatorValue); } },
-                { "type", n => { Type = n.GetEnumValue<global::MissAlise.OneDrive.Models.ColumnTypes>(); } },
-                { "validation", n => { Validation = n.GetObjectValue<global::MissAlise.OneDrive.Models.ColumnValidation>(global::MissAlise.OneDrive.Models.ColumnValidation.CreateFromDiscriminatorValue); } },
             };
         }
         /// <summary>
@@ -268,38 +133,22 @@ namespace MissAlise.OneDrive.Models
         {
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
             base.Serialize(writer);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.BooleanColumn>("boolean", Boolean);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.CalculatedColumn>("calculated", Calculated);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.ChoiceColumn>("choice", Choice);
             writer.WriteStringValue("columnGroup", ColumnGroup);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.ContentApprovalStatusColumn>("contentApprovalStatus", ContentApprovalStatus);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.CurrencyColumn>("currency", Currency);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.DateTimeColumn>("dateTime", DateTime);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.DefaultColumnValue>("defaultValue", DefaultValue);
             writer.WriteStringValue("description", Description);
             writer.WriteStringValue("displayName", DisplayName);
             writer.WriteBoolValue("enforceUniqueValues", EnforceUniqueValues);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.GeolocationColumn>("geolocation", Geolocation);
             writer.WriteBoolValue("hidden", Hidden);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.HyperlinkOrPictureColumn>("hyperlinkOrPicture", HyperlinkOrPicture);
             writer.WriteBoolValue("indexed", Indexed);
             writer.WriteBoolValue("isDeletable", IsDeletable);
             writer.WriteBoolValue("isReorderable", IsReorderable);
             writer.WriteBoolValue("isSealed", IsSealed);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.LookupColumn>("lookup", Lookup);
             writer.WriteStringValue("name", Name);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.NumberColumn>("number", Number);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.PersonOrGroupColumn>("personOrGroup", PersonOrGroup);
             writer.WriteBoolValue("propagateChanges", PropagateChanges);
             writer.WriteBoolValue("readOnly", ReadOnly);
             writer.WriteBoolValue("required", Required);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.ColumnDefinition>("sourceColumn", SourceColumn);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.ContentTypeInfo>("sourceContentType", SourceContentType);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.TermColumn>("term", Term);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.TextColumn>("text", Text);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.ThumbnailColumn>("thumbnail", Thumbnail);
-            writer.WriteEnumValue<global::MissAlise.OneDrive.Models.ColumnTypes>("type", Type);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.ColumnValidation>("validation", Validation);
         }
     }
 }

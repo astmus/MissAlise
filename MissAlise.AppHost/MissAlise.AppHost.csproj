@@ -9,6 +9,8 @@
 		<Nullable>enable</Nullable>
 		<IsAspireHost>true</IsAspireHost>
 		<UserSecretsId>878e6f55-5200-4d1b-b000-52424a303ced</UserSecretsId>
+		<RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
+		<RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
 	</PropertyGroup>
 
 	<ItemGroup>

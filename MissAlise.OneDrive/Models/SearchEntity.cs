@@ -21,14 +21,6 @@ namespace MissAlise.OneDrive.Models
 #else
         public List<global::MissAlise.OneDrive.Models.Search.Acronym> Acronyms { get; set; }
 #endif
-        /// <summary>Administrative answer in Microsoft Search results for common search queries in an organization.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.Search.Bookmark>? Bookmarks { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.Search.Bookmark> Bookmarks { get; set; }
-#endif
         /// <summary>Administrative answer in Microsoft Search results that provide answers for specific search keywords in an organization.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -56,7 +48,6 @@ namespace MissAlise.OneDrive.Models
             return new Dictionary<string, Action<IParseNode>>(base.GetFieldDeserializers())
             {
                 { "acronyms", n => { Acronyms = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Search.Acronym>(global::MissAlise.OneDrive.Models.Search.Acronym.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "bookmarks", n => { Bookmarks = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Search.Bookmark>(global::MissAlise.OneDrive.Models.Search.Bookmark.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "qnas", n => { Qnas = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Search.Qna>(global::MissAlise.OneDrive.Models.Search.Qna.CreateFromDiscriminatorValue)?.AsList(); } },
             };
         }
@@ -69,7 +60,6 @@ namespace MissAlise.OneDrive.Models
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
             base.Serialize(writer);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Search.Acronym>("acronyms", Acronyms);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Search.Bookmark>("bookmarks", Bookmarks);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Search.Qna>("qnas", Qnas);
         }
     }

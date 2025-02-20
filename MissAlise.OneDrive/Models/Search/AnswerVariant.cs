@@ -9,9 +9,11 @@ namespace MissAlise.OneDrive.Models.Search
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class AnswerVariant : IParsable
+    public partial class AnswerVariant : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
+        /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
+        public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>The answer variation description that is shown on the search results page.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -43,17 +45,14 @@ namespace MissAlise.OneDrive.Models.Search
 #nullable restore
 #else
         public string OdataType { get; set; }
-#endif
-        /// <summary>The device or operating system that can view this answer variation. Possible values are: android, androidForWork, ios, macOS, windowsPhone81, windowsPhone81AndLater, windows10AndLater, androidWorkProfile, unknown, androidASOP, androidMobileApplicationManagement, iOSMobileApplicationManagement, unknownFutureValue.</summary>
-        public global::MissAlise.OneDrive.Models.DevicePlatformType? Platform { get; set; }
-        /// <summary>The URL link for the answer variation. When users select this answer variation from the search results, they&apos;re directed to the specified URL.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? WebUrl { get; set; }
-#nullable restore
-#else
-        public string WebUrl { get; set; }
-#endif
+#endif      
+        /// <summary>
+        /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.Search.AnswerVariant"/> and sets the default values.
+        /// </summary>
+        public AnswerVariant()
+        {
+            AdditionalData = new Dictionary<string, object>();
+        }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
@@ -75,9 +74,7 @@ namespace MissAlise.OneDrive.Models.Search
                 { "description", n => { Description = n.GetStringValue(); } },
                 { "displayName", n => { DisplayName = n.GetStringValue(); } },
                 { "languageTag", n => { LanguageTag = n.GetStringValue(); } },
-                { "@odata.type", n => { OdataType = n.GetStringValue(); } },
-                { "platform", n => { Platform = n.GetEnumValue<global::MissAlise.OneDrive.Models.DevicePlatformType>(); } },
-                { "webUrl", n => { WebUrl = n.GetStringValue(); } },
+                { "@odata.type", n => { OdataType = n.GetStringValue(); } },                
             };
         }
         /// <summary>
@@ -90,9 +87,8 @@ namespace MissAlise.OneDrive.Models.Search
             writer.WriteStringValue("description", Description);
             writer.WriteStringValue("displayName", DisplayName);
             writer.WriteStringValue("languageTag", LanguageTag);
-            writer.WriteStringValue("@odata.type", OdataType);
-            writer.WriteEnumValue<global::MissAlise.OneDrive.Models.DevicePlatformType>("platform", Platform);
-            writer.WriteStringValue("webUrl", WebUrl);
+            writer.WriteStringValue("@odata.type", OdataType);            
+            writer.WriteAdditionalData(AdditionalData);
         }
     }
 }

@@ -9,9 +9,11 @@ namespace MissAlise.OneDrive.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class ListInfo : IParsable
+    public partial class ListInfo : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
+        /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
+        public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>If true, indicates that content types are enabled for this list.</summary>
         public bool? ContentTypesEnabled { get; set; }
         /// <summary>If true, indicates that the list isn&apos;t normally visible in the SharePoint user experience.</summary>
@@ -32,6 +34,13 @@ namespace MissAlise.OneDrive.Models
 #else
         public string Template { get; set; }
 #endif
+        /// <summary>
+        /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.ListInfo"/> and sets the default values.
+        /// </summary>
+        public ListInfo()
+        {
+            AdditionalData = new Dictionary<string, object>();
+        }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
@@ -67,6 +76,7 @@ namespace MissAlise.OneDrive.Models
             writer.WriteBoolValue("hidden", Hidden);
             writer.WriteStringValue("@odata.type", OdataType);
             writer.WriteStringValue("template", Template);
+            writer.WriteAdditionalData(AdditionalData);
         }
     }
 }

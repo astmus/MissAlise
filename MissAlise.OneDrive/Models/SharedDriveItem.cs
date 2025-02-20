@@ -52,14 +52,6 @@ namespace MissAlise.OneDrive.Models
 #else
         public global::MissAlise.OneDrive.Models.IdentitySet Owner { get; set; }
 #endif
-        /// <summary>Used to access the permission representing the underlying sharing link</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.Permission? Permission { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.Permission Permission { get; set; }
-#endif
         /// <summary>Used to access the underlying driveItem. Deprecated -- use driveItem instead.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -68,14 +60,7 @@ namespace MissAlise.OneDrive.Models
 #else
         public global::MissAlise.OneDrive.Models.DriveItem Root { get; set; }
 #endif
-        /// <summary>Used to access the underlying site</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.Site? Site { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.Site Site { get; set; }
-#endif
+
         /// <summary>
         /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.SharedDriveItem"/> and sets the default values.
         /// </summary>
@@ -106,9 +91,7 @@ namespace MissAlise.OneDrive.Models
                 { "list", n => { List = n.GetObjectValue<global::MissAlise.OneDrive.Models.List>(global::MissAlise.OneDrive.Models.List.CreateFromDiscriminatorValue); } },
                 { "listItem", n => { ListItem = n.GetObjectValue<global::MissAlise.OneDrive.Models.ListItem>(global::MissAlise.OneDrive.Models.ListItem.CreateFromDiscriminatorValue); } },
                 { "owner", n => { Owner = n.GetObjectValue<global::MissAlise.OneDrive.Models.IdentitySet>(global::MissAlise.OneDrive.Models.IdentitySet.CreateFromDiscriminatorValue); } },
-                { "permission", n => { Permission = n.GetObjectValue<global::MissAlise.OneDrive.Models.Permission>(global::MissAlise.OneDrive.Models.Permission.CreateFromDiscriminatorValue); } },
                 { "root", n => { Root = n.GetObjectValue<global::MissAlise.OneDrive.Models.DriveItem>(global::MissAlise.OneDrive.Models.DriveItem.CreateFromDiscriminatorValue); } },
-                { "site", n => { Site = n.GetObjectValue<global::MissAlise.OneDrive.Models.Site>(global::MissAlise.OneDrive.Models.Site.CreateFromDiscriminatorValue); } },
             };
         }
         /// <summary>
@@ -124,9 +107,7 @@ namespace MissAlise.OneDrive.Models
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.List>("list", List);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.ListItem>("listItem", ListItem);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.IdentitySet>("owner", Owner);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Permission>("permission", Permission);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.DriveItem>("root", Root);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Site>("site", Site);
         }
     }
 }

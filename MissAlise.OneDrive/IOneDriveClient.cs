@@ -8,12 +8,16 @@ namespace MissAlise.OneDrive
 	public interface IOneDriveClient
 	{
 		[Get("/root/children")]
-		Task<ApiResponse<IEnumerable<DriveItem>>> RootItems([Property] IHandleContext ctx, CancellationToken cancel);
+		Task<ApiResponse<IEnumerable<DriveItem>>> RootChildren([Property] IHandleContext ctx, CancellationToken cancel);
 
 		[Get("/root/delta?$select=name,folder,parentReference,size,id,createdDateTime,file,@microsoft.graph.downloadUrl,fileSystemInfo,photo,image,audio,video")]
-		Task<ApiResponse<DriveItemDeltaGetResponse>> RootDelta([Property] IHandleContext ctx, CancellationToken cancel);
+		Task<ApiResponse<DriveItemsDelta>> RootDelta([Property] IHandleContext ctx, CancellationToken cancel);
 
 		[Get("/root/delta")]
-		Task<ApiResponse<DriveItemDeltaGetResponse>> DeltaShift(string token, [Property] IHandleContext ctx, CancellationToken cancel);
+		Task<ApiResponse<DriveItemsDelta>> DeltaShift(string token, [Property] IHandleContext ctx, CancellationToken cancel);
+
+		[Get("/root/delta?{query}")]
+		[QueryUriFormat(UriFormat.Unescaped)]
+		Task<ApiResponse<DriveItemsDelta>> DeltaQuery(string query, [Property] IHandleContext ctx, CancellationToken cancel);
 	}
 }

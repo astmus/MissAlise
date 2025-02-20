@@ -23,14 +23,7 @@ namespace MissAlise.OneDrive.Models
 #endif
         /// <summary>true if the account is enabled; otherwise, false. This property is required when a user is created. Returned only on $select. Supports $filter (eq, ne, not, and in).</summary>
         public bool? AccountEnabled { get; set; }
-        /// <summary>The user&apos;s activities across devices. Read-only. Nullable.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.UserActivity>? Activities { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.UserActivity> Activities { get; set; }
-#endif
+    
         /// <summary>Sets the age group of the user. Allowed values: null, Minor, NotAdult, and Adult. For more information, see legal age group property definitions. Returned only on $select. Supports $filter (eq, ne, not, and in).</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -38,55 +31,7 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public string AgeGroup { get; set; }
-#endif
-        /// <summary>The user&apos;s terms of use acceptance statuses. Read-only. Nullable.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.AgreementAcceptance>? AgreementAcceptances { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.AgreementAcceptance> AgreementAcceptances { get; set; }
-#endif
-        /// <summary>Represents the app roles a user is granted for an application. Supports $expand.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.AppRoleAssignment>? AppRoleAssignments { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.AppRoleAssignment> AppRoleAssignments { get; set; }
-#endif
-        /// <summary>The licenses that are assigned to the user, including inherited (group-based) licenses. This property doesn&apos;t differentiate between directly assigned and inherited licenses. Use the licenseAssignmentStates property to identify the directly assigned and inherited licenses. Not nullable. Returned only on $select. Supports $filter (eq, not, /$count eq 0, /$count ne 0).</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.AssignedLicense>? AssignedLicenses { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.AssignedLicense> AssignedLicenses { get; set; }
-#endif
-        /// <summary>The plans that are assigned to the user. Read-only. Not nullable. Returned only on $select. Supports $filter (eq and not).</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.AssignedPlan>? AssignedPlans { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.AssignedPlan> AssignedPlans { get; set; }
-#endif
-        /// <summary>The authentication methods that are supported for the user.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.Authentication? Authentication { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.Authentication Authentication { get; set; }
-#endif
-        /// <summary>The authorizationInfo property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.AuthorizationInfo? AuthorizationInfo { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.AuthorizationInfo AuthorizationInfo { get; set; }
-#endif
+#endif     
         /// <summary>The birthday of the user. The Timestamp type represents date and time information using ISO 8601 format and is always in UTC. For example, midnight UTC on Jan 1, 2014, is 2014-01-01T00:00:00Z. Returned only on $select.</summary>
         public DateTimeOffset? Birthday { get; set; }
         /// <summary>The telephone numbers for the user. NOTE: Although it&apos;s a string collection, only one number can be set for this property. Read-only for users synced from the on-premises directory. Returned by default. Supports $filter (eq, not, ge, le, startsWith).</summary>
@@ -96,63 +41,7 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public List<string> BusinessPhones { get; set; }
-#endif
-        /// <summary>The user&apos;s primary calendar. Read-only.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.Calendar? Calendar { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.Calendar Calendar { get; set; }
-#endif
-        /// <summary>The user&apos;s calendar groups. Read-only. Nullable.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.CalendarGroup>? CalendarGroups { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.CalendarGroup> CalendarGroups { get; set; }
-#endif
-        /// <summary>The user&apos;s calendars. Read-only. Nullable.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.Calendar>? Calendars { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.Calendar> Calendars { get; set; }
-#endif
-        /// <summary>The calendar view for the calendar. Read-only. Nullable.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.Event>? CalendarView { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.Event> CalendarView { get; set; }
-#endif
-        /// <summary>The chats property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.Chat>? Chats { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.Chat> Chats { get; set; }
-#endif
-        /// <summary>The city where the user is located. Maximum length is 128 characters. Returned only on $select. Supports $filter (eq, ne, not, ge, le, in, startsWith, and eq on null values).</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? City { get; set; }
-#nullable restore
-#else
-        public string City { get; set; }
-#endif
-        /// <summary>The cloudClipboard property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.CloudClipboardRoot? CloudClipboard { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.CloudClipboardRoot CloudClipboard { get; set; }
-#endif
+#endif        
         /// <summary>The name of the company that the user is associated with. This property can be useful for describing the company that a guest comes from. The maximum length is 64 characters.Returned only on $select. Supports $filter (eq, ne, not, ge, le, in, startsWith, and eq on null values).</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -168,24 +57,8 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public string ConsentProvidedForMinor { get; set; }
-#endif
-        /// <summary>The user&apos;s contacts folders. Read-only. Nullable.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.ContactFolder>? ContactFolders { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.ContactFolder> ContactFolders { get; set; }
-#endif
-        /// <summary>The user&apos;s contacts. Read-only. Nullable.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.Contact>? Contacts { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.Contact> Contacts { get; set; }
-#endif
-        /// <summary>The country/region where the user is located; for example, US or UK. Maximum length is 128 characters. Returned only on $select. Supports $filter (eq, ne, not, ge, le, in, startsWith, and eq on null values).</summary>
+#endif      
+        /// <summary>The country or region where the user is located; for example, US or UK. Maximum length is 128 characters. Returned only on $select. Supports $filter (eq, ne, not, ge, le, in, startsWith, and eq on null values).</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public string? Country { get; set; }
@@ -210,15 +83,7 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public string CreationType { get; set; }
-#endif
-        /// <summary>An open complex type that holds the value of a custom security attribute that is assigned to a directory object. Nullable. Returned only on $select. Supports $filter (eq, ne, not, startsWith). The filter value is case-sensitive. To read this property, the calling app must be assigned the CustomSecAttributeAssignment.Read.All permission. To write this property, the calling app must be assigned the CustomSecAttributeAssignment.ReadWrite.All permissions. To read or write this property in delegated scenarios, the admin must be assigned the Attribute Assignment Administrator role.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.CustomSecurityAttributeValue? CustomSecurityAttributes { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.CustomSecurityAttributeValue CustomSecurityAttributes { get; set; }
-#endif
+#endif        
         /// <summary>The name of the department in which the user works. Maximum length is 64 characters. Returned only on $select. Supports $filter (eq, ne, not , ge, le, in, and eq on null values).</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -228,15 +93,7 @@ namespace MissAlise.OneDrive.Models
         public string Department { get; set; }
 #endif
         /// <summary>The limit on the maximum number of devices that the user is permitted to enroll. Allowed values are 5 or 1000.</summary>
-        public int? DeviceEnrollmentLimit { get; set; }
-        /// <summary>The list of troubleshooting events for this user.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.DeviceManagementTroubleshootingEvent>? DeviceManagementTroubleshootingEvents { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.DeviceManagementTroubleshootingEvent> DeviceManagementTroubleshootingEvents { get; set; }
-#endif
+        public int? DeviceEnrollmentLimit { get; set; }     
         /// <summary>The users and contacts that report to the user. (The users and contacts that have their manager property set to this user.) Read-only. Nullable. Supports $expand.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -268,15 +125,7 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public List<global::MissAlise.OneDrive.Models.Drive> Drives { get; set; }
-#endif
-        /// <summary>The employeeExperience property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.EmployeeExperienceUser? EmployeeExperience { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.EmployeeExperienceUser EmployeeExperience { get; set; }
-#endif
+#endif           
         /// <summary>The date and time when the user was hired or will start work in a future hire. Returned only on $select. Supports $filter (eq, ne, not , ge, le, in).</summary>
         public DateTimeOffset? EmployeeHireDate { get; set; }
         /// <summary>The employee identifier assigned to the user by the organization. The maximum length is 16 characters. Returned only on $select. Supports $filter (eq, ne, not , ge, le, in, startsWith, and eq on null values).</summary>
@@ -289,14 +138,7 @@ namespace MissAlise.OneDrive.Models
 #endif
         /// <summary>The date and time when the user left or will leave the organization. To read this property, the calling app must be assigned the User-LifeCycleInfo.Read.All permission. To write this property, the calling app must be assigned the User.Read.All and User-LifeCycleInfo.ReadWrite.All permissions. To read this property in delegated scenarios, the admin needs at least one of the following Microsoft Entra roles: Lifecycle Workflows Administrator (least privilege), Global Reader. To write this property in delegated scenarios, the admin needs the Global Administrator role. Supports $filter (eq, ne, not , ge, le, in). For more information, see Configure the employeeLeaveDateTime property for a user.</summary>
         public DateTimeOffset? EmployeeLeaveDateTime { get; set; }
-        /// <summary>Represents organization data (for example, division and costCenter) associated with a user. Returned only on $select. Supports $filter (eq, ne, not , ge, le, in).</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.EmployeeOrgData? EmployeeOrgData { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.EmployeeOrgData EmployeeOrgData { get; set; }
-#endif
+    
         /// <summary>Captures enterprise worker type. For example, Employee, Contractor, Consultant, or Vendor. Returned only on $select. Supports $filter (eq, ne, not , ge, le, in, startsWith).</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -305,22 +147,8 @@ namespace MissAlise.OneDrive.Models
 #else
         public string EmployeeType { get; set; }
 #endif
-        /// <summary>The user&apos;s events. Default is to show Events under the Default Calendar. Read-only. Nullable.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.Event>? Events { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.Event> Events { get; set; }
-#endif
-        /// <summary>The collection of open extensions defined for the user. Read-only. Supports $expand. Nullable.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.Extension>? Extensions { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.Extension> Extensions { get; set; }
-#endif
+
+    
         /// <summary>For a guest invited to the tenant using the invitation API, this property represents the invited user&apos;s invitation status. For invited users, the state can be PendingAcceptance or Accepted, or null for all other users. Returned only on $select. Supports $filter (eq, ne, not , in).</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -338,15 +166,7 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public string FaxNumber { get; set; }
-#endif
-        /// <summary>The followedSites property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.Site>? FollowedSites { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.Site> FollowedSites { get; set; }
-#endif
+#endif  
         /// <summary>The given name (first name) of the user. Maximum length is 64 characters. Returned by default. Supports $filter (eq, ne, not , ge, le, in, startsWith, and eq on null values).</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -355,16 +175,6 @@ namespace MissAlise.OneDrive.Models
 #else
         public string GivenName { get; set; }
 #endif
-        /// <summary>The hire date of the user. The Timestamp type represents date and time information using ISO 8601 format and is always in UTC. For example, midnight UTC on Jan 1, 2014, is 2014-01-01T00:00:00Z. Returned only on $select.  Note: This property is specific to SharePoint in Microsoft 365. We recommend using the native employeeHireDate property to set and update hire date values using Microsoft Graph APIs.</summary>
-        public DateTimeOffset? HireDate { get; set; }
-        /// <summary>Represents the identities that can be used to sign in to this user account. Microsoft (also known as a local account), organizations, or social identity providers such as Facebook, Google, and Microsoft can provide identity and tie it to a user account. It might contain multiple items with the same signInType value. Returned only on $select.  Supports $filter (eq) with limitations.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.ObjectIdentity>? Identities { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.ObjectIdentity> Identities { get; set; }
-#endif
         /// <summary>The instant message voice-over IP (VOIP) session initiation protocol (SIP) addresses for the user. Read-only. Returned only on $select. Supports $filter (eq, not, ge, le, startsWith).</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -372,22 +182,6 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public List<string> ImAddresses { get; set; }
-#endif
-        /// <summary>Relevance classification of the user&apos;s messages based on explicit designations that override inferred relevance or importance.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.InferenceClassification? InferenceClassification { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.InferenceClassification InferenceClassification { get; set; }
-#endif
-        /// <summary>Represents relationships between a user and items such as OneDrive for work or school documents, calculated using advanced analytics and machine learning techniques. Read-only. Nullable.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.ItemInsights? Insights { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.ItemInsights Insights { get; set; }
 #endif
         /// <summary>A list for the user to describe their interests. Returned only on $select.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -409,14 +203,7 @@ namespace MissAlise.OneDrive.Models
 #else
         public string JobTitle { get; set; }
 #endif
-        /// <summary>The joinedTeams property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.Team>? JoinedTeams { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.Team> JoinedTeams { get; set; }
-#endif
+
         /// <summary>The time when this Microsoft Entra user last changed their password or when their password was created, whichever date the latest action was performed. The date and time information uses ISO 8601 format and is always in UTC. For example, midnight UTC on Jan 1, 2014 is 2014-01-01T00:00:00Z. Returned only on $select.</summary>
         public DateTimeOffset? LastPasswordChangeDateTime { get; set; }
         /// <summary>Used by enterprise applications to determine the legal age group of the user. This property is read-only and calculated based on ageGroup and consentProvidedForMinor properties. Allowed values: null, Undefined,  MinorWithOutParentalConsent, MinorWithParentalConsent, MinorNoParentalConsentRequired, NotAdult, and Adult. For more information, see legal age group property definitions. Returned only on $select.</summary>
@@ -426,23 +213,7 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public string LegalAgeGroupClassification { get; set; }
-#endif
-        /// <summary>State of license assignments for this user. Also indicates licenses that are directly assigned or the user inherited through group memberships. Read-only. Returned only on $select.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.LicenseAssignmentState>? LicenseAssignmentStates { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.LicenseAssignmentState> LicenseAssignmentStates { get; set; }
-#endif
-        /// <summary>A collection of this user&apos;s license details. Read-only.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.LicenseDetails>? LicenseDetails { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.LicenseDetails> LicenseDetails { get; set; }
-#endif
+#endif        
         /// <summary>The SMTP address for the user, for example, jeff@contoso.com. Changes to this property update the user&apos;s proxyAddresses collection to include the value as an SMTP address. This property can&apos;t contain accent characters.  NOTE: We don&apos;t recommend updating this property for Azure AD B2C user profiles. Use the otherMails property instead. Returned by default. Supports $filter (eq, ne, not, ge, le, in, startsWith, endsWith, and eq on null values).</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -450,23 +221,7 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public string Mail { get; set; }
-#endif
-        /// <summary>Settings for the primary mailbox of the signed-in user. You can get or update settings for sending automatic replies to incoming messages, locale, and time zone. Returned only on $select.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.MailboxSettings? MailboxSettings { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.MailboxSettings MailboxSettings { get; set; }
-#endif
-        /// <summary>The user&apos;s mail folders. Read-only. Nullable.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.MailFolder>? MailFolders { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.MailFolder> MailFolders { get; set; }
-#endif
+#endif     
         /// <summary>The mail alias for the user. This property must be specified when a user is created. Maximum length is 64 characters. Returned only on $select. Supports $filter (eq, ne, not, ge, le, in, startsWith, and eq on null values).</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -474,22 +229,6 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public string MailNickname { get; set; }
-#endif
-        /// <summary>Zero or more managed app registrations that belong to the user.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.ManagedAppRegistration>? ManagedAppRegistrations { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.ManagedAppRegistration> ManagedAppRegistrations { get; set; }
-#endif
-        /// <summary>The managed devices associated with the user.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.ManagedDevice>? ManagedDevices { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.ManagedDevice> ManagedDevices { get; set; }
 #endif
         /// <summary>The user or contact that is this user&apos;s manager. Read-only. Supports $expand.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -506,15 +245,7 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public List<global::MissAlise.OneDrive.Models.DirectoryObject> MemberOf { get; set; }
-#endif
-        /// <summary>The messages in a mailbox or folder. Read-only. Nullable.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.Message>? Messages { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.Message> Messages { get; set; }
-#endif
+#endif  
         /// <summary>The primary cellular telephone number for the user. Read-only for users synced from the on-premises directory. Maximum length is 64 characters. Returned by default. Supports $filter (eq, ne, not, ge, le, in, startsWith, and eq on null values) and $search.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -530,15 +261,7 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public string MySite { get; set; }
-#endif
-        /// <summary>The oauth2PermissionGrants property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.OAuth2PermissionGrant>? Oauth2PermissionGrants { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.OAuth2PermissionGrant> Oauth2PermissionGrants { get; set; }
-#endif
+#endif     
         /// <summary>The office location in the user&apos;s place of business. Returned by default. Supports $filter (eq, ne, not, ge, le, in, startsWith, and eq on null values).</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -547,22 +270,7 @@ namespace MissAlise.OneDrive.Models
 #else
         public string OfficeLocation { get; set; }
 #endif
-        /// <summary>The onenote property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.Onenote? Onenote { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.Onenote Onenote { get; set; }
-#endif
-        /// <summary>Information about a meeting, including the URL used to join a meeting, the attendees list, and the description.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.OnlineMeeting>? OnlineMeetings { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.OnlineMeeting> OnlineMeetings { get; set; }
-#endif
+    
         /// <summary>Contains the on-premises Active Directory distinguished name or DN. The property is only populated for customers who are synchronizing their on-premises directory to Microsoft Entra ID via Microsoft Entra Connect. Read-only. Returned only on $select.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -579,14 +287,7 @@ namespace MissAlise.OneDrive.Models
 #else
         public string OnPremisesDomainName { get; set; }
 #endif
-        /// <summary>Contains extensionAttributes1-15 for the user. These extension attributes are also known as Exchange custom attributes 1-15. Each attribute can store up to 1024 characters. For an onPremisesSyncEnabled user, the source of authority for this set of properties is the on-premises and is read-only. For a cloud-only user (where onPremisesSyncEnabled is false), these properties can be set during the creation or update of a user object.  For a cloud-only user previously synced from on-premises Active Directory, these properties are read-only in Microsoft Graph but can be fully managed through the Exchange Admin Center or the Exchange Online V2 module in PowerShell. Returned only on $select. Supports $filter (eq, ne, not, in).</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.OnPremisesExtensionAttributes? OnPremisesExtensionAttributes { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.OnPremisesExtensionAttributes OnPremisesExtensionAttributes { get; set; }
-#endif
+     
         /// <summary>This property is used to associate an on-premises Active Directory user account to their Microsoft Entra user object. This property must be specified when creating a new user account in the Graph if you&apos;re using a federated domain for the user&apos;s userPrincipalName (UPN) property. NOTE: The $ and _ characters can&apos;t be used when specifying this property. Returned only on $select. Supports $filter (eq, ne, not, ge, le, in).</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -597,14 +298,7 @@ namespace MissAlise.OneDrive.Models
 #endif
         /// <summary>Indicates the last time at which the object was synced with the on-premises directory; for example: 2013-02-16T03:04:54Z. The Timestamp type represents date and time information using ISO 8601 format and is always in UTC. For example, midnight UTC on Jan 1, 2014 is 2014-01-01T00:00:00Z. Read-only. Returned only on $select. Supports $filter (eq, ne, not, ge, le, in).</summary>
         public DateTimeOffset? OnPremisesLastSyncDateTime { get; set; }
-        /// <summary>Errors when using Microsoft synchronization product during provisioning. Returned only on $select. Supports $filter (eq, not, ge, le).</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.OnPremisesProvisioningError>? OnPremisesProvisioningErrors { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.OnPremisesProvisioningError> OnPremisesProvisioningErrors { get; set; }
-#endif
+    
         /// <summary>Contains the on-premises samAccountName synchronized from the on-premises directory. The property is only populated for customers who are synchronizing their on-premises directory to Microsoft Entra ID via Microsoft Entra Connect. Read-only. Returned only on $select. Supports $filter (eq, ne, not, ge, le, in, startsWith).</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -639,14 +333,7 @@ namespace MissAlise.OneDrive.Models
 #else
         public List<string> OtherMails { get; set; }
 #endif
-        /// <summary>The outlook property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.OutlookUser? Outlook { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.OutlookUser Outlook { get; set; }
-#endif
+     
         /// <summary>Devices the user owns. Read-only. Nullable. Supports $expand and $filter (/$count eq 0, /$count ne 0, /$count eq 1, /$count ne 1).</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -670,15 +357,7 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public string PasswordPolicies { get; set; }
-#endif
-        /// <summary>Specifies the password profile for the user. The profile contains the user&apos;s password. This property is required when a user is created. The password in the profile must satisfy minimum requirements as specified by the passwordPolicies property. By default, a strong password is required. Returned only on $select. Supports $filter (eq, ne, not, in, and eq on null values). To update this property:  User-PasswordProfile.ReadWrite.All is the least privileged permission to update this property.  In delegated scenarios, the User Administrator Microsoft Entra role is the least privileged admin role supported to update this property for nonadmin users. Privileged Authentication Administrator is the least privileged role that&apos;s allowed to update this property for all administrators in the tenant. In general, the signed-in user must have a higher privileged administrator role as indicated in Who can reset passwords.  In app-only scenarios, the calling app must be assigned a supported permission and at least the User Administrator Microsoft Entra role.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.PasswordProfile? PasswordProfile { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.PasswordProfile PasswordProfile { get; set; }
-#endif
+#endif   
         /// <summary>A list for the user to enumerate their past projects. Returned only on $select.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -686,23 +365,7 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public List<string> PastProjects { get; set; }
-#endif
-        /// <summary>People that are relevant to the user. Read-only. Nullable.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.Person>? People { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.Person> People { get; set; }
-#endif
-        /// <summary>List all resource-specific permission grants of a user.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.ResourceSpecificPermissionGrant>? PermissionGrants { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.ResourceSpecificPermissionGrant> PermissionGrants { get; set; }
-#endif
+#endif            
         /// <summary>The user&apos;s profile photo. Read-only.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -719,15 +382,7 @@ namespace MissAlise.OneDrive.Models
 #else
         public List<global::MissAlise.OneDrive.Models.ProfilePhoto> Photos { get; set; }
 #endif
-        /// <summary>Entry-point to the Planner resource that might exist for a user. Read-only.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.PlannerUser? Planner { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.PlannerUser Planner { get; set; }
-#endif
-        /// <summary>The postal code for the user&apos;s postal address. The postal code is specific to the user&apos;s country/region. In the United States of America, this attribute contains the ZIP code. Maximum length is 40 characters. Returned only on $select. Supports $filter (eq, ne, not, ge, le, in, startsWith, and eq on null values).</summary>
+        /// <summary>The postal code for the user&apos;s postal address. The postal code is specific to the user&apos;s country or region. In the United States of America, this attribute contains the ZIP code. Maximum length is 40 characters. Returned only on $select. Supports $filter (eq, ne, not, ge, le, in, startsWith, and eq on null values).</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public string? PostalCode { get; set; }
@@ -758,31 +413,7 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public string PreferredName { get; set; }
-#endif
-        /// <summary>The presence property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.Presence? Presence { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.Presence Presence { get; set; }
-#endif
-        /// <summary>The print property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.UserPrint? Print { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.UserPrint Print { get; set; }
-#endif
-        /// <summary>The plans that are provisioned for the user. Read-only. Not nullable. Returned only on $select. Supports $filter (eq, not, ge, le).</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.ProvisionedPlan>? ProvisionedPlans { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.ProvisionedPlan> ProvisionedPlans { get; set; }
-#endif
+#endif     
         /// <summary>For example: [&apos;SMTP: bob@contoso.com&apos;, &apos;smtp: bob@sales.contoso.com&apos;]. Changes to the mail property update this collection to include the value as an SMTP address. For more information, see mail and proxyAddresses properties. The proxy address prefixed with SMTP (capitalized) is the primary proxy address, while those addresses prefixed with smtp are the secondary proxy addresses. For Azure AD B2C accounts, this property has a limit of 10 unique addresses. Read-only in Microsoft Graph; you can update this property only through the Microsoft 365 admin center. Not nullable. Returned only on $select. Supports $filter (eq, not, ge, le, startsWith, endsWith, /$count eq 0, /$count ne 0).</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -814,15 +445,7 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public List<string> Schools { get; set; }
-#endif
-        /// <summary>The scopedRoleMemberOf property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.ScopedRoleMembership>? ScopedRoleMemberOf { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.ScopedRoleMembership> ScopedRoleMemberOf { get; set; }
-#endif
+#endif       
         /// <summary>Security identifier (SID) of the user, used in Windows scenarios. Read-only. Returned by default. Supports $select and $filter (eq, not, ge, le, startsWith).</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -830,33 +453,9 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public string SecurityIdentifier { get; set; }
-#endif
-        /// <summary>Errors published by a federated service describing a nontransient, service-specific error regarding the properties or link from a user object.  Supports $filter (eq, not, for isResolved and serviceInstance).</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.ServiceProvisioningError>? ServiceProvisioningErrors { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.ServiceProvisioningError> ServiceProvisioningErrors { get; set; }
-#endif
-        /// <summary>The settings property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.UserSettings? Settings { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.UserSettings Settings { get; set; }
-#endif
+#endif       
         /// <summary>Do not use in Microsoft Graph. Manage this property through the Microsoft 365 admin center instead. Represents whether the user should be included in the Outlook global address list. See Known issue.</summary>
-        public bool? ShowInAddressList { get; set; }
-        /// <summary>Get the last signed-in date and request ID of the sign-in for a given user. Read-only.Returned only on $select. Supports $filter (eq, ne, not, ge, le) but not with any other filterable properties. Note: Details for this property require a Microsoft Entra ID P1 or P2 license and the AuditLog.Read.All permission.This property isn&apos;t returned for a user who never signed in or last signed in before April 2020.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.SignInActivity? SignInActivity { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.SignInActivity SignInActivity { get; set; }
-#endif
+        public bool? ShowInAddressList { get; set; }       
         /// <summary>Any refresh tokens or session tokens (session cookies) issued before this time are invalid. Applications get an error when using an invalid refresh or session token to acquire a delegated access token (to access APIs such as Microsoft Graph). If this happens, the application needs to acquire a new refresh token by requesting the authorized endpoint. Read-only. Use revokeSignInSessions to reset. Returned only on $select.</summary>
         public DateTimeOffset? SignInSessionsValidFromDateTime { get; set; }
         /// <summary>A list for the user to enumerate their skills. Returned only on $select.</summary>
@@ -866,15 +465,7 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public List<string> Skills { get; set; }
-#endif
-        /// <summary>The identifier that relates the user to the working time schedule triggers. Read-Only. Nullable</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.UserSolutionRoot? Solutions { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.UserSolutionRoot Solutions { get; set; }
-#endif
+#endif      
         /// <summary>The users and groups responsible for this guest&apos;s privileges in the tenant and keeping the guest&apos;s information and access updated. (HTTP Methods: GET, POST, DELETE.). Supports $expand.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -906,23 +497,7 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public string Surname { get; set; }
-#endif
-        /// <summary>A container for Microsoft Teams features available for the user. Read-only. Nullable.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.UserTeamwork? Teamwork { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.UserTeamwork Teamwork { get; set; }
-#endif
-        /// <summary>Represents the To Do services available to a user.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.Todo? Todo { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.Todo Todo { get; set; }
-#endif
+#endif              
         /// <summary>The groups, including nested groups, and directory roles that a user is a member of. Nullable.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -931,7 +506,7 @@ namespace MissAlise.OneDrive.Models
 #else
         public List<global::MissAlise.OneDrive.Models.DirectoryObject> TransitiveMemberOf { get; set; }
 #endif
-        /// <summary>A two-letter country code (ISO standard 3166). Required for users that are assigned licenses due to legal requirements to check for availability of services in countries. Examples include: US, JP, and GB. Not nullable. Returned only on $select. Supports $filter (eq, ne, not, ge, le, in, startsWith, and eq on null values).</summary>
+        /// <summary>A two-letter country code (ISO standard 3166). Required for users that are assigned licenses due to legal requirements to check for availability of services in countries/regions. Examples include: US, JP, and GB. Not nullable. Returned only on $select. Supports $filter (eq, ne, not, ge, le, in, startsWith, and eq on null values).</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public string? UsageLocation { get; set; }
@@ -982,129 +557,74 @@ namespace MissAlise.OneDrive.Models
             {
                 { "aboutMe", n => { AboutMe = n.GetStringValue(); } },
                 { "accountEnabled", n => { AccountEnabled = n.GetBoolValue(); } },
-                { "activities", n => { Activities = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.UserActivity>(global::MissAlise.OneDrive.Models.UserActivity.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "ageGroup", n => { AgeGroup = n.GetStringValue(); } },
-                { "agreementAcceptances", n => { AgreementAcceptances = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.AgreementAcceptance>(global::MissAlise.OneDrive.Models.AgreementAcceptance.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "appRoleAssignments", n => { AppRoleAssignments = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.AppRoleAssignment>(global::MissAlise.OneDrive.Models.AppRoleAssignment.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "assignedLicenses", n => { AssignedLicenses = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.AssignedLicense>(global::MissAlise.OneDrive.Models.AssignedLicense.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "assignedPlans", n => { AssignedPlans = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.AssignedPlan>(global::MissAlise.OneDrive.Models.AssignedPlan.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "authentication", n => { Authentication = n.GetObjectValue<global::MissAlise.OneDrive.Models.Authentication>(global::MissAlise.OneDrive.Models.Authentication.CreateFromDiscriminatorValue); } },
-                { "authorizationInfo", n => { AuthorizationInfo = n.GetObjectValue<global::MissAlise.OneDrive.Models.AuthorizationInfo>(global::MissAlise.OneDrive.Models.AuthorizationInfo.CreateFromDiscriminatorValue); } },
                 { "birthday", n => { Birthday = n.GetDateTimeOffsetValue(); } },
                 { "businessPhones", n => { BusinessPhones = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
-                { "calendar", n => { Calendar = n.GetObjectValue<global::MissAlise.OneDrive.Models.Calendar>(global::MissAlise.OneDrive.Models.Calendar.CreateFromDiscriminatorValue); } },
-                { "calendarGroups", n => { CalendarGroups = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.CalendarGroup>(global::MissAlise.OneDrive.Models.CalendarGroup.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "calendarView", n => { CalendarView = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Event>(global::MissAlise.OneDrive.Models.Event.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "calendars", n => { Calendars = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Calendar>(global::MissAlise.OneDrive.Models.Calendar.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "chats", n => { Chats = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Chat>(global::MissAlise.OneDrive.Models.Chat.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "city", n => { City = n.GetStringValue(); } },
-                { "cloudClipboard", n => { CloudClipboard = n.GetObjectValue<global::MissAlise.OneDrive.Models.CloudClipboardRoot>(global::MissAlise.OneDrive.Models.CloudClipboardRoot.CreateFromDiscriminatorValue); } },
                 { "companyName", n => { CompanyName = n.GetStringValue(); } },
                 { "consentProvidedForMinor", n => { ConsentProvidedForMinor = n.GetStringValue(); } },
-                { "contactFolders", n => { ContactFolders = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ContactFolder>(global::MissAlise.OneDrive.Models.ContactFolder.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "contacts", n => { Contacts = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Contact>(global::MissAlise.OneDrive.Models.Contact.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "country", n => { Country = n.GetStringValue(); } },
                 { "createdDateTime", n => { CreatedDateTime = n.GetDateTimeOffsetValue(); } },
                 { "createdObjects", n => { CreatedObjects = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DirectoryObject>(global::MissAlise.OneDrive.Models.DirectoryObject.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "creationType", n => { CreationType = n.GetStringValue(); } },
-                { "customSecurityAttributes", n => { CustomSecurityAttributes = n.GetObjectValue<global::MissAlise.OneDrive.Models.CustomSecurityAttributeValue>(global::MissAlise.OneDrive.Models.CustomSecurityAttributeValue.CreateFromDiscriminatorValue); } },
                 { "department", n => { Department = n.GetStringValue(); } },
                 { "deviceEnrollmentLimit", n => { DeviceEnrollmentLimit = n.GetIntValue(); } },
-                { "deviceManagementTroubleshootingEvents", n => { DeviceManagementTroubleshootingEvents = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DeviceManagementTroubleshootingEvent>(global::MissAlise.OneDrive.Models.DeviceManagementTroubleshootingEvent.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "directReports", n => { DirectReports = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DirectoryObject>(global::MissAlise.OneDrive.Models.DirectoryObject.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "displayName", n => { DisplayName = n.GetStringValue(); } },
                 { "drive", n => { Drive = n.GetObjectValue<global::MissAlise.OneDrive.Models.Drive>(global::MissAlise.OneDrive.Models.Drive.CreateFromDiscriminatorValue); } },
                 { "drives", n => { Drives = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Drive>(global::MissAlise.OneDrive.Models.Drive.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "employeeExperience", n => { EmployeeExperience = n.GetObjectValue<global::MissAlise.OneDrive.Models.EmployeeExperienceUser>(global::MissAlise.OneDrive.Models.EmployeeExperienceUser.CreateFromDiscriminatorValue); } },
                 { "employeeHireDate", n => { EmployeeHireDate = n.GetDateTimeOffsetValue(); } },
                 { "employeeId", n => { EmployeeId = n.GetStringValue(); } },
                 { "employeeLeaveDateTime", n => { EmployeeLeaveDateTime = n.GetDateTimeOffsetValue(); } },
-                { "employeeOrgData", n => { EmployeeOrgData = n.GetObjectValue<global::MissAlise.OneDrive.Models.EmployeeOrgData>(global::MissAlise.OneDrive.Models.EmployeeOrgData.CreateFromDiscriminatorValue); } },
                 { "employeeType", n => { EmployeeType = n.GetStringValue(); } },
-                { "events", n => { Events = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Event>(global::MissAlise.OneDrive.Models.Event.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "extensions", n => { Extensions = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Extension>(global::MissAlise.OneDrive.Models.Extension.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "externalUserState", n => { ExternalUserState = n.GetStringValue(); } },
                 { "externalUserStateChangeDateTime", n => { ExternalUserStateChangeDateTime = n.GetDateTimeOffsetValue(); } },
                 { "faxNumber", n => { FaxNumber = n.GetStringValue(); } },
-                { "followedSites", n => { FollowedSites = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Site>(global::MissAlise.OneDrive.Models.Site.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "givenName", n => { GivenName = n.GetStringValue(); } },
-                { "hireDate", n => { HireDate = n.GetDateTimeOffsetValue(); } },
-                { "identities", n => { Identities = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ObjectIdentity>(global::MissAlise.OneDrive.Models.ObjectIdentity.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "imAddresses", n => { ImAddresses = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
-                { "inferenceClassification", n => { InferenceClassification = n.GetObjectValue<global::MissAlise.OneDrive.Models.InferenceClassification>(global::MissAlise.OneDrive.Models.InferenceClassification.CreateFromDiscriminatorValue); } },
-                { "insights", n => { Insights = n.GetObjectValue<global::MissAlise.OneDrive.Models.ItemInsights>(global::MissAlise.OneDrive.Models.ItemInsights.CreateFromDiscriminatorValue); } },
                 { "interests", n => { Interests = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
                 { "isManagementRestricted", n => { IsManagementRestricted = n.GetBoolValue(); } },
                 { "isResourceAccount", n => { IsResourceAccount = n.GetBoolValue(); } },
                 { "jobTitle", n => { JobTitle = n.GetStringValue(); } },
-                { "joinedTeams", n => { JoinedTeams = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Team>(global::MissAlise.OneDrive.Models.Team.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "lastPasswordChangeDateTime", n => { LastPasswordChangeDateTime = n.GetDateTimeOffsetValue(); } },
                 { "legalAgeGroupClassification", n => { LegalAgeGroupClassification = n.GetStringValue(); } },
-                { "licenseAssignmentStates", n => { LicenseAssignmentStates = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.LicenseAssignmentState>(global::MissAlise.OneDrive.Models.LicenseAssignmentState.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "licenseDetails", n => { LicenseDetails = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.LicenseDetails>(global::MissAlise.OneDrive.Models.LicenseDetails.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "mail", n => { Mail = n.GetStringValue(); } },
-                { "mailFolders", n => { MailFolders = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.MailFolder>(global::MissAlise.OneDrive.Models.MailFolder.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "mailNickname", n => { MailNickname = n.GetStringValue(); } },
-                { "mailboxSettings", n => { MailboxSettings = n.GetObjectValue<global::MissAlise.OneDrive.Models.MailboxSettings>(global::MissAlise.OneDrive.Models.MailboxSettings.CreateFromDiscriminatorValue); } },
-                { "managedAppRegistrations", n => { ManagedAppRegistrations = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ManagedAppRegistration>(global::MissAlise.OneDrive.Models.ManagedAppRegistration.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "managedDevices", n => { ManagedDevices = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ManagedDevice>(global::MissAlise.OneDrive.Models.ManagedDevice.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "manager", n => { Manager = n.GetObjectValue<global::MissAlise.OneDrive.Models.DirectoryObject>(global::MissAlise.OneDrive.Models.DirectoryObject.CreateFromDiscriminatorValue); } },
                 { "memberOf", n => { MemberOf = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DirectoryObject>(global::MissAlise.OneDrive.Models.DirectoryObject.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "messages", n => { Messages = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Message>(global::MissAlise.OneDrive.Models.Message.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "mobilePhone", n => { MobilePhone = n.GetStringValue(); } },
                 { "mySite", n => { MySite = n.GetStringValue(); } },
-                { "oauth2PermissionGrants", n => { Oauth2PermissionGrants = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.OAuth2PermissionGrant>(global::MissAlise.OneDrive.Models.OAuth2PermissionGrant.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "officeLocation", n => { OfficeLocation = n.GetStringValue(); } },
                 { "onPremisesDistinguishedName", n => { OnPremisesDistinguishedName = n.GetStringValue(); } },
                 { "onPremisesDomainName", n => { OnPremisesDomainName = n.GetStringValue(); } },
-                { "onPremisesExtensionAttributes", n => { OnPremisesExtensionAttributes = n.GetObjectValue<global::MissAlise.OneDrive.Models.OnPremisesExtensionAttributes>(global::MissAlise.OneDrive.Models.OnPremisesExtensionAttributes.CreateFromDiscriminatorValue); } },
                 { "onPremisesImmutableId", n => { OnPremisesImmutableId = n.GetStringValue(); } },
                 { "onPremisesLastSyncDateTime", n => { OnPremisesLastSyncDateTime = n.GetDateTimeOffsetValue(); } },
-                { "onPremisesProvisioningErrors", n => { OnPremisesProvisioningErrors = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.OnPremisesProvisioningError>(global::MissAlise.OneDrive.Models.OnPremisesProvisioningError.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "onPremisesSamAccountName", n => { OnPremisesSamAccountName = n.GetStringValue(); } },
                 { "onPremisesSecurityIdentifier", n => { OnPremisesSecurityIdentifier = n.GetStringValue(); } },
                 { "onPremisesSyncEnabled", n => { OnPremisesSyncEnabled = n.GetBoolValue(); } },
                 { "onPremisesUserPrincipalName", n => { OnPremisesUserPrincipalName = n.GetStringValue(); } },
-                { "onenote", n => { Onenote = n.GetObjectValue<global::MissAlise.OneDrive.Models.Onenote>(global::MissAlise.OneDrive.Models.Onenote.CreateFromDiscriminatorValue); } },
-                { "onlineMeetings", n => { OnlineMeetings = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.OnlineMeeting>(global::MissAlise.OneDrive.Models.OnlineMeeting.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "otherMails", n => { OtherMails = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
-                { "outlook", n => { Outlook = n.GetObjectValue<global::MissAlise.OneDrive.Models.OutlookUser>(global::MissAlise.OneDrive.Models.OutlookUser.CreateFromDiscriminatorValue); } },
                 { "ownedDevices", n => { OwnedDevices = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DirectoryObject>(global::MissAlise.OneDrive.Models.DirectoryObject.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "ownedObjects", n => { OwnedObjects = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DirectoryObject>(global::MissAlise.OneDrive.Models.DirectoryObject.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "passwordPolicies", n => { PasswordPolicies = n.GetStringValue(); } },
-                { "passwordProfile", n => { PasswordProfile = n.GetObjectValue<global::MissAlise.OneDrive.Models.PasswordProfile>(global::MissAlise.OneDrive.Models.PasswordProfile.CreateFromDiscriminatorValue); } },
                 { "pastProjects", n => { PastProjects = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
-                { "people", n => { People = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Person>(global::MissAlise.OneDrive.Models.Person.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "permissionGrants", n => { PermissionGrants = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ResourceSpecificPermissionGrant>(global::MissAlise.OneDrive.Models.ResourceSpecificPermissionGrant.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "photo", n => { Photo = n.GetObjectValue<global::MissAlise.OneDrive.Models.ProfilePhoto>(global::MissAlise.OneDrive.Models.ProfilePhoto.CreateFromDiscriminatorValue); } },
                 { "photos", n => { Photos = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ProfilePhoto>(global::MissAlise.OneDrive.Models.ProfilePhoto.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "planner", n => { Planner = n.GetObjectValue<global::MissAlise.OneDrive.Models.PlannerUser>(global::MissAlise.OneDrive.Models.PlannerUser.CreateFromDiscriminatorValue); } },
                 { "postalCode", n => { PostalCode = n.GetStringValue(); } },
                 { "preferredDataLocation", n => { PreferredDataLocation = n.GetStringValue(); } },
                 { "preferredLanguage", n => { PreferredLanguage = n.GetStringValue(); } },
                 { "preferredName", n => { PreferredName = n.GetStringValue(); } },
-                { "presence", n => { Presence = n.GetObjectValue<global::MissAlise.OneDrive.Models.Presence>(global::MissAlise.OneDrive.Models.Presence.CreateFromDiscriminatorValue); } },
-                { "print", n => { Print = n.GetObjectValue<global::MissAlise.OneDrive.Models.UserPrint>(global::MissAlise.OneDrive.Models.UserPrint.CreateFromDiscriminatorValue); } },
-                { "provisionedPlans", n => { ProvisionedPlans = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ProvisionedPlan>(global::MissAlise.OneDrive.Models.ProvisionedPlan.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "proxyAddresses", n => { ProxyAddresses = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
                 { "registeredDevices", n => { RegisteredDevices = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DirectoryObject>(global::MissAlise.OneDrive.Models.DirectoryObject.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "responsibilities", n => { Responsibilities = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
                 { "schools", n => { Schools = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
-                { "scopedRoleMemberOf", n => { ScopedRoleMemberOf = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ScopedRoleMembership>(global::MissAlise.OneDrive.Models.ScopedRoleMembership.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "securityIdentifier", n => { SecurityIdentifier = n.GetStringValue(); } },
-                { "serviceProvisioningErrors", n => { ServiceProvisioningErrors = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ServiceProvisioningError>(global::MissAlise.OneDrive.Models.ServiceProvisioningError.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "settings", n => { Settings = n.GetObjectValue<global::MissAlise.OneDrive.Models.UserSettings>(global::MissAlise.OneDrive.Models.UserSettings.CreateFromDiscriminatorValue); } },
                 { "showInAddressList", n => { ShowInAddressList = n.GetBoolValue(); } },
-                { "signInActivity", n => { SignInActivity = n.GetObjectValue<global::MissAlise.OneDrive.Models.SignInActivity>(global::MissAlise.OneDrive.Models.SignInActivity.CreateFromDiscriminatorValue); } },
                 { "signInSessionsValidFromDateTime", n => { SignInSessionsValidFromDateTime = n.GetDateTimeOffsetValue(); } },
                 { "skills", n => { Skills = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
-                { "solutions", n => { Solutions = n.GetObjectValue<global::MissAlise.OneDrive.Models.UserSolutionRoot>(global::MissAlise.OneDrive.Models.UserSolutionRoot.CreateFromDiscriminatorValue); } },
                 { "sponsors", n => { Sponsors = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DirectoryObject>(global::MissAlise.OneDrive.Models.DirectoryObject.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "state", n => { State = n.GetStringValue(); } },
                 { "streetAddress", n => { StreetAddress = n.GetStringValue(); } },
                 { "surname", n => { Surname = n.GetStringValue(); } },
-                { "teamwork", n => { Teamwork = n.GetObjectValue<global::MissAlise.OneDrive.Models.UserTeamwork>(global::MissAlise.OneDrive.Models.UserTeamwork.CreateFromDiscriminatorValue); } },
-                { "todo", n => { Todo = n.GetObjectValue<global::MissAlise.OneDrive.Models.Todo>(global::MissAlise.OneDrive.Models.Todo.CreateFromDiscriminatorValue); } },
                 { "transitiveMemberOf", n => { TransitiveMemberOf = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DirectoryObject>(global::MissAlise.OneDrive.Models.DirectoryObject.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "usageLocation", n => { UsageLocation = n.GetStringValue(); } },
                 { "userPrincipalName", n => { UserPrincipalName = n.GetStringValue(); } },
@@ -1121,129 +641,73 @@ namespace MissAlise.OneDrive.Models
             base.Serialize(writer);
             writer.WriteStringValue("aboutMe", AboutMe);
             writer.WriteBoolValue("accountEnabled", AccountEnabled);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.UserActivity>("activities", Activities);
             writer.WriteStringValue("ageGroup", AgeGroup);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.AgreementAcceptance>("agreementAcceptances", AgreementAcceptances);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.AppRoleAssignment>("appRoleAssignments", AppRoleAssignments);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.AssignedLicense>("assignedLicenses", AssignedLicenses);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.AssignedPlan>("assignedPlans", AssignedPlans);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Authentication>("authentication", Authentication);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.AuthorizationInfo>("authorizationInfo", AuthorizationInfo);
             writer.WriteDateTimeOffsetValue("birthday", Birthday);
             writer.WriteCollectionOfPrimitiveValues<string>("businessPhones", BusinessPhones);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Calendar>("calendar", Calendar);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.CalendarGroup>("calendarGroups", CalendarGroups);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Calendar>("calendars", Calendars);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Event>("calendarView", CalendarView);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Chat>("chats", Chats);
-            writer.WriteStringValue("city", City);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.CloudClipboardRoot>("cloudClipboard", CloudClipboard);
             writer.WriteStringValue("companyName", CompanyName);
             writer.WriteStringValue("consentProvidedForMinor", ConsentProvidedForMinor);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ContactFolder>("contactFolders", ContactFolders);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Contact>("contacts", Contacts);
             writer.WriteStringValue("country", Country);
             writer.WriteDateTimeOffsetValue("createdDateTime", CreatedDateTime);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DirectoryObject>("createdObjects", CreatedObjects);
             writer.WriteStringValue("creationType", CreationType);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.CustomSecurityAttributeValue>("customSecurityAttributes", CustomSecurityAttributes);
             writer.WriteStringValue("department", Department);
             writer.WriteIntValue("deviceEnrollmentLimit", DeviceEnrollmentLimit);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DeviceManagementTroubleshootingEvent>("deviceManagementTroubleshootingEvents", DeviceManagementTroubleshootingEvents);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DirectoryObject>("directReports", DirectReports);
             writer.WriteStringValue("displayName", DisplayName);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Drive>("drive", Drive);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Drive>("drives", Drives);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.EmployeeExperienceUser>("employeeExperience", EmployeeExperience);
             writer.WriteDateTimeOffsetValue("employeeHireDate", EmployeeHireDate);
             writer.WriteStringValue("employeeId", EmployeeId);
             writer.WriteDateTimeOffsetValue("employeeLeaveDateTime", EmployeeLeaveDateTime);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.EmployeeOrgData>("employeeOrgData", EmployeeOrgData);
             writer.WriteStringValue("employeeType", EmployeeType);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Event>("events", Events);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Extension>("extensions", Extensions);
             writer.WriteStringValue("externalUserState", ExternalUserState);
             writer.WriteDateTimeOffsetValue("externalUserStateChangeDateTime", ExternalUserStateChangeDateTime);
             writer.WriteStringValue("faxNumber", FaxNumber);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Site>("followedSites", FollowedSites);
             writer.WriteStringValue("givenName", GivenName);
-            writer.WriteDateTimeOffsetValue("hireDate", HireDate);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ObjectIdentity>("identities", Identities);
-            writer.WriteCollectionOfPrimitiveValues<string>("imAddresses", ImAddresses);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.InferenceClassification>("inferenceClassification", InferenceClassification);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.ItemInsights>("insights", Insights);
             writer.WriteCollectionOfPrimitiveValues<string>("interests", Interests);
             writer.WriteBoolValue("isManagementRestricted", IsManagementRestricted);
             writer.WriteBoolValue("isResourceAccount", IsResourceAccount);
             writer.WriteStringValue("jobTitle", JobTitle);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Team>("joinedTeams", JoinedTeams);
             writer.WriteDateTimeOffsetValue("lastPasswordChangeDateTime", LastPasswordChangeDateTime);
             writer.WriteStringValue("legalAgeGroupClassification", LegalAgeGroupClassification);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.LicenseAssignmentState>("licenseAssignmentStates", LicenseAssignmentStates);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.LicenseDetails>("licenseDetails", LicenseDetails);
             writer.WriteStringValue("mail", Mail);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.MailboxSettings>("mailboxSettings", MailboxSettings);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.MailFolder>("mailFolders", MailFolders);
             writer.WriteStringValue("mailNickname", MailNickname);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ManagedAppRegistration>("managedAppRegistrations", ManagedAppRegistrations);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ManagedDevice>("managedDevices", ManagedDevices);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.DirectoryObject>("manager", Manager);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DirectoryObject>("memberOf", MemberOf);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Message>("messages", Messages);
             writer.WriteStringValue("mobilePhone", MobilePhone);
             writer.WriteStringValue("mySite", MySite);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.OAuth2PermissionGrant>("oauth2PermissionGrants", Oauth2PermissionGrants);
             writer.WriteStringValue("officeLocation", OfficeLocation);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Onenote>("onenote", Onenote);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.OnlineMeeting>("onlineMeetings", OnlineMeetings);
             writer.WriteStringValue("onPremisesDistinguishedName", OnPremisesDistinguishedName);
             writer.WriteStringValue("onPremisesDomainName", OnPremisesDomainName);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.OnPremisesExtensionAttributes>("onPremisesExtensionAttributes", OnPremisesExtensionAttributes);
             writer.WriteStringValue("onPremisesImmutableId", OnPremisesImmutableId);
             writer.WriteDateTimeOffsetValue("onPremisesLastSyncDateTime", OnPremisesLastSyncDateTime);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.OnPremisesProvisioningError>("onPremisesProvisioningErrors", OnPremisesProvisioningErrors);
             writer.WriteStringValue("onPremisesSamAccountName", OnPremisesSamAccountName);
             writer.WriteStringValue("onPremisesSecurityIdentifier", OnPremisesSecurityIdentifier);
             writer.WriteBoolValue("onPremisesSyncEnabled", OnPremisesSyncEnabled);
             writer.WriteStringValue("onPremisesUserPrincipalName", OnPremisesUserPrincipalName);
             writer.WriteCollectionOfPrimitiveValues<string>("otherMails", OtherMails);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.OutlookUser>("outlook", Outlook);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DirectoryObject>("ownedDevices", OwnedDevices);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DirectoryObject>("ownedObjects", OwnedObjects);
             writer.WriteStringValue("passwordPolicies", PasswordPolicies);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.PasswordProfile>("passwordProfile", PasswordProfile);
             writer.WriteCollectionOfPrimitiveValues<string>("pastProjects", PastProjects);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Person>("people", People);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ResourceSpecificPermissionGrant>("permissionGrants", PermissionGrants);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.ProfilePhoto>("photo", Photo);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ProfilePhoto>("photos", Photos);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.PlannerUser>("planner", Planner);
             writer.WriteStringValue("postalCode", PostalCode);
             writer.WriteStringValue("preferredDataLocation", PreferredDataLocation);
             writer.WriteStringValue("preferredLanguage", PreferredLanguage);
             writer.WriteStringValue("preferredName", PreferredName);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Presence>("presence", Presence);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.UserPrint>("print", Print);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ProvisionedPlan>("provisionedPlans", ProvisionedPlans);
             writer.WriteCollectionOfPrimitiveValues<string>("proxyAddresses", ProxyAddresses);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DirectoryObject>("registeredDevices", RegisteredDevices);
             writer.WriteCollectionOfPrimitiveValues<string>("responsibilities", Responsibilities);
             writer.WriteCollectionOfPrimitiveValues<string>("schools", Schools);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ScopedRoleMembership>("scopedRoleMemberOf", ScopedRoleMemberOf);
             writer.WriteStringValue("securityIdentifier", SecurityIdentifier);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ServiceProvisioningError>("serviceProvisioningErrors", ServiceProvisioningErrors);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.UserSettings>("settings", Settings);
             writer.WriteBoolValue("showInAddressList", ShowInAddressList);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.SignInActivity>("signInActivity", SignInActivity);
             writer.WriteDateTimeOffsetValue("signInSessionsValidFromDateTime", SignInSessionsValidFromDateTime);
             writer.WriteCollectionOfPrimitiveValues<string>("skills", Skills);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.UserSolutionRoot>("solutions", Solutions);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DirectoryObject>("sponsors", Sponsors);
             writer.WriteStringValue("state", State);
             writer.WriteStringValue("streetAddress", StreetAddress);
             writer.WriteStringValue("surname", Surname);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.UserTeamwork>("teamwork", Teamwork);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Todo>("todo", Todo);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DirectoryObject>("transitiveMemberOf", TransitiveMemberOf);
             writer.WriteStringValue("usageLocation", UsageLocation);
             writer.WriteStringValue("userPrincipalName", UserPrincipalName);

@@ -1,7 +1,9 @@
 ﻿using System.Text.Json;
+using Azure.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MissAlise.Application.Interfaces;
+using MissAlise.OneDrive.Auth;
 using Refit;
 
 namespace MissAlise.OneDrive
@@ -28,10 +30,10 @@ namespace MissAlise.OneDrive
 			};
 
 			services.AddScoped<IOneDriveService, OneDriveService>()
-						//.AddSingleton(sp => appConfiguration.Get<AzureAd>())
+						.AddScoped<TokenCredential, OneDriveTokenProvider>()
 						.AddTransient<AuthHeaderHandler>();
-
-			services.AddRefitClient<IOneDriveCredentialsService>(sp=>settings,"onecredentials").ConfigureHttpClient(client => client.BaseAddress = new Uri("https://login.microsoftonline.com"));
+			services.AddHttpClient("onedrive");
+			services.AddRefitClient<IOneDriveTokenService>(sp=>settings,"onecredentials").ConfigureHttpClient(client => client.BaseAddress = new Uri("https://login.microsoftonline.com"));
 			services.AddRefitClient<IOneDriveClient>(settings2).ConfigureHttpClient(client => client.BaseAddress = new Uri("https://graph.microsoft.com/v1.0/me/drive")).AddHttpMessageHandler<AuthHeaderHandler>().AddDefaultLogger();		
 			return services;
 		}

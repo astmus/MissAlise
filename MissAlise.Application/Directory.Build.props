@@ -1,0 +1,11 @@
+<Project>
+  <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
+	<PropertyGroup>
+		<BuildRamdrive>$([System.Environment]::GetEnvironmentVariable("BUILD_RAMDRIVE",System.EnvironmentVariableTarget.Machine))</BuildRamdrive>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(BuildRamdrive)' != '' ">
+		<BaseOutputPath>$(BuildRamdrive)\Projects\$(SolutionName)\$(MSBuildProjectFile)\bin</BaseOutputPath>
+		<BaseIntermediateOutputPath>$(BuildRamdrive)\Projects\$(SolutionName)\$(MSBuildProjectFile)\obj\</BaseIntermediateOutputPath>
+		<IntermediateOutputPath>$(BuildRamdrive)\Projects\$(SolutionName)\$(MSBuildProjectFile)\obj\$(Configuration)\</IntermediateOutputPath>		
+	</PropertyGroup>
+</Project>

@@ -17,7 +17,7 @@
 		<ProjectReference Include="..\MissAlise.Application\MissAlise.Application.csproj" />
 		<ProjectReference Include="..\MissAlise.DataBase\MissAlise.DataBase.csproj" />
 		<ProjectReference Include="..\MissAlise.ServiceDefaults\MissAlise.Shared.csproj" />
-		<ProjectReference Include="..\MissAlise.Services.Common\_MissAlise.Services.Common.csproj" />
+		<ProjectReference Include="..\MissAlise.Services.Common\MissAlise.Services.Common.csproj" />
 	</ItemGroup>
 
 </Project>

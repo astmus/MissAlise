@@ -39,7 +39,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.PhotoService", "M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.VideoService", "MissAlise.VideoService\MissAlise.VideoService.csproj", "{BB792BDD-B3E5-49DA-BF5C-6AC5E95BB671}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "_MissAlise.Services.Common", "MissAlise.Services.Common\_MissAlise.Services.Common.csproj", "{0ED57F02-1A15-478A-A630-42A4F6889E98}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.Services.Common", "MissAlise.Services.Common\MissAlise.Services.Common.csproj", "{0ED57F02-1A15-478A-A630-42A4F6889E98}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -118,5 +118,8 @@ Global
 		{9897A2D5-9ED6-4655-9A1A-C7B59C080AA5} = {D0DD832F-37DA-40F2-B287-D871251463C6}
 		{BB792BDD-B3E5-49DA-BF5C-6AC5E95BB671} = {D0DD832F-37DA-40F2-B287-D871251463C6}
 		{0ED57F02-1A15-478A-A630-42A4F6889E98} = {D0DD832F-37DA-40F2-B287-D871251463C6}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3F6F4408-059B-4CEF-929A-8B8BF857E56D}
 	EndGlobalSection
 EndGlobal

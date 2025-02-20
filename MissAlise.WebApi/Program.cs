@@ -9,6 +9,7 @@ using MissAlise.Bot;
 using MissAlise.DataBase;
 using MissAlise.Entities.OneDrive;
 using MissAlise.OneDrive;
+using MissAlise.OneDrive.Auth;
 
 namespace MissAlise.WebApi;
 
@@ -25,22 +26,23 @@ public class Program
 			options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 			options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;			
 		});
-	
-		builder.Services.Configure<AzureAd>(builder.Configuration.GetSection("AzureAd"));		
+
+		var azureSection = builder.Configuration.GetSection("AzureAd");
+		builder.Services.Configure<AzureAd>(azureSection);		
 		builder.Services.AddProblemDetails();		
 
 		builder.Services.AddApplication()
-			.AddPersistance(builder.Configuration, false)
-			.AddOneDriveService(builder.Configuration.GetSection(nameof(AzureAd)))
+			.AddPersistance(builder.Configuration).AddMigrateService()
+			.AddOneDriveService(azureSection)
 			.AddOneDriveHandling()
 			.AddBotService(builder.Configuration.GetSection("BotConfiguration")); 
 		
 		//builder.Services.AddEndpointsApiExplorer(); это только для minimal api
-		builder.Services.AddSwaggerGen(options=> {
-			var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-			options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
-		}
-		);
+		//builder.Services.AddSwaggerGen(options=> {
+		//	var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+		//	options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+		//}
+		//);
 
 		var app = builder.Build();
 		
@@ -49,8 +51,8 @@ public class Program
 		if (app.Environment.IsDevelopment())
 		{
 			app.UseDeveloperExceptionPage();
-			app.UseSwagger();
-			app.UseSwaggerUI();
+			//app.UseSwagger();
+			//app.UseSwaggerUI();
 		}		
 		
 		app.UseHttpsRedirection();
@@ -67,7 +69,7 @@ public class Program
 		if (ctx.Request.Headers.Referer.Any(refer => refer == config.Instance || refer == "https://login.live.com/" || refer == "https://account.live.com/") == false)
 			return Results.Forbid();
 		//var response2 = await ctx.RequestServices.GetRequiredService<IOneDriveCredentialsService>().GetCredentialsByCode2(config, code, cancel);
-		var response = await ctx.RequestServices.GetRequiredService<IOneDriveCredentialsService>().GetCredentialsByCode(config, code, cancel);
+		var response = await ctx.RequestServices.GetRequiredService<IOneDriveTokenService>().GetCredentialsByCode(config, code, cancel);
 
 		if (!response.IsSuccessful)
 			return Results.Problem(response.Error.ToString(), null, (int)response.StatusCode);

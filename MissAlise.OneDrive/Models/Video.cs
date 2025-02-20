@@ -9,9 +9,11 @@ namespace MissAlise.OneDrive.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class Video : IParsable
+    public partial class Video : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
+        /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
+        public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>Number of audio bits per sample.</summary>
         public int? AudioBitsPerSample { get; set; }
         /// <summary>Number of audio channels.</summary>
@@ -52,6 +54,13 @@ namespace MissAlise.OneDrive.Models
 #endif
         /// <summary>Width of the video, in pixels.</summary>
         public int? Width { get; set; }
+        /// <summary>
+        /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.Video"/> and sets the default values.
+        /// </summary>
+        public Video()
+        {
+            AdditionalData = new Dictionary<string, object>();
+        }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
@@ -101,6 +110,7 @@ namespace MissAlise.OneDrive.Models
             writer.WriteIntValue("height", Height);
             writer.WriteStringValue("@odata.type", OdataType);
             writer.WriteIntValue("width", Width);
+            writer.WriteAdditionalData(AdditionalData);
         }
     }
 }

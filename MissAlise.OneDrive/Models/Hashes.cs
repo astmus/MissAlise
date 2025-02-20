@@ -9,9 +9,11 @@ namespace MissAlise.OneDrive.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class Hashes : IParsable
+    public partial class Hashes : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
+        /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
+        public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>The CRC32 value of the file in little endian (if available). Read-only.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -53,6 +55,13 @@ namespace MissAlise.OneDrive.Models
         public string Sha256Hash { get; set; }
 #endif
         /// <summary>
+        /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.Hashes"/> and sets the default values.
+        /// </summary>
+        public Hashes()
+        {
+            AdditionalData = new Dictionary<string, object>();
+        }
+        /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
         /// <returns>A <see cref="global::MissAlise.OneDrive.Models.Hashes"/></returns>
@@ -89,6 +98,7 @@ namespace MissAlise.OneDrive.Models
             writer.WriteStringValue("quickXorHash", QuickXorHash);
             writer.WriteStringValue("sha1Hash", Sha1Hash);
             writer.WriteStringValue("sha256Hash", Sha256Hash);
+            writer.WriteAdditionalData(AdditionalData);
         }
     }
 }

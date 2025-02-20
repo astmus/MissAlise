@@ -9,9 +9,11 @@ namespace MissAlise.OneDrive.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class DriveItemUploadableProperties : IParsable
+    public partial class DriveItemUploadableProperties : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
+        /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
+        public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>Provides a user-visible description of the item. Read-write. Only on OneDrive Personal.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -38,14 +40,7 @@ namespace MissAlise.OneDrive.Models
 #else
         public global::MissAlise.OneDrive.Models.FileSystemInfo FileSystemInfo { get; set; }
 #endif
-        /// <summary>Media source information. Read-write. Only on OneDrive for Business and SharePoint.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.MediaSource? MediaSource { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.MediaSource MediaSource { get; set; }
-#endif
+
         /// <summary>The name of the item (filename and extension). Read-write.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -62,6 +57,13 @@ namespace MissAlise.OneDrive.Models
 #else
         public string OdataType { get; set; }
 #endif
+        /// <summary>
+        /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.DriveItemUploadableProperties"/> and sets the default values.
+        /// </summary>
+        public DriveItemUploadableProperties()
+        {
+            AdditionalData = new Dictionary<string, object>();
+        }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
@@ -84,7 +86,6 @@ namespace MissAlise.OneDrive.Models
                 { "driveItemSource", n => { DriveItemSource = n.GetObjectValue<global::MissAlise.OneDrive.Models.DriveItemSource>(global::MissAlise.OneDrive.Models.DriveItemSource.CreateFromDiscriminatorValue); } },
                 { "fileSize", n => { FileSize = n.GetLongValue(); } },
                 { "fileSystemInfo", n => { FileSystemInfo = n.GetObjectValue<global::MissAlise.OneDrive.Models.FileSystemInfo>(global::MissAlise.OneDrive.Models.FileSystemInfo.CreateFromDiscriminatorValue); } },
-                { "mediaSource", n => { MediaSource = n.GetObjectValue<global::MissAlise.OneDrive.Models.MediaSource>(global::MissAlise.OneDrive.Models.MediaSource.CreateFromDiscriminatorValue); } },
                 { "name", n => { Name = n.GetStringValue(); } },
                 { "@odata.type", n => { OdataType = n.GetStringValue(); } },
             };
@@ -100,9 +101,9 @@ namespace MissAlise.OneDrive.Models
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.DriveItemSource>("driveItemSource", DriveItemSource);
             writer.WriteLongValue("fileSize", FileSize);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.FileSystemInfo>("fileSystemInfo", FileSystemInfo);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.MediaSource>("mediaSource", MediaSource);
             writer.WriteStringValue("name", Name);
             writer.WriteStringValue("@odata.type", OdataType);
+            writer.WriteAdditionalData(AdditionalData);
         }
     }
 }

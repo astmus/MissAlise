@@ -1,4 +1,5 @@
 ﻿using MissAlise.Entities.OneDrive;
+using User = MissAlise.Entities.OneDrive.User;
 
 namespace MissAlise.Application.Interfaces
 {
@@ -7,11 +8,11 @@ namespace MissAlise.Application.Interfaces
 		DataSynchronizator GetSynchronizator();
 		Task<User> GetOwnerInfo(CancellationToken cancel);
 		Uri CreateAuthorizeLink(string stateIdentifier);
-		Task<IEnumerable<Item>> GetRootItems(CancellationToken cancel);
+		Task<IEnumerable<ItemInfo>> GetRootItems(CancellationToken cancel);
 	}
 
-	public abstract class DataSynchronizator : IAsyncEnumerable<Item>
+	public abstract class DataSynchronizator : IAsyncEnumerable<ItemInfo>
 	{
-		public abstract IAsyncEnumerator<Item> GetAsyncEnumerator(CancellationToken cancellationToken = default);
+		public abstract IAsyncEnumerator<ItemInfo> GetAsyncEnumerator(CancellationToken cancellationToken = default);
 	}
 }

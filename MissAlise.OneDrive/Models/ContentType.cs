@@ -36,14 +36,6 @@ namespace MissAlise.OneDrive.Models
 #else
         public List<global::MissAlise.OneDrive.Models.ContentType> BaseTypes { get; set; }
 #endif
-        /// <summary>The collection of columns that are required by this content type.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::MissAlise.OneDrive.Models.ColumnLink>? ColumnLinks { get; set; }
-#nullable restore
-#else
-        public List<global::MissAlise.OneDrive.Models.ColumnLink> ColumnLinks { get; set; }
-#endif
         /// <summary>Column order information in a content type.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -67,23 +59,7 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public string Description { get; set; }
-#endif
-        /// <summary>Document Set metadata.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.DocumentSet? DocumentSet { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.DocumentSet DocumentSet { get; set; }
-#endif
-        /// <summary>Document template metadata. To make sure that documents have consistent content across a site and its subsites, you can associate a Word, Excel, or PowerPoint template with a site content type.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.DocumentSetContent? DocumentTemplate { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.DocumentSetContent DocumentTemplate { get; set; }
-#endif
+#endif     
         /// <summary>The name of the group this content type belongs to. Helps organize related content types.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -111,15 +87,7 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public string Name { get; set; }
-#endif
-        /// <summary>Specifies the order in which the content type appears in the selection UI.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.ContentTypeOrder? Order { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.ContentTypeOrder Order { get; set; }
-#endif
+#endif      
         /// <summary>The unique identifier of the content type.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -155,18 +123,14 @@ namespace MissAlise.OneDrive.Models
                 { "associatedHubsUrls", n => { AssociatedHubsUrls = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
                 { "base", n => { Base = n.GetObjectValue<global::MissAlise.OneDrive.Models.ContentType>(global::MissAlise.OneDrive.Models.ContentType.CreateFromDiscriminatorValue); } },
                 { "baseTypes", n => { BaseTypes = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ContentType>(global::MissAlise.OneDrive.Models.ContentType.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "columnLinks", n => { ColumnLinks = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ColumnLink>(global::MissAlise.OneDrive.Models.ColumnLink.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "columnPositions", n => { ColumnPositions = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ColumnDefinition>(global::MissAlise.OneDrive.Models.ColumnDefinition.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "columns", n => { Columns = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ColumnDefinition>(global::MissAlise.OneDrive.Models.ColumnDefinition.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "description", n => { Description = n.GetStringValue(); } },
-                { "documentSet", n => { DocumentSet = n.GetObjectValue<global::MissAlise.OneDrive.Models.DocumentSet>(global::MissAlise.OneDrive.Models.DocumentSet.CreateFromDiscriminatorValue); } },
-                { "documentTemplate", n => { DocumentTemplate = n.GetObjectValue<global::MissAlise.OneDrive.Models.DocumentSetContent>(global::MissAlise.OneDrive.Models.DocumentSetContent.CreateFromDiscriminatorValue); } },
                 { "group", n => { Group = n.GetStringValue(); } },
                 { "hidden", n => { Hidden = n.GetBoolValue(); } },
                 { "inheritedFrom", n => { InheritedFrom = n.GetObjectValue<global::MissAlise.OneDrive.Models.ItemReference>(global::MissAlise.OneDrive.Models.ItemReference.CreateFromDiscriminatorValue); } },
                 { "isBuiltIn", n => { IsBuiltIn = n.GetBoolValue(); } },
                 { "name", n => { Name = n.GetStringValue(); } },
-                { "order", n => { Order = n.GetObjectValue<global::MissAlise.OneDrive.Models.ContentTypeOrder>(global::MissAlise.OneDrive.Models.ContentTypeOrder.CreateFromDiscriminatorValue); } },
                 { "parentId", n => { ParentId = n.GetStringValue(); } },
                 { "propagateChanges", n => { PropagateChanges = n.GetBoolValue(); } },
                 { "readOnly", n => { ReadOnly = n.GetBoolValue(); } },
@@ -184,18 +148,14 @@ namespace MissAlise.OneDrive.Models
             writer.WriteCollectionOfPrimitiveValues<string>("associatedHubsUrls", AssociatedHubsUrls);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.ContentType>("base", Base);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ContentType>("baseTypes", BaseTypes);
-            writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ColumnLink>("columnLinks", ColumnLinks);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ColumnDefinition>("columnPositions", ColumnPositions);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ColumnDefinition>("columns", Columns);
             writer.WriteStringValue("description", Description);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.DocumentSet>("documentSet", DocumentSet);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.DocumentSetContent>("documentTemplate", DocumentTemplate);
             writer.WriteStringValue("group", Group);
             writer.WriteBoolValue("hidden", Hidden);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.ItemReference>("inheritedFrom", InheritedFrom);
             writer.WriteBoolValue("isBuiltIn", IsBuiltIn);
             writer.WriteStringValue("name", Name);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.ContentTypeOrder>("order", Order);
             writer.WriteStringValue("parentId", ParentId);
             writer.WriteBoolValue("propagateChanges", PropagateChanges);
             writer.WriteBoolValue("readOnly", ReadOnly);

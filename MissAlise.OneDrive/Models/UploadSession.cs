@@ -9,9 +9,11 @@ namespace MissAlise.OneDrive.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class UploadSession : IParsable
+    public partial class UploadSession : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
+        /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
+        public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>The date and time in UTC that the upload session will expire. The complete file must be uploaded before this expiration time is reached.</summary>
         public DateTimeOffset? ExpirationDateTime { get; set; }
         /// <summary>A collection of byte ranges that the server is missing for the file. These ranges are zero indexed and of the format &apos;start-end&apos; (for example &apos;0-26&apos; to indicate the first 27 bytes of the file). When uploading files as Outlook attachments, instead of a collection of ranges, this property always indicates a single value &apos;{start}&apos;, the location in the file where the next upload should begin.</summary>
@@ -38,6 +40,13 @@ namespace MissAlise.OneDrive.Models
 #else
         public string UploadUrl { get; set; }
 #endif
+        /// <summary>
+        /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.UploadSession"/> and sets the default values.
+        /// </summary>
+        public UploadSession()
+        {
+            AdditionalData = new Dictionary<string, object>();
+        }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
@@ -73,6 +82,7 @@ namespace MissAlise.OneDrive.Models
             writer.WriteCollectionOfPrimitiveValues<string>("nextExpectedRanges", NextExpectedRanges);
             writer.WriteStringValue("@odata.type", OdataType);
             writer.WriteStringValue("uploadUrl", UploadUrl);
+            writer.WriteAdditionalData(AdditionalData);
         }
     }
 }

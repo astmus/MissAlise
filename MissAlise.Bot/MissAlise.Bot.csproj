@@ -6,6 +6,8 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UserSecretsId>dotnet-MissAlise.Bot-488bbd0c-7175-48dd-afa6-328fa88510fb</UserSecretsId>
 		<RootNamespace>$(MSBuildProjectName.Replace(" ", "_").Replace("Service", ""))</RootNamespace>
+		<RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
+		<RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
 	</PropertyGroup>
 
 	<ItemGroup>

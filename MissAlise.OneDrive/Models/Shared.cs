@@ -9,9 +9,11 @@ namespace MissAlise.OneDrive.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class Shared : IParsable
+    public partial class Shared : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
+        /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
+        public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>The OdataType property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -46,6 +48,13 @@ namespace MissAlise.OneDrive.Models
 #endif
         /// <summary>The UTC date and time when the item was shared. Read-only.</summary>
         public DateTimeOffset? SharedDateTime { get; set; }
+        /// <summary>
+        /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.Shared"/> and sets the default values.
+        /// </summary>
+        public Shared()
+        {
+            AdditionalData = new Dictionary<string, object>();
+        }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
@@ -83,6 +92,7 @@ namespace MissAlise.OneDrive.Models
             writer.WriteStringValue("scope", Scope);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.IdentitySet>("sharedBy", SharedBy);
             writer.WriteDateTimeOffsetValue("sharedDateTime", SharedDateTime);
+            writer.WriteAdditionalData(AdditionalData);
         }
     }
 }

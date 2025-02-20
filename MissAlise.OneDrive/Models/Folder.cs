@@ -9,9 +9,11 @@ namespace MissAlise.OneDrive.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class Folder : IParsable
+    public partial class Folder : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
+        /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
+        public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>Number of children contained immediately within this container.</summary>
         public int? ChildCount { get; set; }
         /// <summary>The OdataType property</summary>
@@ -30,6 +32,13 @@ namespace MissAlise.OneDrive.Models
 #else
         public global::MissAlise.OneDrive.Models.FolderView View { get; set; }
 #endif
+        /// <summary>
+        /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.Folder"/> and sets the default values.
+        /// </summary>
+        public Folder()
+        {
+            AdditionalData = new Dictionary<string, object>();
+        }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
@@ -63,6 +72,7 @@ namespace MissAlise.OneDrive.Models
             writer.WriteIntValue("childCount", ChildCount);
             writer.WriteStringValue("@odata.type", OdataType);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.FolderView>("view", View);
+            writer.WriteAdditionalData(AdditionalData);
         }
     }
 }

@@ -9,9 +9,11 @@ namespace MissAlise.OneDrive.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class RemoteItem : IParsable
+    public partial class RemoteItem : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
+        /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
+        public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>Identity of the user, device, and application which created the item. Read-only.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -112,14 +114,6 @@ namespace MissAlise.OneDrive.Models
 #else
         public global::MissAlise.OneDrive.Models.Shared Shared { get; set; }
 #endif
-        /// <summary>Provides interop between items in OneDrive for Business and SharePoint with the full set of item identifiers. Read-only.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.SharepointIds? SharepointIds { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.SharepointIds SharepointIds { get; set; }
-#endif
         /// <summary>Size of the remote item. Read-only.</summary>
         public long? Size { get; set; }
         /// <summary>If the current item is also available as a special folder, this facet is returned. Read-only.</summary>
@@ -155,6 +149,13 @@ namespace MissAlise.OneDrive.Models
         public string WebUrl { get; set; }
 #endif
         /// <summary>
+        /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.RemoteItem"/> and sets the default values.
+        /// </summary>
+        public RemoteItem()
+        {
+            AdditionalData = new Dictionary<string, object>();
+        }
+        /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
         /// <returns>A <see cref="global::MissAlise.OneDrive.Models.RemoteItem"/></returns>
@@ -186,7 +187,6 @@ namespace MissAlise.OneDrive.Models
                 { "package", n => { Package = n.GetObjectValue<global::MissAlise.OneDrive.Models.Package>(global::MissAlise.OneDrive.Models.Package.CreateFromDiscriminatorValue); } },
                 { "parentReference", n => { ParentReference = n.GetObjectValue<global::MissAlise.OneDrive.Models.ItemReference>(global::MissAlise.OneDrive.Models.ItemReference.CreateFromDiscriminatorValue); } },
                 { "shared", n => { Shared = n.GetObjectValue<global::MissAlise.OneDrive.Models.Shared>(global::MissAlise.OneDrive.Models.Shared.CreateFromDiscriminatorValue); } },
-                { "sharepointIds", n => { SharepointIds = n.GetObjectValue<global::MissAlise.OneDrive.Models.SharepointIds>(global::MissAlise.OneDrive.Models.SharepointIds.CreateFromDiscriminatorValue); } },
                 { "size", n => { Size = n.GetLongValue(); } },
                 { "specialFolder", n => { SpecialFolder = n.GetObjectValue<global::MissAlise.OneDrive.Models.SpecialFolder>(global::MissAlise.OneDrive.Models.SpecialFolder.CreateFromDiscriminatorValue); } },
                 { "video", n => { Video = n.GetObjectValue<global::MissAlise.OneDrive.Models.Video>(global::MissAlise.OneDrive.Models.Video.CreateFromDiscriminatorValue); } },
@@ -215,12 +215,12 @@ namespace MissAlise.OneDrive.Models
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Package>("package", Package);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.ItemReference>("parentReference", ParentReference);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Shared>("shared", Shared);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.SharepointIds>("sharepointIds", SharepointIds);
             writer.WriteLongValue("size", Size);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.SpecialFolder>("specialFolder", SpecialFolder);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Video>("video", Video);
             writer.WriteStringValue("webDavUrl", WebDavUrl);
             writer.WriteStringValue("webUrl", WebUrl);
+            writer.WriteAdditionalData(AdditionalData);
         }
     }
 }

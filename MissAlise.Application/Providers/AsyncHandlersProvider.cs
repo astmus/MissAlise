@@ -6,8 +6,8 @@ namespace MissAlise.Application.Providers
 	public interface IAsyncHandlersProvider
 	{
 		IAsyncHandler<TCommand> GetHandler<TCommand>();
-	}
-
+	}	
+	
 	internal class AsyncHandlersProvider : IAsyncHandlersProvider
 	{
 		private readonly IServiceProvider services;

@@ -68,14 +68,6 @@ namespace MissAlise.OneDrive.Models
 #else
         public List<global::MissAlise.OneDrive.Models.RichLongRunningOperation> Operations { get; set; }
 #endif
-        /// <summary>Returns identifiers useful for SharePoint REST compatibility. Read-only.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.SharepointIds? SharepointIds { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.SharepointIds SharepointIds { get; set; }
-#endif
         /// <summary>The set of subscriptions on the list.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -84,14 +76,7 @@ namespace MissAlise.OneDrive.Models
 #else
         public List<global::MissAlise.OneDrive.Models.Subscription> Subscriptions { get; set; }
 #endif
-        /// <summary>If present, indicates that the list is system-managed. Read-only.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.SystemFacet? System { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.SystemFacet System { get; set; }
-#endif
+
         /// <summary>
         /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.List"/> and sets the default values.
         /// </summary>
@@ -124,9 +109,7 @@ namespace MissAlise.OneDrive.Models
                 { "items", n => { Items = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ListItem>(global::MissAlise.OneDrive.Models.ListItem.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "list", n => { ListProp = n.GetObjectValue<global::MissAlise.OneDrive.Models.ListInfo>(global::MissAlise.OneDrive.Models.ListInfo.CreateFromDiscriminatorValue); } },
                 { "operations", n => { Operations = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.RichLongRunningOperation>(global::MissAlise.OneDrive.Models.RichLongRunningOperation.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "sharepointIds", n => { SharepointIds = n.GetObjectValue<global::MissAlise.OneDrive.Models.SharepointIds>(global::MissAlise.OneDrive.Models.SharepointIds.CreateFromDiscriminatorValue); } },
                 { "subscriptions", n => { Subscriptions = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Subscription>(global::MissAlise.OneDrive.Models.Subscription.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "system", n => { System = n.GetObjectValue<global::MissAlise.OneDrive.Models.SystemFacet>(global::MissAlise.OneDrive.Models.SystemFacet.CreateFromDiscriminatorValue); } },
             };
         }
         /// <summary>
@@ -144,9 +127,7 @@ namespace MissAlise.OneDrive.Models
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.ListItem>("items", Items);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.ListInfo>("list", ListProp);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.RichLongRunningOperation>("operations", Operations);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.SharepointIds>("sharepointIds", SharepointIds);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.Subscription>("subscriptions", Subscriptions);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.SystemFacet>("system", System);
         }
     }
 }

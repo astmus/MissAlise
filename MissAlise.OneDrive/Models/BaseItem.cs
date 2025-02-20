@@ -98,17 +98,12 @@ namespace MissAlise.OneDrive.Models
             _ = parseNode ?? throw new ArgumentNullException(nameof(parseNode));
             var mappingValue = parseNode.GetChildNode("@odata.type")?.GetStringValue();
             return mappingValue switch
-            {
-                "#microsoft.graph.baseSitePage" => new global::MissAlise.OneDrive.Models.BaseSitePage(),
+            {                
                 "#microsoft.graph.drive" => new global::MissAlise.OneDrive.Models.Drive(),
                 "#microsoft.graph.driveItem" => new global::MissAlise.OneDrive.Models.DriveItem(),
                 "#microsoft.graph.list" => new global::MissAlise.OneDrive.Models.List(),
-                "#microsoft.graph.listItem" => new global::MissAlise.OneDrive.Models.ListItem(),
-                "#microsoft.graph.recycleBin" => new global::MissAlise.OneDrive.Models.RecycleBin(),
-                "#microsoft.graph.recycleBinItem" => new global::MissAlise.OneDrive.Models.RecycleBinItem(),
-                "#microsoft.graph.sharedDriveItem" => new global::MissAlise.OneDrive.Models.SharedDriveItem(),
-                "#microsoft.graph.site" => new global::MissAlise.OneDrive.Models.Site(),
-                "#microsoft.graph.sitePage" => new global::MissAlise.OneDrive.Models.SitePage(),
+                "#microsoft.graph.listItem" => new global::MissAlise.OneDrive.Models.ListItem(),                
+                "#microsoft.graph.sharedDriveItem" => new global::MissAlise.OneDrive.Models.SharedDriveItem(),                
                 _ => new global::MissAlise.OneDrive.Models.BaseItem(),
             };
         }

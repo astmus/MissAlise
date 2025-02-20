@@ -32,14 +32,6 @@ namespace MissAlise.OneDrive.Models
 #else
         public string Name { get; set; }
 #endif
-        /// <summary>The retention settings enforced on the item. Read-write.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.RetentionLabelSettings? RetentionSettings { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.RetentionLabelSettings RetentionSettings { get; set; }
-#endif
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
@@ -62,7 +54,6 @@ namespace MissAlise.OneDrive.Models
                 { "labelAppliedBy", n => { LabelAppliedBy = n.GetObjectValue<global::MissAlise.OneDrive.Models.IdentitySet>(global::MissAlise.OneDrive.Models.IdentitySet.CreateFromDiscriminatorValue); } },
                 { "labelAppliedDateTime", n => { LabelAppliedDateTime = n.GetDateTimeOffsetValue(); } },
                 { "name", n => { Name = n.GetStringValue(); } },
-                { "retentionSettings", n => { RetentionSettings = n.GetObjectValue<global::MissAlise.OneDrive.Models.RetentionLabelSettings>(global::MissAlise.OneDrive.Models.RetentionLabelSettings.CreateFromDiscriminatorValue); } },
             };
         }
         /// <summary>
@@ -77,7 +68,6 @@ namespace MissAlise.OneDrive.Models
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.IdentitySet>("labelAppliedBy", LabelAppliedBy);
             writer.WriteDateTimeOffsetValue("labelAppliedDateTime", LabelAppliedDateTime);
             writer.WriteStringValue("name", Name);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.RetentionLabelSettings>("retentionSettings", RetentionSettings);
         }
     }
 }

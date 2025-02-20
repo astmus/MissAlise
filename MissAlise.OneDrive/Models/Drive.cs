@@ -76,14 +76,7 @@ namespace MissAlise.OneDrive.Models
 #else
         public global::MissAlise.OneDrive.Models.DriveItem Root { get; set; }
 #endif
-        /// <summary>The sharePointIds property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.SharepointIds? SharePointIds { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.SharepointIds SharePointIds { get; set; }
-#endif
+
         /// <summary>Collection of common folders available in OneDrive. Read-only. Nullable.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -91,14 +84,6 @@ namespace MissAlise.OneDrive.Models
 #nullable restore
 #else
         public List<global::MissAlise.OneDrive.Models.DriveItem> Special { get; set; }
-#endif
-        /// <summary>If present, indicates that it&apos;s a system-managed drive. Read-only.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::MissAlise.OneDrive.Models.SystemFacet? System { get; set; }
-#nullable restore
-#else
-        public global::MissAlise.OneDrive.Models.SystemFacet System { get; set; }
 #endif
         /// <summary>
         /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.Drive"/> and sets the default values.
@@ -133,9 +118,7 @@ namespace MissAlise.OneDrive.Models
                 { "owner", n => { Owner = n.GetObjectValue<global::MissAlise.OneDrive.Models.IdentitySet>(global::MissAlise.OneDrive.Models.IdentitySet.CreateFromDiscriminatorValue); } },
                 { "quota", n => { Quota = n.GetObjectValue<global::MissAlise.OneDrive.Models.Quota>(global::MissAlise.OneDrive.Models.Quota.CreateFromDiscriminatorValue); } },
                 { "root", n => { Root = n.GetObjectValue<global::MissAlise.OneDrive.Models.DriveItem>(global::MissAlise.OneDrive.Models.DriveItem.CreateFromDiscriminatorValue); } },
-                { "sharePointIds", n => { SharePointIds = n.GetObjectValue<global::MissAlise.OneDrive.Models.SharepointIds>(global::MissAlise.OneDrive.Models.SharepointIds.CreateFromDiscriminatorValue); } },
                 { "special", n => { Special = n.GetCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DriveItem>(global::MissAlise.OneDrive.Models.DriveItem.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "system", n => { System = n.GetObjectValue<global::MissAlise.OneDrive.Models.SystemFacet>(global::MissAlise.OneDrive.Models.SystemFacet.CreateFromDiscriminatorValue); } },
             };
         }
         /// <summary>
@@ -154,9 +137,7 @@ namespace MissAlise.OneDrive.Models
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.IdentitySet>("owner", Owner);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Quota>("quota", Quota);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.DriveItem>("root", Root);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.SharepointIds>("sharePointIds", SharePointIds);
             writer.WriteCollectionOfObjectValues<global::MissAlise.OneDrive.Models.DriveItem>("special", Special);
-            writer.WriteObjectValue<global::MissAlise.OneDrive.Models.SystemFacet>("system", System);
         }
     }
 }

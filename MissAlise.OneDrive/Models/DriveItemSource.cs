@@ -9,9 +9,11 @@ namespace MissAlise.OneDrive.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class DriveItemSource : IParsable
+    public partial class DriveItemSource : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
+        /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
+        public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>Enumeration value that indicates the source application where the file was created.</summary>
         public global::MissAlise.OneDrive.Models.DriveItemSourceApplication? Application { get; set; }
         /// <summary>The external identifier for the drive item from the source.</summary>
@@ -30,6 +32,13 @@ namespace MissAlise.OneDrive.Models
 #else
         public string OdataType { get; set; }
 #endif
+        /// <summary>
+        /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.DriveItemSource"/> and sets the default values.
+        /// </summary>
+        public DriveItemSource()
+        {
+            AdditionalData = new Dictionary<string, object>();
+        }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
@@ -63,6 +72,7 @@ namespace MissAlise.OneDrive.Models
             writer.WriteEnumValue<global::MissAlise.OneDrive.Models.DriveItemSourceApplication>("application", Application);
             writer.WriteStringValue("externalId", ExternalId);
             writer.WriteStringValue("@odata.type", OdataType);
+            writer.WriteAdditionalData(AdditionalData);
         }
     }
 }

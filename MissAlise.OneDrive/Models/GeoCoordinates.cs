@@ -9,9 +9,11 @@ namespace MissAlise.OneDrive.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class GeoCoordinates : IParsable
+    public partial class GeoCoordinates : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
+        /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
+        public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>Optional. The altitude (height), in feet,  above sea level for the item. Read-only.</summary>
         public double? Altitude { get; set; }
         /// <summary>Optional. The latitude, in decimal, for the item. Read-only.</summary>
@@ -26,6 +28,13 @@ namespace MissAlise.OneDrive.Models
 #else
         public string OdataType { get; set; }
 #endif
+        /// <summary>
+        /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.GeoCoordinates"/> and sets the default values.
+        /// </summary>
+        public GeoCoordinates()
+        {
+            AdditionalData = new Dictionary<string, object>();
+        }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
@@ -61,6 +70,7 @@ namespace MissAlise.OneDrive.Models
             writer.WriteDoubleValue("latitude", Latitude);
             writer.WriteDoubleValue("longitude", Longitude);
             writer.WriteStringValue("@odata.type", OdataType);
+            writer.WriteAdditionalData(AdditionalData);
         }
     }
 }

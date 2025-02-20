@@ -4,11 +4,12 @@ using MissAlise.Application.Interfaces;
 using MissAlise.Application.Providers;
 using MissAlise.Application.UseCases.Sync;
 using MissAlise.Interfaces;
+using MissAlise.OneDrive.Models;
 using Telegram.Bot.Types;
 
 namespace MissAlise.Bot.Handlers
 {
-	internal class ChatMessageHandler : AsyncHandlerBase<Message>
+	internal class ChatMessageHandler : AsyncHandlerBase<Telegram.Bot.Types.Message>
 	{
 		private readonly IOneDriveService storage;
 		private readonly IAsyncHandlersProvider provider;
@@ -23,8 +24,9 @@ namespace MissAlise.Bot.Handlers
 			this.userProfiles = userProfiles;
 		}
 
-		protected override async Task HandleAsync(Message data, CancellationToken cancel)
-		{			
+		protected override async Task HandleAsync(Telegram.Bot.Types.Message data, CancellationToken cancel)
+		{
+			//var list =  storage.Root.Query<DriveItem>().Select(s=> s.Photo).ToList();
 			if (data.Text == "/sync")
 			{
 				var handler = provider.GetHandler<SyncCommand>();

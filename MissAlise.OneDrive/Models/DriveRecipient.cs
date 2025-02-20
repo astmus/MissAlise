@@ -9,9 +9,11 @@ namespace MissAlise.OneDrive.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class DriveRecipient : IParsable
+    public partial class DriveRecipient : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
+        /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
+        public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>The alias of the domain object, for cases where an email address is unavailable (e.g. security groups).</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -44,6 +46,13 @@ namespace MissAlise.OneDrive.Models
 #else
         public string OdataType { get; set; }
 #endif
+        /// <summary>
+        /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.DriveRecipient"/> and sets the default values.
+        /// </summary>
+        public DriveRecipient()
+        {
+            AdditionalData = new Dictionary<string, object>();
+        }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
@@ -79,6 +88,7 @@ namespace MissAlise.OneDrive.Models
             writer.WriteStringValue("email", Email);
             writer.WriteStringValue("objectId", ObjectId);
             writer.WriteStringValue("@odata.type", OdataType);
+            writer.WriteAdditionalData(AdditionalData);
         }
     }
 }

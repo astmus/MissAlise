@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MissAlise.DataBase.Contexts;
 using MissAlise.DataBase.Models;
 using MissAlise.Entities.OneDrive;
@@ -11,32 +12,42 @@ namespace MissAlise.DataBase
 	{
 		private readonly IMongoCollection<DbUserProfile> userProfiles;
 		private readonly IdentityContext identity;
+		private readonly ILogger<UserProfilesRepository> logger;
 		static ReplaceOptions options = new ReplaceOptions { IsUpsert = true };
 
-		public UserProfilesRepository(IMongoDatabase database, IdentityContext identity)
+		public UserProfilesRepository(IMongoDatabase database, IdentityContext identity, ILogger<UserProfilesRepository> logger)
 		{
 			userProfiles = database.GetCollection<DbUserProfile>("UserProfiles");
 			this.identity = identity;
+			this.logger = logger;
 		}
 
 
 		public async Task<UserProfile> FindAsync(string id, CancellationToken cancel)
 		{
 			var filter = Builders<DbUserProfile>.Filter.Eq(r => r.Telegram.Id, id);
-			var projection = Builders<UserProfile>.Projection.Exclude("_id");
+			var projection = Builders<DbUserProfile>.Projection.Exclude("_id");
 			return await userProfiles.Find(filter)/*.Project<DbUserProfile>(projection)*/.FirstOrDefaultAsync(cancel);
 		}
 
 		public async Task AddOrReplaceAsync(UserProfile user, CancellationToken cancel)
 		{
-			var filter = Builders<DbUserProfile>.Filter.Eq(r => r.Telegram.Id, user.Telegram.Id);
-			var projection = Builders<UserProfile>.Projection.Combine();
-			var profile = await userProfiles.Find(filter)/*.Project<DbUserProfile>(projection)*/.FirstOrDefaultAsync(cancel);
-			profile ??= new() {
-				AccessData = user.AccessData,
-				Telegram = user.Telegram
-			};
-			var res = await userProfiles.ReplaceOneAsync(filter, profile, options, cancel);
+			try
+			{
+				var filter = Builders<DbUserProfile>.Filter.Eq(r => r.Telegram.Id, user.Telegram.Id);
+				var projection = Builders<UserProfile>.Projection.Combine();
+				var profile = await userProfiles.Find(filter)/*.Project<DbUserProfile>(projection)*/.FirstOrDefaultAsync(cancel);
+				profile ??= new()
+				{
+					AccessData = user.AccessData,
+					Telegram = user.Telegram
+				};
+				var res = await userProfiles.ReplaceOneAsync(filter, profile, options, cancel);
+			}
+			catch (Exception error)
+			{
+				logger.LogError(error, error.Message);
+			}
 		}
 
 		public async Task<IEnumerable<UserProfile>> AllAsync(CancellationToken cancel)

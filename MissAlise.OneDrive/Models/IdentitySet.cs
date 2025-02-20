@@ -9,9 +9,11 @@ namespace MissAlise.OneDrive.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class IdentitySet : IParsable
+    public partial class IdentitySet : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
+        /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
+        public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>Optional. The application associated with this action.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -45,6 +47,13 @@ namespace MissAlise.OneDrive.Models
         public global::MissAlise.OneDrive.Models.Identity User { get; set; }
 #endif
         /// <summary>
+        /// Instantiates a new <see cref="global::MissAlise.OneDrive.Models.IdentitySet"/> and sets the default values.
+        /// </summary>
+        public IdentitySet()
+        {
+            AdditionalData = new Dictionary<string, object>();
+        }
+        /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
         /// <returns>A <see cref="global::MissAlise.OneDrive.Models.IdentitySet"/></returns>
@@ -55,11 +64,6 @@ namespace MissAlise.OneDrive.Models
             var mappingValue = parseNode.GetChildNode("@odata.type")?.GetStringValue();
             return mappingValue switch
             {
-                "#microsoft.graph.chatMessageFromIdentitySet" => new global::MissAlise.OneDrive.Models.ChatMessageFromIdentitySet(),
-                "#microsoft.graph.chatMessageMentionedIdentitySet" => new global::MissAlise.OneDrive.Models.ChatMessageMentionedIdentitySet(),
-                "#microsoft.graph.chatMessageReactionIdentitySet" => new global::MissAlise.OneDrive.Models.ChatMessageReactionIdentitySet(),
-                "#microsoft.graph.communicationsIdentitySet" => new global::MissAlise.OneDrive.Models.CommunicationsIdentitySet(),
-                "#microsoft.graph.sharePointIdentitySet" => new global::MissAlise.OneDrive.Models.SharePointIdentitySet(),
                 _ => new global::MissAlise.OneDrive.Models.IdentitySet(),
             };
         }
@@ -88,6 +92,7 @@ namespace MissAlise.OneDrive.Models
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Identity>("device", Device);
             writer.WriteStringValue("@odata.type", OdataType);
             writer.WriteObjectValue<global::MissAlise.OneDrive.Models.Identity>("user", User);
+            writer.WriteAdditionalData(AdditionalData);
         }
     }
 }
