@@ -1,11 +1,6 @@
-﻿using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using MissAlise.Application.Interfaces;
-using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
-using MissAlise.OneDrive.Models;
-using System.Linq;
-using Microsoft.Kiota.Serialization;
 
 namespace MissAlise.Application.UseCases.Sync
 {

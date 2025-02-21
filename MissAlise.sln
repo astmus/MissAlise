@@ -23,10 +23,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentatio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.DataBase", "MissAlise.DataBase\MissAlise.DataBase.csproj", "{26149FAB-CF5A-4DCF-A82A-30ECAEBAB599}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.Background.Abstractions", "MissAlise.Background.Abstractions\MissAlise.Background.Abstractions.csproj", "{92068564-7F81-4737-802A-F3E821B9ACA4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.Worker", "MissAlise.Worker\MissAlise.Worker.csproj", "{87021025-FB55-4036-BD4C-CEA19E79DDDE}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.Bot", "MissAlise.Bot\MissAlise.Bot.csproj", "{A9802D55-765D-4E16-864F-D037E73A6C7D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.OneDrive", "MissAlise.OneDrive\MissAlise.OneDrive.csproj", "{61462F03-5EF4-438C-A694-BE595C5D92E5}"
@@ -40,6 +36,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.VideoService", "MissAlise.VideoService\MissAlise.VideoService.csproj", "{BB792BDD-B3E5-49DA-BF5C-6AC5E95BB671}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.Services.Common", "MissAlise.Services.Common\MissAlise.Services.Common.csproj", "{0ED57F02-1A15-478A-A630-42A4F6889E98}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.Background.Abstractions", "MissAlise.Background.Abstractions\MissAlise.Background.Abstractions.csproj", "{6BD3E236-D5BC-7404-F8DE-2E4035894A03}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,14 +69,6 @@ Global
 		{26149FAB-CF5A-4DCF-A82A-30ECAEBAB599}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{26149FAB-CF5A-4DCF-A82A-30ECAEBAB599}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{26149FAB-CF5A-4DCF-A82A-30ECAEBAB599}.Release|Any CPU.Build.0 = Release|Any CPU
-		{92068564-7F81-4737-802A-F3E821B9ACA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{92068564-7F81-4737-802A-F3E821B9ACA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{92068564-7F81-4737-802A-F3E821B9ACA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{92068564-7F81-4737-802A-F3E821B9ACA4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{87021025-FB55-4036-BD4C-CEA19E79DDDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{87021025-FB55-4036-BD4C-CEA19E79DDDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{87021025-FB55-4036-BD4C-CEA19E79DDDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{87021025-FB55-4036-BD4C-CEA19E79DDDE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A9802D55-765D-4E16-864F-D037E73A6C7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A9802D55-765D-4E16-864F-D037E73A6C7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9802D55-765D-4E16-864F-D037E73A6C7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -103,6 +93,10 @@ Global
 		{0ED57F02-1A15-478A-A630-42A4F6889E98}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0ED57F02-1A15-478A-A630-42A4F6889E98}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0ED57F02-1A15-478A-A630-42A4F6889E98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BD3E236-D5BC-7404-F8DE-2E4035894A03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BD3E236-D5BC-7404-F8DE-2E4035894A03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BD3E236-D5BC-7404-F8DE-2E4035894A03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BD3E236-D5BC-7404-F8DE-2E4035894A03}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -111,7 +105,6 @@ Global
 		{838409E8-D1F9-4E2F-B9AB-1D8AB43D7229} = {7DF210E5-96C3-4716-AD1E-F321B6777F1D}
 		{B6871D2A-74A8-4DBD-8FB6-F18166710806} = {E9A0D5CC-032F-42BC-8350-753FDA2CE3AE}
 		{26149FAB-CF5A-4DCF-A82A-30ECAEBAB599} = {029C5ED3-ABC7-4423-9D81-216ABB8D6E54}
-		{87021025-FB55-4036-BD4C-CEA19E79DDDE} = {7DF210E5-96C3-4716-AD1E-F321B6777F1D}
 		{A9802D55-765D-4E16-864F-D037E73A6C7D} = {6EDC1486-EB91-4D1F-93D6-F18BDA8D2FD0}
 		{61462F03-5EF4-438C-A694-BE595C5D92E5} = {029C5ED3-ABC7-4423-9D81-216ABB8D6E54}
 		{868C3DD9-5668-47A6-AFAF-1D091BB9011F} = {7DF210E5-96C3-4716-AD1E-F321B6777F1D}

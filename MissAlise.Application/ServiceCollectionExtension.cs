@@ -21,7 +21,7 @@ namespace MissAlise.Application
 		public static IServiceCollection AddOneDriveHandling(this IServiceCollection services)
 		{
 			services.AddScoped<IAsyncHandlersProvider, AsyncHandlersProvider>()
-									.AddScoped<IAsyncHandler<SyncCommand>, SyncCommandHandler>();
+						.AddScoped<IAsyncHandler<SyncCommand>, SyncCommandHandler>();
 			return services;
 		}
 	}

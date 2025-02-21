@@ -10,7 +10,7 @@ public partial class Folder : ItemInfo
 
 	public Folder? Parent { get; set; }
 
-	public ICollection<Folder> Folders { get; set; } = new List<Folder>();
+	//public ICollection<Folder> Folders { get; set; } = new List<Folder>();
 
-	public virtual ICollection<FsFile> Files { get; set; } = new List<FsFile>();
+	public ICollection<BaseFile> Files { get; set; } = new List<BaseFile>();
 }

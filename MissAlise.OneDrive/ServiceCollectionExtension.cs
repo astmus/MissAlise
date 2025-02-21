@@ -32,6 +32,7 @@ namespace MissAlise.OneDrive
 			services.AddScoped<IOneDriveService, OneDriveService>()
 						.AddScoped<TokenCredential, OneDriveTokenProvider>()
 						.AddTransient<AuthHeaderHandler>();
+
 			services.AddHttpClient("onedrive");
 			services.AddRefitClient<IOneDriveTokenService>(sp=>settings,"onecredentials").ConfigureHttpClient(client => client.BaseAddress = new Uri("https://login.microsoftonline.com"));
 			services.AddRefitClient<IOneDriveClient>(settings2).ConfigureHttpClient(client => client.BaseAddress = new Uri("https://graph.microsoft.com/v1.0/me/drive")).AddHttpMessageHandler<AuthHeaderHandler>().AddDefaultLogger();		

@@ -52,8 +52,8 @@ namespace MissAlise.Services.Photos.Controllers
 			if (photo == null)
 				return NotFound("photo " + id);
 
-			if (await db.GetItemById<Folder>(photo.Folderid, cancel) is not Folder folder)
-				return NotFound("folder " + photo.Folderid);
+			if (await db.GetById<Folder>(photo.FolderId, cancel) is not Folder folder)
+				return NotFound("folder " + photo.FolderId);
 
 			var path = Path.Combine(folder.Path, folder.Title, photo.Caption);
 
@@ -69,8 +69,8 @@ namespace MissAlise.Services.Photos.Controllers
 			if (img == null)
 				return NotFound("image " + id);
 
-			if (await db.GetItemById<Folder>(img.Folderid, cancel) is not Folder folder)
-				return NotFound("folder " + img.Folderid);
+			if (await db.GetById<Folder>(img.FolderId, cancel) is not Folder folder)
+				return NotFound("folder " + img.FolderId);
 
 			args.Format ??= Path.GetExtension(img.Caption) switch
 			{

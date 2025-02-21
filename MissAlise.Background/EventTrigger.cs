@@ -3,14 +3,6 @@ using MissAlise.Utils;
 
 namespace MissAlise.Background
 {
-	public enum MonthWeek : byte
-	{
-		First = 1,
-		Second = 2,
-		Third = 3,
-		Fourth = 4
-	}
-
 	public record EventTrigger<TJob> : EventTrigger where TJob : class
 	{
 		public Func<BackgroundJob<TJob>, CancellationToken, ValueTask> FireStarter { get; protected set; }
@@ -37,26 +29,8 @@ namespace MissAlise.Background
 
 		public override ValueTask Fire(CancellationToken cancel)
 			=> FireStarter(_job, cancel);
-	}
-	
-#nullable enable
 
-	public abstract record EventTrigger
-	{
-		public string JobKey { get; set; } = null!;
-		public string Description { get; set; } = null!;
-		public bool IsEnabled { get; set; } = true;
-		public abstract IBackgroundJob Job { get; }
-
-		public MonthWeek[]? Weeks { get; set; }//переделать на флаг
-		public DayOfWeek[]? Days { get; set; }
-		public DateOnly? StartAt { get; set; }
-		public virtual TimeOnly? RunAt { get; set; }
-		public virtual TimeOnly? EndAt { get; set; }
-		public virtual TimeSpan? Delay { get; set; }
-		public TimeSpan? FreezeTime { get; set; }
-
-		public virtual bool Check()
+		public override bool Check()
 		{
 			if (FreezeTime?.TotalSeconds > 0)
 			{
@@ -80,8 +54,7 @@ namespace MissAlise.Background
 
 			return isOk;
 		}
-
-		public abstract ValueTask Fire(CancellationToken cancel);
 	}
-#nullable enable
+	
+#nullable restore
 }

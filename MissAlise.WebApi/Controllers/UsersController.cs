@@ -1,5 +1,6 @@
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
+using MissAlise.Application.Dto;
 using MissAlise.Interfaces;
 
 namespace MissAlise.WebApi.Controllers;
@@ -22,14 +23,14 @@ public class UsersController : ControllerBase
 	/// Список всех пользователей
 	/// </summary>
 	/// <returns></returns>
-	//[HttpGet]
-	//public async Task<IEnumerable<UserDto>> Get(CancellationToken cancel)
-	//{
-	//	var users = await usersProfiles.AllAsync(cancel);
-	//	Thread.Sleep(100000);
-	//	cancel.ThrowIfCancellationRequested();
-	//	return users.Select(user => new UserDto() { Id = user.Telegram.Id, DisplayName = user.Telegram.DisplayName }).ToArray();		
-	//}
+	[HttpGet]
+	public async Task<IEnumerable<UserDto>> Get(CancellationToken cancel)
+	{
+		var users = await usersProfiles.AllAsync(cancel);
+		Thread.Sleep(100000);
+		cancel.ThrowIfCancellationRequested();
+		return users.Select(user => new UserDto() { Id = user.Telegram.Id, DisplayName = user.Telegram.DisplayName }).ToArray();
+	}
 
 	/// <summary>
 	/// Поиск пользователя по id

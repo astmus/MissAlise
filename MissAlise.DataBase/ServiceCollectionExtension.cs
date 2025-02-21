@@ -14,7 +14,12 @@ namespace MissAlise.DataBase
 	public static class ServiceCollectionExtension
 	{
 		public static IServiceCollection AddMigrateService(this IServiceCollection services)
-			=> services.AddHostedService<MigrateService>();
+		{
+			services.AddHostedService<MigrateService>();
+			services.AddOpenTelemetry()
+				.WithTracing(tracing => tracing.AddSource(MigrateService.ActivitySourceName));
+			return services;
+		}
 
 		public static IServiceCollection AddPersistance(this IServiceCollection services, IConfiguration appConfig)
 		{

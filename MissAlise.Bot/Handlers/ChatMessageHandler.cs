@@ -4,8 +4,6 @@ using MissAlise.Application.Interfaces;
 using MissAlise.Application.Providers;
 using MissAlise.Application.UseCases.Sync;
 using MissAlise.Interfaces;
-using MissAlise.OneDrive.Models;
-using Telegram.Bot.Types;
 
 namespace MissAlise.Bot.Handlers
 {

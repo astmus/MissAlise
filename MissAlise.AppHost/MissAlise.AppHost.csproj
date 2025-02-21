@@ -25,7 +25,6 @@
 		<ProjectReference Include="..\MissAlise.PhotoService\MissAlise.PhotoService.csproj" />
 		<ProjectReference Include="..\MissAlise.VideoService\MissAlise.VideoService.csproj" />
 		<ProjectReference Include="..\MissAlise.WebApi\MissAlise.WebApi.csproj" />
-		<ProjectReference Include="..\MissAlise.Worker\MissAlise.Worker.csproj" />
 	</ItemGroup>
 
 </Project>

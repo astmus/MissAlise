@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MissAlise.Background.Abstractions\MissAlise.Background.Abstractions.csproj" />
-    <ProjectReference Include="..\MissAlise.DataBase\MissAlise.DataBase.csproj" />
+    <ProjectReference Include="..\MissAlise.ServiceDefaults\MissAlise.Shared.csproj" />
   </ItemGroup>
 
 </Project>

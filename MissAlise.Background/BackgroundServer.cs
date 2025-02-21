@@ -14,10 +14,9 @@ namespace MissAlise.Background
 		public int MaxBackHandlers { get => _maxBackHandlers; set { if (_maxBackHandlers < value) _workers.Release(value - _maxBackHandlers); _maxBackHandlers = value; } }
 		public bool IsOverdosed => CurrentPressure > MaxPressure;
 
+		static SemaphoreSlim _workers = new SemaphoreSlim(2, 128);
 		protected readonly ILogger log;
 		private readonly IEventTriggersSource triggers;
-
-		static SemaphoreSlim _workers = new SemaphoreSlim(2, 128);
 		int _currentPressure;
 		int _maxBackHandlers = 2;
 

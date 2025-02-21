@@ -82,7 +82,7 @@ namespace MissAlise.OneDrive
 					Year = item.Audio.Year,
 					Genre = item.Audio.Genre
 				},
-				{ File: not null } => new Entities.OneDrive.FsFile()
+				{ File: not null } => new Entities.OneDrive.BaseFile()
 			};
 
 			result.Name = item.Name;
@@ -90,7 +90,7 @@ namespace MissAlise.OneDrive
 			result.CreatedDateTime = item.FileSystemInfo.CreatedDateTime;
 			result.ModifieDateTime = item.FileSystemInfo.LastModifiedDateTime;
 
-			if (result is not Entities.OneDrive.FsFile file)
+			if (result is not Entities.OneDrive.BaseFile file)
 				return result;
 
 			file.Size = item.Size;

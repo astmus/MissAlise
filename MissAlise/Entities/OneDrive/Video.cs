@@ -3,9 +3,8 @@ using System.Collections.Generic;
 
 namespace MissAlise.Entities.OneDrive;
 
-public partial class Video : FsFile
+public partial class Video : BaseFile
 {	
-
 	public int? Audiobitspersample { get; set; }
 
 	public int? Audiochannels { get; set; }

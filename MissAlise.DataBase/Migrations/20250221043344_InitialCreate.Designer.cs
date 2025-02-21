@@ -11,48 +11,48 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace MissAlise.DataBase.Migrations
 {
-	[DbContext(typeof(UserMediaContext))]
-    [Migration("20250109130306_InitialMigration")]
-    partial class InitialMigration
+    [DbContext(typeof(UserMediaContext))]
+    [Migration("20250221043344_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("ProductVersion", "9.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("MissAlise.DataBase.Models.Item", b =>
+            modelBuilder.Entity("MissAlise.Entities.OneDrive.ItemInfo", b =>
                 {
-                    b.Property<int>("Itemid")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Itemid"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("Createddatetime")
+                    b.Property<DateTimeOffset?>("CreatedDateTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime?>("Modifiedatetime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Title")
+                    b.Property<string>("MimeType")
                         .HasColumnType("text");
 
-                    b.Property<int?>("Type")
-                        .HasColumnType("integer");
+                    b.Property<DateTimeOffset?>("ModifieDateTime")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("Itemid");
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
 
-                    b.ToTable("Items");
+                    b.HasKey("Id");
+
+                    b.ToTable("ItemInfo");
 
                     b.UseTptMappingStrategy();
                 });
 
-            modelBuilder.Entity("MissAlise.DataBase.Models.User", b =>
+            modelBuilder.Entity("MissAlise.Entities.OneDrive.User", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(32)
@@ -69,17 +69,12 @@ namespace MissAlise.DataBase.Migrations
                         .HasColumnType("character varying(64)");
 
                     b.Property<string>("Mail")
-                        .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.Property<string>("PreferredLanguage")
-                        .IsRequired()
                         .HasMaxLength(8)
                         .HasColumnType("character varying(8)");
-
-                    b.Property<int?>("StorageFolderItemid")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Surname")
                         .IsRequired()
@@ -87,77 +82,68 @@ namespace MissAlise.DataBase.Migrations
                         .HasColumnType("character varying(64)");
 
                     b.Property<string>("UserPrincipalName")
-                        .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StorageFolderItemid");
-
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("MissAlise.DataBase.Models.File", b =>
+            modelBuilder.Entity("MissAlise.Entities.OneDrive.BaseFile", b =>
                 {
-                    b.HasBaseType("MissAlise.DataBase.Models.Item");
+                    b.HasBaseType("MissAlise.Entities.OneDrive.ItemInfo");
+
+                    b.Property<string>("Caption")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Extension")
                         .HasColumnType("text");
 
-                    b.Property<int>("Fileid")
+                    b.Property<int>("FolderId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("FolderItemid")
-                        .HasColumnType("integer");
+                    b.Property<long?>("Size")
+                        .HasColumnType("bigint");
 
-                    b.Property<string>("Mimetype")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
-                    b.Property<int?>("Size")
-                        .HasColumnType("integer");
-
-                    b.HasIndex("FolderItemid");
+                    b.HasIndex("FolderId");
 
                     b.ToTable("Files");
                 });
 
-            modelBuilder.Entity("MissAlise.DataBase.Models.Folder", b =>
+            modelBuilder.Entity("MissAlise.Entities.OneDrive.Folder", b =>
                 {
-                    b.HasBaseType("MissAlise.DataBase.Models.Item");
+                    b.HasBaseType("MissAlise.Entities.OneDrive.ItemInfo");
 
-                    b.Property<int>("Folderid")
+                    b.Property<int?>("ParentId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
 
                     b.Property<int?>("Parentfolderid")
                         .HasColumnType("integer");
 
                     b.Property<string>("Path")
+                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasIndex("Parentfolderid");
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasIndex("ParentId");
 
                     b.ToTable("Folders");
                 });
 
-            modelBuilder.Entity("MissAlise.DataBase.Models.Audio", b =>
+            modelBuilder.Entity("MissAlise.Entities.OneDrive.Audio", b =>
                 {
-                    b.HasBaseType("MissAlise.DataBase.Models.File");
+                    b.HasBaseType("MissAlise.Entities.OneDrive.BaseFile");
 
                     b.Property<string>("Album")
                         .HasColumnType("text");
 
                     b.Property<string>("Artist")
                         .HasColumnType("text");
-
-                    b.Property<int>("Audioid")
-                        .HasColumnType("integer");
 
                     b.Property<long?>("Bitrate")
                         .HasColumnType("bigint");
@@ -174,11 +160,11 @@ namespace MissAlise.DataBase.Migrations
                     b.Property<int?>("Track")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("TrackCount")
+                        .HasColumnType("integer");
+
                     b.Property<string>("TrackTitle")
                         .HasColumnType("text");
-
-                    b.Property<int?>("Trackcount")
-                        .HasColumnType("integer");
 
                     b.Property<int?>("Year")
                         .HasColumnType("integer");
@@ -186,9 +172,9 @@ namespace MissAlise.DataBase.Migrations
                     b.ToTable("Audios");
                 });
 
-            modelBuilder.Entity("MissAlise.DataBase.Models.Photo", b =>
+            modelBuilder.Entity("MissAlise.Entities.OneDrive.Photo", b =>
                 {
-                    b.HasBaseType("MissAlise.DataBase.Models.File");
+                    b.HasBaseType("MissAlise.Entities.OneDrive.BaseFile");
 
                     b.Property<string>("Cameramake")
                         .HasColumnType("text");
@@ -217,9 +203,6 @@ namespace MissAlise.DataBase.Migrations
                     b.Property<int?>("Orientation")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Photoid")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime?>("Takendatetime")
                         .HasColumnType("timestamp with time zone");
 
@@ -229,9 +212,9 @@ namespace MissAlise.DataBase.Migrations
                     b.ToTable("Photos");
                 });
 
-            modelBuilder.Entity("MissAlise.DataBase.Models.Video", b =>
+            modelBuilder.Entity("MissAlise.Entities.OneDrive.Video", b =>
                 {
-                    b.HasBaseType("MissAlise.DataBase.Models.File");
+                    b.HasBaseType("MissAlise.Entities.OneDrive.BaseFile");
 
                     b.Property<int?>("Audiobitspersample")
                         .HasColumnType("integer");
@@ -260,87 +243,74 @@ namespace MissAlise.DataBase.Migrations
                     b.Property<int?>("Height")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Videoid")
-                        .HasColumnType("integer");
-
                     b.Property<int?>("Width")
                         .HasColumnType("integer");
 
                     b.ToTable("Videos");
                 });
 
-            modelBuilder.Entity("MissAlise.DataBase.Models.User", b =>
+            modelBuilder.Entity("MissAlise.Entities.OneDrive.BaseFile", b =>
                 {
-                    b.HasOne("MissAlise.DataBase.Models.Folder", "StorageFolder")
-                        .WithMany()
-                        .HasForeignKey("StorageFolderItemid");
-
-                    b.Navigation("StorageFolder");
-                });
-
-            modelBuilder.Entity("MissAlise.DataBase.Models.File", b =>
-                {
-                    b.HasOne("MissAlise.DataBase.Models.Folder", "Folder")
+                    b.HasOne("MissAlise.Entities.OneDrive.Folder", "Folder")
                         .WithMany("Files")
-                        .HasForeignKey("FolderItemid");
+                        .HasForeignKey("FolderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("MissAlise.DataBase.Models.Item", null)
+                    b.HasOne("MissAlise.Entities.OneDrive.ItemInfo", null)
                         .WithOne()
-                        .HasForeignKey("MissAlise.DataBase.Models.File", "Itemid")
+                        .HasForeignKey("MissAlise.Entities.OneDrive.BaseFile", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Folder");
                 });
 
-            modelBuilder.Entity("MissAlise.DataBase.Models.Folder", b =>
+            modelBuilder.Entity("MissAlise.Entities.OneDrive.Folder", b =>
                 {
-                    b.HasOne("MissAlise.DataBase.Models.Item", null)
+                    b.HasOne("MissAlise.Entities.OneDrive.ItemInfo", null)
                         .WithOne()
-                        .HasForeignKey("MissAlise.DataBase.Models.Folder", "Itemid")
+                        .HasForeignKey("MissAlise.Entities.OneDrive.Folder", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MissAlise.DataBase.Models.Folder", "Parent")
-                        .WithMany("Folders")
-                        .HasForeignKey("Parentfolderid")
-                        .OnDelete(DeleteBehavior.Restrict);
+                    b.HasOne("MissAlise.Entities.OneDrive.Folder", "Parent")
+                        .WithMany()
+                        .HasForeignKey("ParentId");
 
                     b.Navigation("Parent");
                 });
 
-            modelBuilder.Entity("MissAlise.DataBase.Models.Audio", b =>
+            modelBuilder.Entity("MissAlise.Entities.OneDrive.Audio", b =>
                 {
-                    b.HasOne("MissAlise.DataBase.Models.File", null)
+                    b.HasOne("MissAlise.Entities.OneDrive.BaseFile", null)
                         .WithOne()
-                        .HasForeignKey("MissAlise.DataBase.Models.Audio", "Itemid")
+                        .HasForeignKey("MissAlise.Entities.OneDrive.Audio", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MissAlise.DataBase.Models.Photo", b =>
+            modelBuilder.Entity("MissAlise.Entities.OneDrive.Photo", b =>
                 {
-                    b.HasOne("MissAlise.DataBase.Models.File", null)
+                    b.HasOne("MissAlise.Entities.OneDrive.BaseFile", null)
                         .WithOne()
-                        .HasForeignKey("MissAlise.DataBase.Models.Photo", "Itemid")
+                        .HasForeignKey("MissAlise.Entities.OneDrive.Photo", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MissAlise.DataBase.Models.Video", b =>
+            modelBuilder.Entity("MissAlise.Entities.OneDrive.Video", b =>
                 {
-                    b.HasOne("MissAlise.DataBase.Models.File", null)
+                    b.HasOne("MissAlise.Entities.OneDrive.BaseFile", null)
                         .WithOne()
-                        .HasForeignKey("MissAlise.DataBase.Models.Video", "Itemid")
+                        .HasForeignKey("MissAlise.Entities.OneDrive.Video", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MissAlise.DataBase.Models.Folder", b =>
+            modelBuilder.Entity("MissAlise.Entities.OneDrive.Folder", b =>
                 {
                     b.Navigation("Files");
-
-                    b.Navigation("Folders");
                 });
 #pragma warning restore 612, 618
         }

@@ -3,6 +3,8 @@ namespace MissAlise.Background
 {
 	public partial record BackgroundJob<TJob>
 	{
+		public static IBackgroundJobBuilder<TJob> CreateBuilder(BackgroundJob<TJob> job)
+				=> new Builder(job);
 		internal record Builder : IBackgroundJobBuilder<TJob>, IBackgroundTriggerBuilder<TJob>
 		{
 			public readonly BackgroundJob<TJob> _job;

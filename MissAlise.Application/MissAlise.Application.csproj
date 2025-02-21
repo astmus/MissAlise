@@ -1,27 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>annotations</Nullable>
-    <RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
-    <RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
+	<TargetFramework>net8.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>annotations</Nullable>
+	<RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
+	<RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
   </PropertyGroup>
 
   <ItemGroup>    
-    <ProjectReference Include="..\MissAlise.ServiceDefaults\MissAlise.Shared.csproj" />
-    <ProjectReference Include="..\MissAlise\MissAlise.csproj" />
+	<ProjectReference Include="..\MissAlise.Background\MissAlise.Background.csproj" />    
+	<ProjectReference Include="..\MissAlise.ServiceDefaults\MissAlise.Shared.csproj" />
+	<ProjectReference Include="..\MissAlise\MissAlise.csproj" />
   </ItemGroup>
 
   <ItemGroup>  
-    <PackageReference Include="Microsoft.Kiota.Abstractions" Version="1.16.4" />
-    <PackageReference Include="System.Text.Json" Version="9.0.1" />
+	<PackageReference Include="Microsoft.Kiota.Abstractions" Version="1.17.1" />
+	<PackageReference Include="System.Text.Json" Version="9.0.2" />
   </ItemGroup>
-	<ItemGroup>
+	<!--<ItemGroup>
 		<Compile Include="..\MissAlise.OneDrive\Models\**\*">
 			<Link>MissAlise.OneDrive\%(RecursiveDir)/%(FileName)%(Extension)</Link>			
 		</Compile>
-	</ItemGroup>
+	</ItemGroup>-->
 	<ItemGroup>
 	  <Compile Remove="..\MissAlise.OneDrive\Models\AccessAction.cs" />
 	  <Compile Remove="..\MissAlise.OneDrive\Models\AccessPackage.cs" />
@@ -791,7 +792,7 @@
 	  <Compile Remove="..\MissAlise.OneDrive\Models\WorkforceIntegrationSupportedEntities.cs" />
 	</ItemGroup>
   <ItemGroup>
-    <Folder Include="Services\" />
+	<Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

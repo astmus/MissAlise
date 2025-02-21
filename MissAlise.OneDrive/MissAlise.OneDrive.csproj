@@ -22,7 +22,4 @@
 	<ItemGroup>
 		<ProjectReference Include="..\MissAlise.Application\MissAlise.Application.csproj" />
 	</ItemGroup>
-	<ItemGroup>
-		<Compile Remove="Models\**\*" />		
-	</ItemGroup>
 </Project>

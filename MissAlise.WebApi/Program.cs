@@ -5,11 +5,15 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using MissAlise.Application;
 using MissAlise.Application.Interfaces;
+using MissAlise.Background;
 using MissAlise.Bot;
 using MissAlise.DataBase;
 using MissAlise.Entities.OneDrive;
 using MissAlise.OneDrive;
 using MissAlise.OneDrive.Auth;
+using MissAlise.Utils;
+using MissAlise.Worker.Background;
+using MissAlise.Worker.Background.Handlers;
 
 namespace MissAlise.WebApi;
 
@@ -28,14 +32,21 @@ public class Program
 		});
 
 		var azureSection = builder.Configuration.GetSection("AzureAd");
-		builder.Services.Configure<AzureAd>(azureSection);		
+		var botSection = builder.Configuration.GetSection("BotConfiguration");		
+		
 		builder.Services.AddProblemDetails();		
-
 		builder.Services.AddApplication()
-			.AddPersistance(builder.Configuration).AddMigrateService()
+			.AddMigrateService()
+			.AddPersistance(builder.Configuration)
+			.AddBackgroundServer<MissAliseBackgroundServer>()
+				//.AddBackgroundJob<SyncDataJob, SyncBackgroundTaskHandler>(
+				//	builder => builder.SetDescription("Синхронизация данных").AddTrigger(new SyncDataJob(64), "Полуминутно").SetDelay(Time.Minute / 2))
+				.AddBackgroundJob<SyncOneDriveJob, SyncOneDriveJobHandler>(
+					builder => builder.SetDescription("Синхронизация OneDrive")//.AddTrigger(new SyncOneDriveFolderJob(default,default), "1 min").SetDelay(Time.Minute)
+				)
 			.AddOneDriveService(azureSection)
 			.AddOneDriveHandling()
-			.AddBotService(builder.Configuration.GetSection("BotConfiguration")); 
+			.AddBotService(botSection);
 		
 		//builder.Services.AddEndpointsApiExplorer(); это только для minimal api
 		//builder.Services.AddSwaggerGen(options=> {
@@ -59,8 +70,11 @@ public class Program
 		app.UseRouting();
 		app.UseAuthentication();
 		app.UseAuthorization();
-		app.MapControllers();
-		
+		app.UseEndpoints(endpoints =>
+		{
+			endpoints.MapControllers();
+		});
+
 		await app.RunAsync();
 	}
 

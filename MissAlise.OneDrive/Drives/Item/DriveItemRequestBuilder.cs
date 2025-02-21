@@ -15,11 +15,6 @@ namespace MissAlise.OneDrive.Drives.Item
         {
             get => new global::MissAlise.OneDrive.Drives.Item.Bundles.BundlesRequestBuilder(PathParameters, RequestAdapter);
         }
-        /// <summary>Provides operations to manage the following property of the microsoft.graph.drive entity.</summary>
-        public global::MissAlise.OneDrive.Drives.Item.Following.FollowingRequestBuilder Following
-        {
-            get => new global::MissAlise.OneDrive.Drives.Item.Following.FollowingRequestBuilder(PathParameters, RequestAdapter);
-        }
         /// <summary>Provides operations to manage the items property of the microsoft.graph.drive entity.</summary>
         public global::MissAlise.OneDrive.Drives.Item.Items.ItemsRequestBuilder Items
         {
