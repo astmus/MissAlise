@@ -5,7 +5,7 @@ using MongoDB.Driver;
 using Folder = MissAlise.Entities.OneDrive.Folder;
 using User = MissAlise.Entities.OneDrive.User;
 
-namespace MissAlise.DataBase
+namespace MissAlise.DataBase.Repositories
 {
 	internal class UserRepository : IUserRepository
 	{
@@ -33,8 +33,7 @@ namespace MissAlise.DataBase
 				var result = await ctx.Users.AddAsync(owner, cancel);
 				await ctx.SaveChangesAsync(cancel).ConfigureAwait(false);
 			}
-			var userStroage = await ctx.Folders.Include(u => u.Files).ThenInclude(u=>u.Folder).AsSplitQuery()
-			.FirstOrDefaultAsync(u => u.Id.ToString() == user.Id).ConfigureAwait(false);
+			var userStroage = await ctx.Folders.Include(u => u.Children).AsSplitQuery().FirstOrDefaultAsync(u => u.Id.ToString() == user.Id).ConfigureAwait(false);
 
 			return new UserStorage()
 			{
@@ -42,8 +41,7 @@ namespace MissAlise.DataBase
 				{
 					Title = user.DisplayName,
 					CreatedDateTime = DateTime.UtcNow,
-					ModifieDateTime = DateTime.UtcNow,
-					Name = user.GivenName,
+					ModifieDateTime = DateTime.UtcNow,					
 					Path = Path.Combine(defPath, user.DisplayName)
 				},
 				SaveAsync = () => ctx.SaveChangesAsync(cancel)

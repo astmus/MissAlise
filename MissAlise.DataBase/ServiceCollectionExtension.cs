@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MissAlise.Application.Models;
 using MissAlise.Background;
 using MissAlise.DataBase.Contexts;
+using MissAlise.DataBase.Repositories;
 using MissAlise.Interfaces;
 using MongoDB.Driver;
 
@@ -13,7 +14,7 @@ namespace MissAlise.DataBase
 {
 	public static class ServiceCollectionExtension
 	{
-		public static IServiceCollection AddMigrateService(this IServiceCollection services)
+		public static IServiceCollection AddMigrationsService(this IServiceCollection services)
 		{
 			services.AddHostedService<MigrateService>();
 			services.AddOpenTelemetry()
@@ -21,21 +22,35 @@ namespace MissAlise.DataBase
 			return services;
 		}
 
-		public static IServiceCollection AddPersistance(this IServiceCollection services, IConfiguration appConfig)
+		public static IServiceCollection AddPersistanceServices(this IServiceCollection services, IConfiguration appConfig)
 		{
 			services.AddScoped<IBackgroundJobRepository, BackgroundJobRepository>();
 			services.AddScoped<IUserProfilesRepository, UserProfilesRepository>()
 						.AddScoped<IUserRepository, UserRepository>()
 						.AddScoped<IPhotoRepository, PhotoRepository>()
-			//			.AddScoped<IUserStore<AppUser>, UserStore<AppUser>>()
+						//.AddScoped<IUserStore<AppUser>, UserStore<AppUser>>()
 						.AddScoped<IVideoRepository, VideoRepository>();
 			
-			services.AddIdentityCore<AppUser>().AddEntityFrameworkStores<IdentityContext>();
+			services.AddIdentityCore<AppUser>(options =>
+			{
+				options.SignIn.RequireConfirmedAccount = false;
+				options.User.RequireUniqueEmail = false;
+			})
+			.AddEntityFrameworkStores<IdentityContext>()
+			.AddSignInManager()
+			.AddDefaultTokenProviders();
 
 			services.AddDbContext<IdentityContext>(options =>
 				options.UseSqlite(appConfig.GetConnectionString("DefaultIdentityConnection")));
+							
+			var settings = MongoClientSettings.FromConnectionString("mongodb://localhost:27017");
+#if DEBUG
+			settings.ServerSelectionTimeout = TimeSpan.FromSeconds(600);
+			settings.ConnectTimeout = TimeSpan.FromSeconds(600); 
+#endif
 
-			services.AddSingleton<IMongoClient>(new MongoClient("mongodb://localhost:27017"));
+			var client = new MongoClient(settings);
+			services.AddSingleton<IMongoClient>(client);
 			services.AddSingleton<IMongoDatabase>(sp =>
 			{
 				var client = sp.GetRequiredService<IMongoClient>();
@@ -47,4 +62,5 @@ namespace MissAlise.DataBase
 			return services;
 		}
 	}
+	//dotnet ef migrations add InitialMigration --context UserMediaContext --output-dir Migrations
 }

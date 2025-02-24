@@ -1,37 +1,68 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AutoMapper;
+using MediatR;
+using Microsoft.Extensions.Logging;
 using MissAlise.Application;
+using MissAlise.Application.Abstractions;
 using MissAlise.Application.Interfaces;
-using MissAlise.Application.Providers;
-using MissAlise.Application.UseCases.Sync;
-using MissAlise.Interfaces;
+using MissAlise.Application.Models;
+using MissAlise.Application.Services.Authentication;
+using MissAlise.Application.Services.Sync;
+using Telegram.Bot;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace MissAlise.Bot.Handlers
 {
-	internal class ChatMessageHandler : AsyncHandlerBase<Telegram.Bot.Types.Message>
+	internal class ChatMessageHandler : BotAsyncHandlerBase<Message>
 	{
-		private readonly IOneDriveService storage;
-		private readonly IAsyncHandlersProvider provider;
+		private readonly IHandleContext _ctx;
+		private readonly IOneDriveService _oneService;
 		private readonly ILogger<ChatMessageHandler> log;
-		private readonly IUserProfilesRepository userProfiles;
+		private readonly IMediator mm;
+		private readonly IMapper _mapper;
+		private readonly IAuthenticationService _authService;
 
-		public ChatMessageHandler(IOneDriveService storage, IAsyncHandlersProvider provider, ILogger<ChatMessageHandler> log, IUserProfilesRepository userProfiles)
+		public ChatMessageHandler(IHandleContext ctx, IOneDriveService oneService, ILogger<ChatMessageHandler> log, IMediator mm, BotWorker bot, IMapper mapper, IAuthenticationService authService) : base(bot)
 		{
-			this.storage = storage;
-			this.provider = provider;
 			this.log = log;
-			this.userProfiles = userProfiles;
+			this.mm = mm;
+			_oneService = oneService;
+			_ctx = ctx;
+			_mapper = mapper;
+			_authService = authService;
 		}
 
-		protected override async Task HandleAsync(Telegram.Bot.Types.Message data, CancellationToken cancel)
+		protected override async Task HandleAsync(Message data, CancellationToken cancel)
 		{
-			//var list =  storage.Root.Query<DriveItem>().Select(s=> s.Photo).ToList();
+			Result res = null;
 			if (data.Text == "/sync")
 			{
-				var handler = provider.GetHandler<SyncCommand>();
-				await handler.InvokeAsync(new SyncCommand(), cancel);
+				res = await mm.Send(new SyncCommand(), cancel).ConfigureAwait(false);
 			}
-			//var infoIt = await storage.GetRootItems(cancel);
-			var info = await storage.GetOwnerInfo(cancel);
+
+			if (res is not Result<UnauthorizedAccessException> fail)
+			{
+				var info = await _oneService.GetOwnerInfo(cancel);
+				return;
+			}
+
+			var tgUser = _ctx.GetCurrent<Telegram.Bot.Types.User>();
+			var appUser = _mapper.Map<AppUser>(tgUser);
+
+			if (await _authService.UserExistsAsync(appUser) == false)
+			{
+				var result = await _authService.AddUserAsync(appUser).ConfigureAwait(false);
+				if (!result.Succeeded)
+				{
+					await _bot.Client.SendMessage(data.Chat, "Ошибка при создании пользователя", parseMode: ParseMode.MarkdownV2, cancellationToken: cancel).ConfigureAwait(false);
+					return;
+				}
+			}
+			
+			var link = _oneService.CreateAuthorizeLink(data.Chat.Id);
+			await _bot.Client.DeleteMyCommands().ConfigureAwait(false);
+			await _bot.Client.SetChatMenuButton(data.Chat.Id, new MenuButtonWebApp() { Text = "Авторизоваться", WebApp = new WebAppInfo(link.ToString()) }, cancel).ConfigureAwait(false);
+			await _bot.Client.SendMessage(data.Chat, "Необходима авторизация", parseMode: ParseMode.MarkdownV2, cancellationToken: cancel).ConfigureAwait(false);
 		}
 	}
 }

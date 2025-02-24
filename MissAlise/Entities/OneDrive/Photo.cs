@@ -1,6 +1,6 @@
 ﻿namespace MissAlise.Entities.OneDrive;
 
-public partial class Photo : BaseFile
+public partial class Photo : DataFile
 {
 	public string? Cameramake { get; set; }
 

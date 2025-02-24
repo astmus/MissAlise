@@ -15,6 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>  
+	<PackageReference Include="AutoMapper" Version="14.0.0" />  
+	<PackageReference Include="AutoMapper.AspNetCore.OData.EFCore" Version="7.0.0" />  
+	<PackageReference Include="AutoMapper.Extensions.ExpressionMapping" Version="8.0.0" />  
+	<PackageReference Include="MediatR" Version="12.4.1" />  
 	<PackageReference Include="Microsoft.Kiota.Abstractions" Version="1.17.1" />
 	<PackageReference Include="System.Text.Json" Version="9.0.2" />
   </ItemGroup>
@@ -791,8 +795,5 @@
 	  <Compile Remove="..\MissAlise.OneDrive\Models\WorkforceIntegrationEncryptionProtocol.cs" />
 	  <Compile Remove="..\MissAlise.OneDrive\Models\WorkforceIntegrationSupportedEntities.cs" />
 	</ItemGroup>
-  <ItemGroup>
-	<Folder Include="Services\" />
-  </ItemGroup>
 
 </Project>

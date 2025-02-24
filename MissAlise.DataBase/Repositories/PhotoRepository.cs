@@ -6,7 +6,7 @@ using MissAlise.DataBase.Contexts;
 using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
 
-namespace MissAlise.DataBase
+namespace MissAlise.DataBase.Repositories
 {
 	internal class PhotoRepository : ItemsRepository, IPhotoRepository
 	{	

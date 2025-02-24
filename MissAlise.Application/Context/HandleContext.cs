@@ -1,23 +1,22 @@
 ﻿using MissAlise.Application.Interfaces;
+using MissAlise.Application.Models;
 using MissAlise.Utils;
 
 namespace MissAlise.Application.Context
 {
-	internal class HandleContext : IHandleContext
-	{
-		public IContextItems Items { get; init; }
-
-		public HandleContext(IContextItems items)
-		{
-			Items = items;
-		}
-
+	internal class HandleContext : ContextItems,  IHandleContext
+	{		
 		public T GetCurrent<T>(string id = null, bool throwIfNull = false) where T : class
 		{
-			var result =	Items.Get<T>(id ?? Identity<T>.Name);
+			var result =	Get<T>(id ?? Identity<T>.Discrimonator);
+
 			if (throwIfNull)
 				ArgumentNullException.ThrowIfNull(result);
+
 			return result;
 		}
+
+		public AppUser CurrentUser 
+			=> GetCurrent<AppUser>();
 	}
 }

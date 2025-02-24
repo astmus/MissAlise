@@ -21,20 +21,20 @@ namespace MissAlise.Services.Photos.Controllers
 
 		[HttpGet]
 		[OutputCache(Duration = 60)]
-		public async Task<ActionResult<IEnumerable<PhotoSlimDto>>> Get([FromQuery] PagedQuery? pageQuery, CancellationToken cancel)
+		public async Task<ActionResult<IEnumerable<PhotoSlim>>> Get([FromQuery] PagedQuery? pageQuery, CancellationToken cancel)
 		{
 			if (pageQuery is not PagedQuery query)
 				query = new PagedQuery();
 
 			var itemsPage = await db.GetPageAsync(query.Page, query.PerPage, cancel).ConfigureAwait(false);
-			IEnumerable<PhotoSlimDto> result = itemsPage.Select(sel => new PhotoSlimDto() { Id = sel.Id.ToString(), Name = sel.Caption ?? string.Empty }).ToArray();
+			IEnumerable<PhotoSlim> result = itemsPage.Select(sel => new PhotoSlim() { Id = sel.Id.ToString(), Name = sel.Name ?? string.Empty }).ToArray();
 			AddLinksHeaders(itemsPage);
 			return Ok(result);
 		}
 
 		[HttpGet("{id:int}")]
 		[OutputCache(Duration = 60)]
-		public async Task<ActionResult<IEnumerable<PhotoDto>>> GetPhoto([FromRoute] int id, CancellationToken cancel)
+		public async Task<ActionResult<IEnumerable<Application.Dto.Photo>>> GetPhoto([FromRoute] int id, CancellationToken cancel)
 		{
 			var photo = await db.FirstAsync(photo => photo.Id == id, cancel).ConfigureAwait(false);
 			if (photo == null)
@@ -52,10 +52,10 @@ namespace MissAlise.Services.Photos.Controllers
 			if (photo == null)
 				return NotFound("photo " + id);
 
-			if (await db.GetById<Folder>(photo.FolderId, cancel) is not Folder folder)
-				return NotFound("folder " + photo.FolderId);
+			if (await db.GetById<Folder>(photo.Id, cancel) is not Folder folder)
+				return NotFound("folder " + photo.Id);
 
-			var path = Path.Combine(folder.Path, folder.Title, photo.Caption);
+			var path = Path.Combine(folder.Path, folder.Title ?? string.Empty, photo.Name);
 
 			var info = await media.GetMetaDataAsync(path, cancel).ConfigureAwait(false);
 
@@ -69,24 +69,24 @@ namespace MissAlise.Services.Photos.Controllers
 			if (img == null)
 				return NotFound("image " + id);
 
-			if (await db.GetById<Folder>(img.FolderId, cancel) is not Folder folder)
-				return NotFound("folder " + img.FolderId);
+			if (await db.GetById<Folder>(img.Id, cancel) is not Folder folder)
+				return NotFound("folder " + img.Id);
 
-			args.Format ??= Path.GetExtension(img.Caption) switch
+			args.Format ??= Path.GetExtension(img.Name) switch
 			{
 				".jpeg" or ".jpg" => ImageFormat.jpeg,
 				".png" => ImageFormat.png,
 				".bmp" => ImageFormat.bmp,
 				".tiff" => ImageFormat.tiff,
 				".webp" => ImageFormat.webp,
-				_ => throw new ArgumentException("File format exception "+img.Caption)
+				_ => throw new ArgumentException("File format exception "+img.Name)
 			};
 			
-			var targetPath = Path.Combine(folder.Path, folder.Title, $"{args.Name}.{args.Format}");
+			var targetPath = Path.Combine(folder.Path, folder.Title ?? string.Empty, $"{args.Name}.{args.Format}");
 			if (System.IO.File.Exists(targetPath))
 				return Conflict($"File name conflict '{Path.GetFileName(targetPath)}'");
 
-			var path = Path.Combine(folder.Path, folder.Title, img.Caption);
+			var path = Path.Combine(folder.Path, folder.Title ?? string.Empty, img.Name);
 
 			var info = await media.ImageFromAsync(path, args, cancel).ConfigureAwait(false);
 			if (info.Anomaly != null)
@@ -101,7 +101,7 @@ namespace MissAlise.Services.Photos.Controllers
 				Iso = img.Iso,
 				Cameramake = img.Cameramake,
 				Cameramodel = img.Cameramodel,
-				Caption = info.Format.Filename,
+				Name = info.Format.Filename,
 				Size = int.Parse(info.Format.Size),
 				Folder = folder,
 				MimeType = "image/" + info.Streams[0].CodecName,
@@ -109,7 +109,7 @@ namespace MissAlise.Services.Photos.Controllers
 				ModifieDateTime = DateTimeOffset.UtcNow
 			};
 
-			folder.Files.Add(photo);
+			folder.Children.Add(photo);
 			return Ok(info);
 		}
 	}

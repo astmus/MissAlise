@@ -24,29 +24,14 @@ namespace MissAlise.Bot
 			this.logger = logger;
 		}
 
-		public async Task AuthorizationCompleted(string state, UserCredentials credentials, CancellationToken cancel)
+		public async Task AuthorizationCompleted(string state, AccessInformation credentials, CancellationToken cancel)
 		{
 			try
 			{
 				var profile = await repository.FindAsync(state, cancel);
-				profile ??= new UserProfile()
-				{
-				 Telegram = new User() { Id = state }
-				};
-				profile.AccessData = credentials;
-				//profile.Id = state;
-				await repository.AddOrReplaceAsync(profile, cancel);
-				//var chatId = long.Parse(state);
-				var tmpUser = await repository.PopPendingUser(state, cancel);
-
-				var user = new AppUser
-				{
-					Id = tmpUser?.Id ?? state,
-					UserName = tmpUser?.DisplayName ?? state
-				};
-
-				var result = await manager.CreateAsync(user);			
-
+				var appUser = await manager.FindByIdAsync(state);
+				appUser.AccessData = credentials;
+				var res = await manager.UpdateAsync(appUser);				
 				await bot.Client.SendMessage(long.Parse(state), "Авторизация успешна", parseMode: ParseMode.MarkdownV2, cancellationToken: default);
 			}
 			catch (Exception error)

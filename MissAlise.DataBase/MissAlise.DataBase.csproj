@@ -29,6 +29,9 @@
 	<ItemGroup>
 		<ProjectReference Include="..\MissAlise.Application\MissAlise.Application.csproj" />
 		<ProjectReference Include="..\MissAlise.Background.Abstractions\MissAlise.Background.Abstractions.csproj" />
+	</ItemGroup>	
+	<ItemGroup>
+	  <Folder Include="Migrations\Identity\" />
 	</ItemGroup>
 
 </Project>

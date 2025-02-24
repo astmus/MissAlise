@@ -48,43 +48,44 @@ namespace MissAlise.Bot
 			public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancel)
 			{
 				try
-				{
+				{					
 					using var handleScope = factory.CreateScope();
 					var services = handleScope.ServiceProvider;
-					var manager = services.GetRequiredService<UserManager<AppUser>>();
-					var user = await manager.FindByIdAsync(update.GetCurrentMessage().From.Id.ToString());
+					//var manager = services.GetRequiredService<UserManager<AppUser>>();
+					//var user = await manager.FindByIdAsync(update.GetCurrentMessage().From.Id.ToString());
 
-					if (user == null)
-					{
-						var profiles = services.GetRequiredService<IUserProfilesRepository>();
-						var tmpUser = update.GetCurrentMessage().From;
-						await profiles.AddPendingUser(new Entities.OneDrive.User()
-						{
-							Id = tmpUser.Id.ToString(),
-							DisplayName = tmpUser.Username,
-							GivenName = tmpUser.FirstName,
-							Surname = tmpUser.LastName ?? string.Empty
-						}, cancel);
+					//if (user == null)
+					//{
+					//	var profiles = services.GetRequiredService<IUserProfilesRepository>();
+					//	var tmpUser = update.GetCurrentMessage().From;
+					//	await profiles.AddPendingUser(new Entities.OneDrive.User()
+					//	{
+					//		Id = tmpUser.Id.ToString(),
+					//		DisplayName = tmpUser.Username,
+					//		GivenName = tmpUser.FirstName,
+					//		Surname = tmpUser.LastName ?? string.Empty
+					//	}, cancel);
 
-						var link = services.GetRequiredService<AzureAd>().AuthorizeLink(update.Message.Chat.Id.ToString());
-						await bot.Client.DeleteMyCommands().ConfigureAwait(false);
-						await bot.Client.SetChatMenuButton(update.Message.Chat.Id, new MenuButtonWebApp() { Text = "Авторизоваться", WebApp = new WebAppInfo(link.ToString()) }, cancel).ConfigureAwait(false); 
-						await bot.Client.SendMessage(update.Message.Chat, "Необходима авторизация", parseMode: ParseMode.MarkdownV2, cancellationToken: cancel).ConfigureAwait(false);
-						return;
-					}
+					//	var link = services.GetRequiredService<AzureAd>().AuthorizeLink(update.Message.Chat.Id.ToString());
+					//	await bot.Client.DeleteMyCommands().ConfigureAwait(false);
+					//	await bot.Client.SetChatMenuButton(update.Message.Chat.Id, new MenuButtonWebApp() { Text = "Авторизоваться", WebApp = new WebAppInfo(link.ToString()) }, cancel).ConfigureAwait(false); 
+					//	await bot.Client.SendMessage(update.Message.Chat, "Необходима авторизация", parseMode: ParseMode.MarkdownV2, cancellationToken: cancel).ConfigureAwait(false);
+					//	return;
+					//}
 
-					var items = services.GetRequiredService<IHandleContext>().Items;
-					items.Set(user);
-					items.Set(update);					
-					var handler = services.GetRequiredService<IAsyncHandler<Message>>();
+					var sender = update.GetCurrentUser();
+					var ctx = services.GetRequiredService<IHandleContext>();					
+					ctx.Set(update);
+					ctx.Set(new Claimant(sender.Id.ToString(), sender.Username), "user.Id");
+					ctx.Set(sender);
+
 					Task currentTask = update switch
 					{
 						//{ Command: not null } => HandleUpdateAsync(update, update.Command, stoppingToken),
-						{ CallbackQuery: not null } => HandleCallbackAsync(update, update.CallbackQuery, cancel),
-						{ InlineQuery: not null } => HandleSearchAsync(update, update.InlineQuery, cancel),
-						{ Message: not null } => handler.InvokeAsync(update.GetCurrentMessage(), cancel),
+						{ CallbackQuery: not null } => InvokeHandlerAsync(services, update.CallbackQuery, cancel),
+						{ InlineQuery: not null } => InvokeHandlerAsync(services, update.InlineQuery, cancel),						
 						//{ ChosenInlineResult: not null } => Task.CompletedTask,
-						_ => Task.CompletedTask
+						_ => null
 						//{ EditedMessage: not null } => UpdateType.EditedMessage,
 						//{ ChannelPost: not null } => UpdateType.ChannelPost,
 						//{ EditedChannelPost: not null } => UpdateType.EditedChannelPost,
@@ -98,8 +99,10 @@ namespace MissAlise.Bot
 						//{ ChatMember: not null } => UpdateType.ChatMember,
 						//{ ChatJoinRequest: not null } => UpdateType.ChatJoinRequest,
 						//{ ChatBoost: not null } => UpdateType.ChatBoost,
-						//{ RemovedChatBoost: not null } => UpdateType.RemovedChatBoost,
+						//{ RemovedChatBoost: not null } => UpdateType.RemovedChatBoost
 					};
+				
+					currentTask ??= InvokeHandlerAsync(services, update.GetCurrentMessage(), cancel);
 					await currentTask.ConfigureAwait(false);
 				}
 				catch (Exception error)
@@ -108,6 +111,11 @@ namespace MissAlise.Bot
 				}
 			}
 
+			private Task InvokeHandlerAsync<TUpdateItem>(IServiceProvider sp, TUpdateItem updateItem, CancellationToken cancel) where TUpdateItem : class
+			{
+				var handler = sp.GetRequiredService<IAsyncHandler<TUpdateItem>>();
+				return handler.InvokeAsync(updateItem , cancel);
+			}
 
 			private Task HandleSearchAsync(Update update, InlineQuery inlineQuery, object stoppingToken) => throw new NotImplementedException();
 			private Task HandleCallbackAsync(Update update, CallbackQuery callbackQuery, object stoppingToken) => throw new NotImplementedException();

@@ -1,27 +1,33 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MissAlise.Application.Context;
 using MissAlise.Application.Interfaces;
-using MissAlise.Application.Providers;
-using MissAlise.Application.UseCases.Sync;
+using MissAlise.Application.Services.Authentication;
 
 namespace MissAlise.Application
 {
 	public static class ServiceCollectionExtension
 	{
-		public static IServiceCollection AddApplication(this IServiceCollection services)
+		public static IServiceCollection AddApplicationServices(this IServiceCollection services)
 		{
 			services.TryAddScoped<IHandleContext, HandleContext>();
 			services.TryAddScoped<IContextItems, ContextItems>();
-			//services.TryAddTransient(sp => sp.GetRequiredService<IHandleContext>().GetCurrent<UserProfile>(throwIfNull: false));
-			
-			return services;
-		}
+			services.AddMediatR(cfg =>
+			{
+				cfg.RegisterServicesFromAssemblyContaining<ContextItems>();
+				cfg.AddBehavior<AuthBehavior>();				
+			});
 
-		public static IServiceCollection AddOneDriveHandling(this IServiceCollection services)
-		{
-			services.AddScoped<IAsyncHandlersProvider, AsyncHandlersProvider>()
-						.AddScoped<IAsyncHandler<SyncCommand>, SyncCommandHandler>();
+			services.AddScoped<IAuthenticationService, AuthenticationService>();			
+			services.AddCascadingAuthenticationState();
+			services.AddAuthorization();
+			services.AddAuthentication(options =>
+			{
+				options.DefaultScheme = IdentityConstants.ApplicationScheme;
+				options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+			});			
+
 			return services;
 		}
 	}

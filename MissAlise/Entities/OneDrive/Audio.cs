@@ -2,7 +2,7 @@
 
 namespace MissAlise.Entities.OneDrive;
 
-public partial class Audio : BaseFile
+public partial class Audio : DataFile
 {
 	public string? TrackTitle { get; set; }
 

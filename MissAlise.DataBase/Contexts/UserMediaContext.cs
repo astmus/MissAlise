@@ -16,15 +16,10 @@ public partial class UserMediaContext : DbContext
 	}
 
 	public virtual DbSet<Audio> Audios { get; set; }
-
-	public virtual DbSet<BaseFile> Files { get; set; }
-
+	public virtual DbSet<DataFile> Files { get; set; }
 	public virtual DbSet<Folder> Folders { get; set; }
-
 	public virtual DbSet<Photo> Photos { get; set; }
-
 	public virtual DbSet<Video> Videos { get; set; }
-
 	public virtual DbSet<User> Users { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -38,7 +33,7 @@ public partial class UserMediaContext : DbContext
 		//	item.Property(p => p.ModifieDateTime).HasColumnName("Modifiedatetime");
 		//});
 
-		modelBuilder.Entity<BaseFile>().UseTptMappingStrategy();
+		modelBuilder.Entity<DataFile>().UseTptMappingStrategy();
 		//modelBuilder.Entity<File>(file =>
 		//{
 		//	file.HasKey(p => p.Id).HasName("Itemid");			
@@ -62,5 +57,5 @@ public partial class UserMediaContext : DbContext
 	//protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	//	=> optionsBuilder.UseNpgsql("Host=192.168.0.3;Database=missdb;Username=postgres;Password=postgres");
 	//protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-	//	=> optionsBuilder.UseNpgsql("Host=localhost;Database=missdb;Username=docker;Password=docker");
+	//	=> optionsBuilder.UseNpgsql("Host=localhost;Database=missdb;Username=postgres;Password=postgres");
 }

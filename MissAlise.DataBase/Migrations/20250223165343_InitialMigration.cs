@@ -7,27 +7,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MissAlise.DataBase.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "ItemInfo",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: true),
-                    MimeType = table.Column<string>(type: "text", nullable: true),
-                    CreatedDateTime = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    ModifieDateTime = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ItemInfo", x => x.Id);
-                });
-
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
@@ -43,59 +27,6 @@ namespace MissAlise.DataBase.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Folders",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false),
-                    Parentfolderid = table.Column<int>(type: "integer", nullable: true),
-                    Title = table.Column<string>(type: "text", nullable: false),
-                    Path = table.Column<string>(type: "text", nullable: false),
-                    ParentId = table.Column<int>(type: "integer", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Folders", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Folders_Folders_ParentId",
-                        column: x => x.ParentId,
-                        principalTable: "Folders",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Folders_ItemInfo_Id",
-                        column: x => x.Id,
-                        principalTable: "ItemInfo",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Files",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false),
-                    Caption = table.Column<string>(type: "text", nullable: false),
-                    Size = table.Column<long>(type: "bigint", nullable: true),
-                    Extension = table.Column<string>(type: "text", nullable: true),
-                    FolderId = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Files", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Files_Folders_FolderId",
-                        column: x => x.FolderId,
-                        principalTable: "Folders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Files_ItemInfo_Id",
-                        column: x => x.Id,
-                        principalTable: "ItemInfo",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -117,12 +48,21 @@ namespace MissAlise.DataBase.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Audios", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Audios_Files_Id",
-                        column: x => x.Id,
-                        principalTable: "Files",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Files",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Extension = table.Column<string>(type: "text", nullable: true),
+                    Size = table.Column<long>(type: "bigint", nullable: true),
+                    FolderId1 = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Files", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -180,20 +120,101 @@ namespace MissAlise.DataBase.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Folders",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false),
+                    Parentfolderid = table.Column<int>(type: "integer", nullable: true),
+                    Path = table.Column<string>(type: "text", nullable: false),
+                    ParentId = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Folders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Folders_Folders_ParentId",
+                        column: x => x.ParentId,
+                        principalTable: "Folders",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ItemInfo",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Title = table.Column<string>(type: "text", nullable: true),
+                    MimeType = table.Column<string>(type: "text", nullable: true),
+                    CreatedDateTime = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    ModifieDateTime = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    FolderId = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ItemInfo", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ItemInfo_Folders_FolderId",
+                        column: x => x.FolderId,
+                        principalTable: "Folders",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.CreateIndex(
-                name: "IX_Files_FolderId",
+                name: "IX_Files_FolderId1",
                 table: "Files",
-                column: "FolderId");
+                column: "FolderId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Folders_ParentId",
                 table: "Folders",
                 column: "ParentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ItemInfo_FolderId",
+                table: "ItemInfo",
+                column: "FolderId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Audios_Files_Id",
+                table: "Audios",
+                column: "Id",
+                principalTable: "Files",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Files_Folders_FolderId1",
+                table: "Files",
+                column: "FolderId1",
+                principalTable: "Folders",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Files_ItemInfo_Id",
+                table: "Files",
+                column: "Id",
+                principalTable: "ItemInfo",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Folders_ItemInfo_Id",
+                table: "Folders",
+                column: "Id",
+                principalTable: "ItemInfo",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_ItemInfo_Folders_FolderId",
+                table: "ItemInfo");
+
             migrationBuilder.DropTable(
                 name: "Audios");
 

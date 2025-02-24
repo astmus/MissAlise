@@ -1,10 +1,14 @@
 ﻿using Microsoft.Extensions.Logging;
+using MissAlise.Application.Abstractions;
+using MissAlise.Application.Abstractions.RequestHandler;
 using MissAlise.Application.Interfaces;
 using MissAlise.Interfaces;
 
-namespace MissAlise.Application.UseCases.Sync
+namespace MissAlise.Application.Services.Sync
 {
-	public class SyncCommandHandler : AsyncHandlerBase<SyncCommand>
+	public record SyncCommand() : ICommand;
+
+	public class SyncCommandHandler : AsyncHandlerBase<SyncCommand>, ICommandHandler<SyncCommand>
 	{
 		private readonly IHttpClientFactory factory;
 
@@ -13,14 +17,16 @@ namespace MissAlise.Application.UseCases.Sync
 		private readonly ILogger<SyncCommandHandler> log;
 		private readonly IUserRepository usersRepository;
 		private readonly IOneDriveService oneDrive;
+		private readonly IHandleContext ctx;
 		const string ROOT_SYNC_PATH = @"M:\Sync\"; // и вот это барахло тоже убрать
-		public SyncCommandHandler(IHttpClientFactory factory, ILogger<SyncCommandHandler> log, IUserRepository usersRepository, IOneDriveService oneDrive)
+		public SyncCommandHandler(IHttpClientFactory factory, ILogger<SyncCommandHandler> log, IUserRepository usersRepository, IOneDriveService oneDrive, IHandleContext ctx)
 		{
 			this.factory = factory;
 			//this.client = client;
 			this.log = log;
 			this.usersRepository = usersRepository;
 			this.oneDrive = oneDrive;
+			this.ctx = ctx;
 		}
 		static readonly string[] fields = ["name", "folder", "parentReference", "size", "id", "createdDateTime", "file", "@microsoft.graph.downloadUrl", "fileSystemInfo", "photo", "image", "audio", "video"];
 		protected override async Task HandleAsync(SyncCommand data, CancellationToken cancel)
@@ -29,9 +35,9 @@ namespace MissAlise.Application.UseCases.Sync
 			{
 				await Task.Delay(50);
 				
-			//	var items = await oneDrive.GetRootItems(cancel);				
+				//	var items = await oneDrive.GetRootItems(cancel);				
 				//var sync = oneDrive.GetSynchronizator().ToBlockingEnumerable().Where(w=> w is Photo).ToList();
-				int i = 0;
+				var i = 0;
 				using var http = factory.CreateClient("onecredentials");
 				//var user = await client.Me.GetAsync();
 				//var drive = await client.Me.Drive.GetAsync().ConfigureAwait(false);
@@ -91,6 +97,17 @@ namespace MissAlise.Application.UseCases.Sync
 			}
 		}
 
+		public async Task<Result> Handle(SyncCommand request, CancellationToken cancellationToken)
+		{
+			
+			await foreach (var item in oneDrive.GetSynchronizator().WithCancellation(cancellationToken))
+			{
+				int i = 0;
+			}
+
+			return Result.Ok();
+		}
+
 		//public async Task DownloadIfFile(DriveItem item, string path, CancellationToken cancel)
 		//{
 		//	if (item.File != null && System.IO.File.Exists(path) == false)
@@ -106,7 +123,7 @@ namespace MissAlise.Application.UseCases.Sync
 		//{
 		//	if (currentItem == null)
 		//		yield break;
-			
+
 		//var childrenRequest = graphClient.Drives[currentItem.ParentReference.DriveId].Items[currentItem.Id].Children;
 
 		//	var children = await childrenRequest.GetAsync(query => query.QueryParameters.Select = fields).ConfigureAwait(false);

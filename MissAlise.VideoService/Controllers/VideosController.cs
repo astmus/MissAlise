@@ -20,12 +20,12 @@ namespace MissAlise.Services.Videos.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IEnumerable<VideoDto>> Get(CancellationToken cancel)
+		public async Task<IEnumerable<Video>> Get(CancellationToken cancel)
 		{
 			if (await cache.GetStringAsync("photo", cancel) is string cached)
-				return JsonSerializer.Deserialize<VideoDto[]>(cached) ?? Enumerable.Empty<VideoDto>();
+				return JsonSerializer.Deserialize<Video[]>(cached) ?? Enumerable.Empty<Video>();
 
-			IEnumerable<VideoDto> result = [new VideoDto() { Name = "Video " + photoNum-- }];
+			IEnumerable<Video> result = [new Video() { Name = "Video " + photoNum-- }];
 			var rawJson = JsonSerializer.Serialize(result);
 			await cache.SetStringAsync("photo", rawJson, new DistributedCacheEntryOptions
 			{

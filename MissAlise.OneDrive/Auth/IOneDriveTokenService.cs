@@ -5,7 +5,7 @@ namespace MissAlise.OneDrive.Auth
 {
 	public interface IOneDriveTokenService
 	{
-		async Task<ApiResponse<UserCredentials>> GetCredentialsByCode(AzureAd azure, string code, CancellationToken cancel)
+		async Task<ApiResponse<AccessInformation>> GetCredentialsByCode(AzureAd azure, string code, CancellationToken cancel)
 		{
 			var content = new
 			{
@@ -19,7 +19,7 @@ namespace MissAlise.OneDrive.Auth
 			return await RequestCredentials(content, cancel);
 		}
 
-		async Task<ApiResponse<UserCredentials>> RefreshCredentials(AzureAd azure, string refreshToken, CancellationToken cancel)
+		async Task<ApiResponse<AccessInformation>> RefreshCredentials(AzureAd azure, string refreshToken, CancellationToken cancel)
 		{
 			var content = new
 			{
@@ -32,6 +32,6 @@ namespace MissAlise.OneDrive.Auth
 		}
 
 		[Post("/common/oauth2/v2.0/token")]
-		internal Task<ApiResponse<UserCredentials>> RequestCredentials([Body(BodySerializationMethod.UrlEncoded)] object body, CancellationToken cancel);
+		internal Task<ApiResponse<AccessInformation>> RequestCredentials([Body(BodySerializationMethod.UrlEncoded)] object body, CancellationToken cancel);
 	}
 }

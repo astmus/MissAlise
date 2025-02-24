@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace MissAlise.WebApi.Migrations
+namespace MissAlise.DataBase.Migrations.Identity
 {
     /// <inheritdoc />
-    public partial class IdentityInitial : Migration
+    public partial class InitialIdentity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -51,6 +51,23 @@ namespace MissAlise.WebApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PendingUsers",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "TEXT", maxLength: 32, nullable: false),
+                    DisplayName = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
+                    GivenName = table.Column<string>(type: "TEXT", maxLength: 64, nullable: false),
+                    Mail = table.Column<string>(type: "TEXT", maxLength: 64, nullable: true),
+                    PreferredLanguage = table.Column<string>(type: "TEXT", maxLength: 8, nullable: true),
+                    Surname = table.Column<string>(type: "TEXT", maxLength: 64, nullable: false),
+                    UserPrincipalName = table.Column<string>(type: "TEXT", maxLength: 64, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PendingUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -69,6 +86,29 @@ namespace MissAlise.WebApi.Migrations
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AccessInformation",
+                columns: table => new
+                {
+                    IdToken = table.Column<string>(type: "TEXT", nullable: false),
+                    TokenType = table.Column<string>(type: "TEXT", nullable: false),
+                    Scope = table.Column<string>(type: "TEXT", nullable: false),
+                    ExpiresIn = table.Column<int>(type: "INTEGER", nullable: false),
+                    AccessToken = table.Column<string>(type: "TEXT", nullable: false),
+                    RefreshToken = table.Column<string>(type: "TEXT", nullable: false),
+                    ExpiredAfter = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    UserId = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AccessInformation", x => x.IdToken);
+                    table.ForeignKey(
+                        name: "FK_AccessInformation_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -157,6 +197,12 @@ namespace MissAlise.WebApi.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_AccessInformation_UserId",
+                table: "AccessInformation",
+                column: "UserId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
                 column: "RoleId");
@@ -198,6 +244,9 @@ namespace MissAlise.WebApi.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "AccessInformation");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
             migrationBuilder.DropTable(
@@ -211,6 +260,9 @@ namespace MissAlise.WebApi.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "PendingUsers");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

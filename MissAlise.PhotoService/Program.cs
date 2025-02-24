@@ -14,7 +14,7 @@ namespace MissAlise.Services.Photos
 			builder.AddRedisDistributedCache(connectionName: "cache");
 			builder.AddRedisOutputCache(connectionName: "cache", configureOptions: options => {});
 
-			builder.Services.AddApplication().AddPersistance(builder.Configuration);			
+			builder.Services.AddApplicationServices().AddPersistanceServices(builder.Configuration);			
 			builder.Services.AddControllers().AddJsonOptions(options =>
 			{
 				options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;

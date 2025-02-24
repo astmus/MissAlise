@@ -1,4 +1,6 @@
-﻿using MissAlise.Entities.OneDrive;
+﻿using MissAlise.Application.Abstractions;
+using MissAlise.Application.Models;
+using MissAlise.Entities.OneDrive;
 using User = MissAlise.Entities.OneDrive.User;
 
 namespace MissAlise.Application.Interfaces
@@ -7,8 +9,9 @@ namespace MissAlise.Application.Interfaces
 	{		
 		DataSynchronizator GetSynchronizator();
 		Task<User> GetOwnerInfo(CancellationToken cancel);
-		Uri CreateAuthorizeLink(string stateIdentifier);
+		Uri CreateAuthorizeLink(object stateIdentifier);
 		Task<IEnumerable<ItemInfo>> GetRootItems(CancellationToken cancel);
+		Task<Result<AppUser>> RefreshUserAccessTokenAsync(AppUser user, CancellationToken cancel);
 	}
 
 	public abstract class DataSynchronizator : IAsyncEnumerable<ItemInfo>

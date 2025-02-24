@@ -43,8 +43,7 @@ namespace MissAlise.OneDrive
 			ItemInfo result = item switch
 			{
 				{ Folder: not null } => new Entities.OneDrive.Folder()
-				{
-					Name = item.Name,
+				{					
 					Title = $"[{item.Name}]",
 					Path = item.ParentReference.Path,
 					MimeType = "folder"
@@ -82,19 +81,19 @@ namespace MissAlise.OneDrive
 					Year = item.Audio.Year,
 					Genre = item.Audio.Genre
 				},
-				{ File: not null } => new Entities.OneDrive.BaseFile()
+				{ File: not null } => new Entities.OneDrive.DataFile()
 			};
 
-			result.Name = item.Name;
+			result.Title = item.Name;
 			result.MimeType = item.File?.MimeType;
 			result.CreatedDateTime = item.FileSystemInfo.CreatedDateTime;
 			result.ModifieDateTime = item.FileSystemInfo.LastModifiedDateTime;
 
-			if (result is not Entities.OneDrive.BaseFile file)
+			if (result is not Entities.OneDrive.DataFile file)
 				return result;
 
 			file.Size = item.Size;
-			file.Caption = Path.GetFileNameWithoutExtension(item.Name);
+			file.Name = Path.GetFileNameWithoutExtension(item.Name);
 			file.Extension = Path.GetExtension(item.Name);
 
 			return file;

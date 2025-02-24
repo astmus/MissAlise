@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MissAlise.Application.Background;
 using MissAlise.Background;
 
-namespace MissAlise.Worker.Background.Handlers
+namespace MissAlise.Application.Background.Handlers
 {
 	public class SyncBackgroundTaskHandler : BackgroundJobHandler<SyncDataJob>
 	{

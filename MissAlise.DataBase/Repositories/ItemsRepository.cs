@@ -2,7 +2,7 @@
 using MissAlise.DataBase.Contexts;
 using MissAlise.Entities.OneDrive;
 
-namespace MissAlise.DataBase
+namespace MissAlise.DataBase.Repositories
 {
 	internal abstract class ItemsRepository : IDisposable
 	{		

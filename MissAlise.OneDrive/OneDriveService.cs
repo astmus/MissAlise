@@ -4,12 +4,16 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Web;
 using Azure.Core;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.Graph;
 using Microsoft.Kiota.Authentication.Azure;
 using Microsoft.Kiota.Http.HttpClientLibrary;
+using MissAlise.Application.Abstractions;
 using MissAlise.Application.Interfaces;
+using MissAlise.Application.Models;
 using MissAlise.Entities.OneDrive;
+using MissAlise.OneDrive.Auth;
 using MissAlise.OneDrive.Drives.Item.Items.Item.Delta;
 using MissAlise.OneDrive.Models;
 using User = MissAlise.Entities.OneDrive.User;
@@ -34,28 +38,33 @@ namespace MissAlise.OneDrive
 		private readonly IHandleContext ctx;
 		private readonly TokenCredential tkn;
 		private readonly IHttpClientFactory fac;
+		private readonly IOneDriveTokenService _tokenService;
+		private readonly UserManager<AppUser> _manager;
 
-		public OneDriveService(IOptions<AzureAd> azure, IOneDriveClient oneDrive, IHandleContext ctx, TokenCredential tkn, IHttpClientFactory fac)
+		public OneDriveService(IOptions<AzureAd> azure, TokenCredential tkn , IOneDriveClient oneDrive, IHandleContext ctx, IHttpClientFactory fac, IOneDriveTokenService tokenService, UserManager<AppUser> manager)
 		{
 			this.azure = azure.Value;
 			this.oneDrive = oneDrive;
 			this.ctx = ctx;
 			this.tkn = tkn;
 			this.fac = fac;
+			_tokenService = tokenService;
+			_manager = manager;
 		}
 
 		public async Task<User> GetOwnerInfo(CancellationToken cancel)
 		{
 			var allowedHosts = new[] { "graph.microsoft.com" };
 			var graphScopes = azure.Scopes.Split(" ");
-			var credential = tkn;
-			var authProvider = new AzureIdentityAuthenticationProvider(credential, allowedHosts, scopes: graphScopes);
+			//var credential = tkn;
+			var authProvider = new AzureIdentityAuthenticationProvider(tkn, allowedHosts, scopes: graphScopes);
 
 			using var http = fac.CreateClient("onedrive");
 			var requestAdapter = new HttpClientRequestAdapter(authProvider, httpClient: http);
 			var client = new ApiClient(requestAdapter);
 			
-			var childrenRequest = client.Drives["Me"].Items["Root"].Delta; //client.Drives[root.ParentReference.DriveId].Items[root.Id].Delta;
+			var childrenRequest = client.Drives["Me"].Items["Root"].Delta; 
+			//client.Drives[root.ParentReference.DriveId].Items[root.Id].Delta;
 			
 			var items = await childrenRequest.GetAsDeltaGetResponseAsync(cancellationToken: cancel);
 						
@@ -69,7 +78,7 @@ namespace MissAlise.OneDrive
 				item =>
 				{
 					varo++;
-					sb.AppendLine(item.Name+"state"+item.Deleted?.State);					
+					sb.AppendLine(item.Name+" state"+item.Deleted?.State);					
 					return true;
 				});
 			}
@@ -102,23 +111,38 @@ namespace MissAlise.OneDrive
 
 			return default;
 		}
-
-		public Uri CreateAuthorizeLink(string stateIdentifier)
+		
+		public Uri CreateAuthorizeLink(object stateIdentifier)
 		{
-			UriBuilder b = new UriBuilder(azure.AuthPath);
-			var query = HttpUtility.ParseQueryString(b.Query);
+			UriBuilder builder = new UriBuilder(azure.AuthPath);
+			var query = HttpUtility.ParseQueryString(builder.Query);
 			query["scope"] = azure.Scopes;
 			query["client_id"] = azure.ClientId;
 			query["response_type"] = "code";
 			query["redirect_uri"] = azure.RedirectUri + azure.CallbackPath;
 			query["prompt"] = "select_account";
-			query["state"] = stateIdentifier;
-			b.Query = query.ToString();
-			return b.Uri;
+			query["state"] = stateIdentifier.ToString();
+			builder.Query = query.ToString();
+			return builder.Uri;
 		}
+
 		public DataSynchronizator GetSynchronizator()
 		{
 			return new OneDriveDataSynchronizator(oneDrive, ctx);
+		}
+
+		public async Task<Result<AppUser>> RefreshUserAccessTokenAsync(AppUser user, CancellationToken cancel)
+		{
+			var response = await _tokenService.RefreshCredentials(azure, user.AccessData.RefreshToken, cancel).ConfigureAwait(false);
+			if (response.IsSuccessful)
+			{
+				user.AccessData = response.Content;
+				user.AccessData.ExpiredAfter = DateTimeOffset.UtcNow.AddSeconds(response.Content.ExpiresIn);
+				await _manager.UpdateAsync(user).ConfigureAwait(false);
+				return user;
+			}
+			else
+				return Result.Fail<AppUser>(response.Error.Content);
 		}
 	}
 

@@ -6,20 +6,19 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MissAlise.DataBase.Contexts;
 
-
 #nullable disable
 
-namespace MissAlise.WebApi.Migrations
+namespace MissAlise.DataBase.Migrations.Identity
 {
-	[DbContext(typeof(IdentityContext))]
-    [Migration("20250213035119_IdentityInitial")]
-    partial class IdentityInitial
+    [DbContext(typeof(IdentityContext))]
+    [Migration("20250223213535_InitialIdentity")]
+    partial class InitialIdentity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.13");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.11");
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -213,6 +212,82 @@ namespace MissAlise.WebApi.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("MissAlise.Entities.OneDrive.AccessInformation", b =>
+                {
+                    b.Property<string>("IdToken")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AccessToken")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("ExpiredAfter")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ExpiresIn")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("RefreshToken")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TokenType")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("IdToken");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("AccessInformation");
+                });
+
+            modelBuilder.Entity("MissAlise.Entities.OneDrive.User", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("GivenName")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Mail")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PreferredLanguage")
+                        .HasMaxLength(8)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Surname")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserPrincipalName")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PendingUsers", (string)null);
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -262,6 +337,18 @@ namespace MissAlise.WebApi.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("MissAlise.Entities.OneDrive.AccessInformation", b =>
+                {
+                    b.HasOne("MissAlise.Application.Models.AppUser", null)
+                        .WithOne("AccessData")
+                        .HasForeignKey("MissAlise.Entities.OneDrive.AccessInformation", "UserId");
+                });
+
+            modelBuilder.Entity("MissAlise.Application.Models.AppUser", b =>
+                {
+                    b.Navigation("AccessData");
                 });
 #pragma warning restore 612, 618
         }

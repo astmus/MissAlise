@@ -24,12 +24,12 @@ public class UsersController : ControllerBase
 	/// </summary>
 	/// <returns></returns>
 	[HttpGet]
-	public async Task<IEnumerable<UserDto>> Get(CancellationToken cancel)
+	public async Task<IEnumerable<User>> Get(CancellationToken cancel)
 	{
 		var users = await usersProfiles.AllAsync(cancel);
 		Thread.Sleep(100000);
-		cancel.ThrowIfCancellationRequested();
-		return users.Select(user => new UserDto() { Id = user.Telegram.Id, DisplayName = user.Telegram.DisplayName }).ToArray();
+		cancel.ThrowIfCancellationRequested();		
+		return users.Select(user => new User() { Id = user.Telegram.Id, DisplayName = user.Telegram.DisplayName }).ToArray();
 	}
 
 	/// <summary>

@@ -10,22 +10,19 @@ namespace MissAlise.Bot
 	{
 		internal class UpdateReceiver : BackgroundService
 		{
-			private readonly ILogger<UpdateReceiver> logger;
-			private readonly IServiceScopeFactory factory;
+			private readonly ILogger<UpdateReceiver> logger;			
 			private BotWorker bot;
-			private IServiceScope scope;
+			private readonly IServiceScope scope;
 			public UpdateReceiver(ILogger<UpdateReceiver> logger, IServiceScopeFactory factory)
 			{
-				this.logger = logger;
-				this.factory = factory;
+				this.logger = logger;				
+				scope = factory.CreateScope();
 			}
 			public override async Task StartAsync(CancellationToken cancellationToken)
 			{
-				scope = factory.CreateScope();
-				bot = scope.ServiceProvider.GetRequiredService<BotWorker>();				
-				
 				try
 				{
+					bot = scope.ServiceProvider.GetRequiredService<BotWorker>();				
 					bot.botInfo = await bot.Client.GetMe(cancellationToken).ConfigureAwait(false);
 					await bot.Client.DeleteMyCommands(cancellationToken:cancellationToken);				
 				}
@@ -33,6 +30,7 @@ namespace MissAlise.Bot
 				{
 					logger.LogError(error, "Connect to bot failed");
 					await StopAsync(cancellationToken);
+					scope.Dispose();
 					return;
 				}
 				

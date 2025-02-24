@@ -1,6 +1,6 @@
 ﻿namespace MissAlise.Entities.OneDrive
 {
-	public class UserCredentials
+	public class AccessInformation
 	{		
 		public string TokenType { get; set; }
 		public string Scope { get; set; }

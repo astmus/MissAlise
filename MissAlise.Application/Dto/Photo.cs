@@ -1,12 +1,12 @@
 ﻿namespace MissAlise.Application.Dto
 {
-	public class PhotoSlimDto
+	public class PhotoSlim
 	{
 		public string Id { get; set; }		
 		public string Name { get; set; }
 	}
 
-	public class PhotoDto
+	public class Photo
 	{
 		public string Id { get; set; }
 		public string? Name { get; set; }
@@ -16,11 +16,5 @@
 		public int? Iso { get; set; }
 		public int? Height { get; set; }
 		public int? Width { get; set; }
-	}
-
-	public class PhotoExtDto
-	{
-		public string Id { get; set; }
-		public string Name { get; set; }
 	}
 }

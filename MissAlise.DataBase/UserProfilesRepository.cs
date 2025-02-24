@@ -42,7 +42,8 @@ namespace MissAlise.DataBase
 					AccessData = user.AccessData,
 					Telegram = user.Telegram
 				};
-				var res = await userProfiles.ReplaceOneAsync(filter, profile, options, cancel);
+				var update = Builders<DbUserProfile>.Update.Set("AccessData", user.AccessData);
+				var res = await userProfiles.UpdateOneAsync(filter, update);
 			}
 			catch (Exception error)
 			{
