@@ -3,12 +3,14 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MissAlise.Application;
 using MissAlise.Application.Background;
 using MissAlise.Application.Background.Handlers;
 using MissAlise.Application.Interfaces;
 using MissAlise.Application.Models;
+using MissAlise.Application.Services.User;
 using MissAlise.Background;
 using MissAlise.Bot;
 using MissAlise.DataBase;
@@ -89,11 +91,15 @@ public class Program
 		if (!response.IsSuccessful)
 			return Results.Problem(response.Error.ToString(), null, (int)response.StatusCode);
 		UserManager<AppUser> manager = ctx.RequestServices.GetRequiredService<UserManager<AppUser>>();
-		var appUser = await manager.FindByIdAsync(state);
+		//var userSrv = ctx.RequestServices.GetRequiredService<IUserService>();
+		var appUser = await manager.Users.Include(user => user.AccessData).SingleOrDefaultAsync(user => user.Id == state);
+		appUser.AccessData = null;
+		var result = await manager.UpdateAsync(appUser);
+		// AccessData будет множитс€ в таблице, потому что у токена будет новый id. ѕорешать с EF как нить потом
 		appUser.AccessData = response.Content;
 		appUser.AccessData.ExpiredAfter = DateTimeOffset.UtcNow.AddSeconds(response.Content.ExpiresIn);
-		appUser.EmailConfirmed = true;
-		var result = await manager.UpdateAsync(appUser);
+		appUser.EmailConfirmed = true;		
+		result = await manager.UpdateAsync(appUser);
 		if (result.Succeeded)
 			return Results.Text("<html><body>јвторизаци€ закончена успешно. ¬ы можете закрыть это окно</body></html>", "text/html", Encoding.UTF8, 200);
 		else

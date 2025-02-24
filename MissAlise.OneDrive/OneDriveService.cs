@@ -20,16 +20,6 @@ using User = MissAlise.Entities.OneDrive.User;
 
 namespace MissAlise.OneDrive
 {
-	public class DriveDataContext : OneDriveQueryable<DriveItem>
-	{
-		public DriveDataContext(ODataQueryProvider provider) : base(provider)
-		{
-		}
-
-		public DriveDataContext(ODataQueryProvider provider, Expression? expression = null) : base(provider, expression)
-		{
-		}
-	}
 
 	public class OneDriveService : IOneDriveService
 	{
@@ -41,7 +31,7 @@ namespace MissAlise.OneDrive
 		private readonly IOneDriveTokenService _tokenService;
 		private readonly UserManager<AppUser> _manager;
 
-		public OneDriveService(IOptions<AzureAd> azure, TokenCredential tkn , IOneDriveClient oneDrive, IHandleContext ctx, IHttpClientFactory fac, IOneDriveTokenService tokenService, UserManager<AppUser> manager)
+		public OneDriveService(IOptions<AzureAd> azure, TokenCredential tkn, IOneDriveClient oneDrive, IHandleContext ctx, IHttpClientFactory fac, IOneDriveTokenService tokenService, UserManager<AppUser> manager)
 		{
 			this.azure = azure.Value;
 			this.oneDrive = oneDrive;
@@ -57,19 +47,20 @@ namespace MissAlise.OneDrive
 			var allowedHosts = new[] { "graph.microsoft.com" };
 			var graphScopes = azure.Scopes.Split(" ");
 			//var credential = tkn;
-			var authProvider = new AzureIdentityAuthenticationProvider(tkn, allowedHosts, scopes: graphScopes);
 
 			using var http = fac.CreateClient("onedrive");
-			var requestAdapter = new HttpClientRequestAdapter(authProvider, httpClient: http);
+
+			var authProvider = new AzureIdentityAuthenticationProvider(tkn, allowedHosts, scopes: graphScopes);
+			using var requestAdapter = new HttpClientRequestAdapter(authProvider, httpClient: http);
 			var client = new ApiClient(requestAdapter);
-			
-			var childrenRequest = client.Drives["Me"].Items["Root"].Delta; 
+
+			var childrenRequest = client.Drives["Me"].Items["Root"].Delta;
 			//client.Drives[root.ParentReference.DriveId].Items[root.Id].Delta;
-			
+
 			var items = await childrenRequest.GetAsDeltaGetResponseAsync(cancellationToken: cancel);
-						
+
 			PageIterator<DriveItem, DeltaGetResponse> iterator = null;
-			
+
 			int varo = 0;
 			StringBuilder sb = new StringBuilder();
 			try
@@ -78,7 +69,7 @@ namespace MissAlise.OneDrive
 				item =>
 				{
 					varo++;
-					sb.AppendLine(item.Name+" state"+item.Deleted?.State);					
+					sb.AppendLine(item.Name + " state" + item.Deleted?.State);
 					return true;
 				});
 			}
@@ -96,6 +87,8 @@ namespace MissAlise.OneDrive
 			return null;
 		}
 
+		
+
 		public async Task<IEnumerable<ItemInfo>> GetRootItems(CancellationToken cancel)
 		{
 			//var resp = await client.Drives["ff"].Items[""].Delta.GetAsDeltaGetResponseAsync();
@@ -111,7 +104,7 @@ namespace MissAlise.OneDrive
 
 			return default;
 		}
-		
+
 		public Uri CreateAuthorizeLink(object stateIdentifier)
 		{
 			UriBuilder builder = new UriBuilder(azure.AuthPath);
@@ -143,6 +136,19 @@ namespace MissAlise.OneDrive
 			}
 			else
 				return Result.Fail<AppUser>(response.Error.Content);
+		}
+
+		public IOrderedQueryable<Microsoft.Graph.Models.DriveItem> DataContext { get; }
+	}
+
+	public class DriveDataContext : OneDriveQueryable<DriveItem>
+	{
+		public DriveDataContext(ODataQueryProvider provider) : base(provider)
+		{
+		}
+
+		public DriveDataContext(ODataQueryProvider provider, Expression? expression = null) : base(provider, expression)
+		{
 		}
 	}
 
@@ -216,7 +222,7 @@ namespace MissAlise.OneDrive
 		protected override MemberMemberBinding VisitMemberMemberBinding(MemberMemberBinding node)
 			=> base.VisitMemberMemberBinding(node);
 		protected override Expression VisitMethodCall(MethodCallExpression node)
-			=> base.VisitMethodCall(node);		
+			=> base.VisitMethodCall(node);
 
 		protected override Expression VisitBlock(BlockExpression node)
 			=> base.VisitBlock(node);
@@ -275,6 +281,11 @@ namespace MissAlise.OneDrive
 
 		public IQueryable CreateQuery(Expression expression)
 		{
+			ArgumentNullException.ThrowIfNull(expression);
+
+			if (!typeof(IQueryable).IsAssignableFrom(expression.Type))
+				throw new ArgumentException(nameof(expression));
+
 			return new DriveDataContext(this, expression);
 		}
 

@@ -2,6 +2,7 @@
 using MissAlise.Application.Abstractions;
 using MissAlise.Application.Abstractions.RequestHandler;
 using MissAlise.Application.Interfaces;
+using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
 
 namespace MissAlise.Application.Services.Sync
@@ -97,15 +98,15 @@ namespace MissAlise.Application.Services.Sync
 			}
 		}
 
-		public async Task<Result> Handle(SyncCommand request, CancellationToken cancellationToken)
+		public async Task<Result> Handle(SyncCommand request, CancellationToken cancel)
 		{
-			
-			await foreach (var item in oneDrive.GetSynchronizator().WithCancellation(cancellationToken))
+			List<ItemInfo> Items = new List<ItemInfo>();
+			await foreach (var item in oneDrive.GetSynchronizator().WithCancellation(cancel))
 			{
-				int i = 0;
+				Items.Add(item);
 			}
-
-			return Result.Ok();
+			
+			return Result.Successful;
 		}
 
 		//public async Task DownloadIfFile(DriveItem item, string path, CancellationToken cancel)

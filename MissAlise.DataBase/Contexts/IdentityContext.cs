@@ -25,7 +25,7 @@ namespace MissAlise.DataBase.Contexts
 			base.OnModelCreating(modelBuilder);
 			modelBuilder.Entity<User>().ToTable("PendingUsers");
 			modelBuilder.Entity<AccessInformation>().HasKey(acc=>acc.IdToken);
-			modelBuilder.Entity<AppUser>().HasOne(e => e.AccessData).WithOne().HasForeignKey<AccessInformation>("UserId");
+			modelBuilder.Entity<AppUser>().HasOne(e => e.AccessData).WithOne().HasForeignKey<AccessInformation>("UserId")/*.OnDelete(DeleteBehavior.Cascade)*/;
 			//.HasForeignKey<UserCredentials>(c => c.AppUserId);
 		}
 	}

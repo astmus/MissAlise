@@ -11,11 +11,10 @@ namespace MissAlise.OneDrive
 		private DriveItemsDelta driveDelta;
 		private readonly IOneDriveClient client;
 		private readonly IHandleContext ctx;
-
 		public OneDriveDataSynchronizator(IOneDriveClient client, IHandleContext ctx)
 		{
 			this.client = client;
-			this.ctx = ctx;
+			this.ctx = ctx;			
 		}
 
 		public override async IAsyncEnumerator<ItemInfo> GetAsyncEnumerator(CancellationToken cancellationToken = default)

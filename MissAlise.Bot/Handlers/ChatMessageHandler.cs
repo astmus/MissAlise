@@ -46,6 +46,7 @@ namespace MissAlise.Bot.Handlers
 				return;
 			}
 
+			// нижележащее по хорошему бы в базовый класс так как "неавторизованность" может и не с Message начинаться
 			var tgUser = _ctx.GetCurrent<Telegram.Bot.Types.User>();
 			var appUser = _mapper.Map<AppUser>(tgUser);
 

@@ -7,8 +7,7 @@
 		public string? Error { get; }		
 		protected Result(string? error = null)
 			=> Error = error;
-			
-		public static Result Ok() => Successful;
+				
 		public static Result Fail(string error) => new(error);
 		public static Result<T> Ok<T>(T value) => new(value, string.Empty);
 		public static Result<T> Fail<T>(string error) => new(default, error);        
