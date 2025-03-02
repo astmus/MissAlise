@@ -9,8 +9,6 @@ using MissAlise.Application;
 using MissAlise.Application.Background;
 using MissAlise.Application.Background.Handlers;
 using MissAlise.Application.Common;
-using MissAlise.Application.Interfaces;
-using MissAlise.Application.Services.User;
 using MissAlise.Background;
 using MissAlise.Bot;
 using MissAlise.DataBase;
@@ -32,12 +30,12 @@ public class Program
 		{
 			options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 			options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-			options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;			
+			options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
 		});
 
 		var azureSection = builder.Configuration.GetSection("AzureAd");
-		var botSection = builder.Configuration.GetSection("BotConfiguration");		
-		
+		var botSection = builder.Configuration.GetSection("BotConfiguration");
+
 		builder.Services.AddProblemDetails()
 			.AddApplicationServices()
 			.AddMigrationsService()
@@ -45,7 +43,7 @@ public class Program
 			.AddBackgroundServer<MissAliseBackgroundServer>()
 			.AddBackgroundJob<SyncOneDriveJob, SyncOneDriveJobHandler>(
 					builder => builder.SetDescription("Синхронизация OneDrive"))//.AddTrigger(new SyncOneDriveFolderJob(default,default), "1 min").SetDelay(Time.Minute))
-			.AddOneDriveService(azureSection)			
+			.AddOneDriveService(azureSection)
 			.AddBotService(botSection)
 			.AddRouting(options =>
 			{
@@ -61,7 +59,7 @@ public class Program
 		//);
 		ApplyMapping(builder.Services);
 		var app = builder.Build();
-		
+
 		app.MapGet("/signin-oidc", Signin);
 
 		if (app.Environment.IsDevelopment())
@@ -69,8 +67,8 @@ public class Program
 			app.UseDeveloperExceptionPage();
 			//app.UseSwagger();
 			//app.UseSwaggerUI();
-		}		
-		
+		}
+
 		app.UseHttpsRedirection();
 		app.UseRouting();
 		app.UseAuthentication();
@@ -85,7 +83,7 @@ public class Program
 		AzureAd config = options.Value;
 		if (ctx.Request.Headers.Referer.Any(refer => refer == config.Instance || refer == "https://login.live.com/" || refer == "https://account.live.com/") == false)
 			return Results.Forbid();
-		
+
 		var response = await ctx.RequestServices.GetRequiredService<IOneDriveTokenService>().GetCredentialsByCode(config, code, cancel);
 
 		if (!response.IsSuccessful)
@@ -95,15 +93,15 @@ public class Program
 		var appUser = await manager.Users.Include(user => user.AccessData).SingleOrDefaultAsync(user => user.Id == state);
 		appUser.AccessData = null;
 		var result = await manager.UpdateAsync(appUser);
-		
+
 		appUser.AccessData = response.Content;
 		appUser.AccessData.ExpiredAfter = DateTimeOffset.UtcNow.AddSeconds(response.Content.ExpiresIn);
-		appUser.EmailConfirmed = true;	
+		appUser.EmailConfirmed = true;
 		result = await manager.UpdateAsync(appUser);
 		if (result.Succeeded)
 			return Results.Text("<html><body>Авторизация закончена успешно. Вы можете закрыть это окно</body></html>", "text/html", Encoding.UTF8, 200);
 		else
-			return Results.Text($"<html><body>Ошибка авторизации. {string.Join('\n', result.Errors.Select(sel=> sel.Description))}</body></html>", "text/html", Encoding.UTF8, 401);
+			return Results.Text($"<html><body>Ошибка авторизации. {string.Join('\n', result.Errors.Select(sel => sel.Description))}</body></html>", "text/html", Encoding.UTF8, 401);
 	}
 
 	static void ApplyMapping(IServiceCollection services)

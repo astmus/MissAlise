@@ -11,10 +11,10 @@ namespace MissAlise.Background
 			return services.AddHostedService<TServer>();
 		}
 
-		public static IServiceCollection AddBackgroundJob<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TJob, 
+		public static IServiceCollection AddBackgroundJob<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TJob,
 		[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] THandler>
 		(
-			this IServiceCollection services, 
+			this IServiceCollection services,
 			Action<IBackgroundJobBuilder<TJob>> jobConfigurator
 		)
 

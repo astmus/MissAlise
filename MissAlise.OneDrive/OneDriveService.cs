@@ -4,10 +4,10 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Web;
 using Azure.Core;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.Graph;
-using Microsoft.Graph.Groups.Item.Onenote.Notebooks.GetNotebookFromWebUrl;
+
+//using Microsoft.Graph;
 using Microsoft.Kiota.Authentication.Azure;
 using Microsoft.Kiota.Http.HttpClientLibrary;
 using MissAlise.Application.Common;
@@ -23,63 +23,57 @@ namespace MissAlise.OneDrive
 {
 	internal class OneDriveService : IOneDriveService
 	{
-		private readonly AzureAd azure;
-		private readonly IOneDriveClient oneDrive;
-		private readonly IHandleContext ctx;
-		private readonly TokenCredential tkn;
-		private readonly IHttpClientFactory fac;
+		private readonly AzureAd _azure;		
+		private readonly IHandleContext _ctx;
+		private readonly ApiClient _client;
 		private readonly IOneDriveTokenService _tokenService;
 		private readonly IAuthenticationService _manager;
 
-		public OneDriveService(IOptions<AzureAd> azure, TokenCredential tkn, IOneDriveClient oneDrive, IHandleContext ctx, IHttpClientFactory fac, IOneDriveTokenService tokenService, IAuthenticationService manager)
+		public OneDriveService(IOptions<AzureAd> azure, ApiClient client, IHandleContext ctx, IOneDriveTokenService tokenService, IAuthenticationService manager)
 		{
-			this.azure = azure.Value;
-			this.oneDrive = oneDrive;
-			this.ctx = ctx;
-			this.tkn = tkn;
-			this.fac = fac;
+			_azure = azure.Value;
+			_ctx = ctx;
+			_client = client;
 			_tokenService = tokenService;
 			_manager = manager;
 		}
 
 		public async Task<User> GetOwnerInfo(CancellationToken cancel)
 		{
-			var allowedHosts = new[] { "graph.microsoft.com" };
-			var graphScopes = azure.Scopes.Split(" ");
-			//var credential = tkn;
+			//var allowedHosts = new[] { "graph.microsoft.com" };
+			//var graphScopes = _azure.Scopes.Split(" ");
+			////var credential = tkn;
 
-			using var http = fac.CreateClient("onedrive");
+			//using var http = _fac.CreateClient("onedrive");
 
-			var authProvider = new AzureIdentityAuthenticationProvider(tkn, allowedHosts, scopes: graphScopes);
-			using var requestAdapter = new HttpClientRequestAdapter(authProvider, httpClient: http);
-			var client = new ApiClient(requestAdapter);
+			//var authProvider = new AzureIdentityAuthenticationProvider(_tkn, allowedHosts, scopes: graphScopes);
+			//using var requestAdapter = new HttpClientRequestAdapter(authProvider, httpClient: http);
+			//var client = new ApiClient(requestAdapter);
 
-			var childrenRequest = client.Drives["Me"].Items["Root"].Delta;
+			var childrenRequest = _client.Drives["Me"].Items["Root"].Delta;
+			var sel = childrenRequest.ToGetRequestInformation(r => r.QueryParameters.Select = "Id Name File FileSystemInfo Video Photo Size ParentReference".ToLower().Split(' '));
+			//sel.
 			//client.Drives[root.ParentReference.DriveId].Items[root.Id].Delta;
 
-			var items = await childrenRequest.GetAsDeltaGetResponseAsync(cancellationToken: cancel);
-
-			PageIterator<DriveItem, DeltaGetResponse> iterator = null;
+			var items = await childrenRequest.GetAsDeltaGetResponseAsync<DriveDeltaItems>(r => r.QueryParameters.Select = "Id Name File FileSystemInfo Video Photo Size ParentReference".ToLower().Split(' '),cancellationToken: cancel);			
+			PageIterator<DriveItem, DriveDeltaItems> iterator = null;
 
 			int varo = 0;
 			StringBuilder sb = new StringBuilder();
-			try
-			{
-				iterator = PageIterator<DriveItem, DeltaGetResponse>.CreatePageIterator(requestAdapter, items,
+
+				iterator = PageIterator<DriveItem, DriveDeltaItems>.CreatePageIterator(_client.Adapter, items, callback:
 				item =>
 				{
 					varo++;
 					sb.AppendLine(item.Name + " state" + item.Deleted?.State);
 					return true;
-				}, requestConfigurator:request=> {
-			
-					return request;
-				});
-			}
-			catch (Exception er)
-			{
-				int i = 0;
-			}
+				}
+				//}, requestConfigurator: request =>
+				//{
+				//	return request;
+				//}
+				);
+
 			await iterator.IterateAsync(cancel);
 			string str = sb.ToString();
 			//var items = await oneDrive.RootChildren(ctx, cancel);
@@ -90,53 +84,30 @@ namespace MissAlise.OneDrive
 			return null;
 		}
 
-		public async Task<IEnumerable<ItemInfo>> GetRootItems(CancellationToken cancel)
-		{
-			//var resp = await client.Drives["ff"].Items[""].Delta.GetAsDeltaGetResponseAsync();
-			//var items = await oneClient.RootItems(ctx, cancel);
-			
-			var res = await oneDrive.RootDelta(ctx.CurrentUser.AccessData.AccessToken, cancel);
-			List<ItemInfo> Items = new List<ItemInfo>();
-			await foreach (var item in GetSynchronizator().WithCancellation(cancel))
-			{
-				Items.Add(item);
-			}
-			//if (res.Content != null)
-
+		public Task<IEnumerable<ItemInfo>> GetRootItems(CancellationToken cancel)
+		{			
 			return default;
 		}
 
 		public Uri CreateAuthorizeLink(object stateIdentifier)
 		{
-			UriBuilder builder = new UriBuilder(azure.AuthPath);
+			UriBuilder builder = new UriBuilder(_azure.AuthPath);
 			var query = HttpUtility.ParseQueryString(builder.Query);
-			query["scope"] = azure.Scopes;
-			query["client_id"] = azure.ClientId;
+			query["scope"] = _azure.Scopes;
+			query["client_id"] = _azure.ClientId;
 			query["response_type"] = "code";
-			query["redirect_uri"] = azure.RedirectUri + azure.CallbackPath;
+			query["redirect_uri"] = _azure.RedirectUri + _azure.CallbackPath;
 			query["prompt"] = "select_account";
 			query["state"] = stateIdentifier.ToString();
 			builder.Query = query.ToString();
 			return builder.Uri;
-		}
-
-		public DataSynchronizator GetSynchronizator(Expression<Func<Microsoft.Graph.Models.DriveItem, object>> select = null)
-		{
-			string selQuery = null;
-			if (select != null)
-			{
-				var visitor = new ODataVisitor();
-				visitor.Visit(select);
-				selQuery = visitor.QueryString;
-			}
-			return new OneDriveDataSynchronizator(oneDrive, ctx, selQuery?.ToLower());
-		}
+		}		
 
 		public async Task<Result<AppUser>> RefreshUserAccessTokenAsync(AppUser user, CancellationToken cancel)
 		{
-			var response = await _tokenService.RefreshCredentials(azure, user.AccessData.RefreshToken, cancel).ConfigureAwait(false);
+			var response = await _tokenService.RefreshCredentials(_azure, user.AccessData.RefreshToken, cancel).ConfigureAwait(false);
 			if (response.IsSuccessful)
-			{				
+			{
 				user.AccessData = response.Content;
 				user.AccessData.ExpiredAfter = DateTimeOffset.UtcNow.AddSeconds(response.Content.ExpiresIn);
 				var result = await _manager.UpdateUserAsync(user).ConfigureAwait(false);
@@ -144,10 +115,10 @@ namespace MissAlise.OneDrive
 			}
 			else
 				return Result.Fail<AppUser>(response.Error.Content);
-		}	
+		}
 	}
 
-	internal class DriveDataContext : OneDriveQueryable<Microsoft.Graph.Models.DriveItem>
+	internal class DriveDataContext : OneDriveQueryable<DriveItem>
 	{
 		public DriveDataContext(ODataQueryProvider provider) : base(provider)
 		{
@@ -277,7 +248,7 @@ namespace MissAlise.OneDrive
 	}
 
 	internal class ODataQueryProvider : IQueryProvider
-	{	
+	{
 		public IQueryable CreateQuery(Expression expression)
 		{
 			ArgumentNullException.ThrowIfNull(expression);

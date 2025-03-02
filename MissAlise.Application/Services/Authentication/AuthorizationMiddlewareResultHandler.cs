@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Http;
 
 namespace MissAlise.Application.Services.Authentication
 {
-    public class AuthorizationMiddlewareResultHandler : IAuthorizationMiddlewareResultHandler
-    {
-        public Task HandleAsync(RequestDelegate next, HttpContext context, AuthorizationPolicy policy, PolicyAuthorizationResult authorizeResult)
-        {
-            return next(context);
-        }
-    }
+	public class AuthorizationMiddlewareResultHandler : IAuthorizationMiddlewareResultHandler
+	{
+		public Task HandleAsync(RequestDelegate next, HttpContext context, AuthorizationPolicy policy, PolicyAuthorizationResult authorizeResult)
+		{
+			return next(context);
+		}
+	}
 }

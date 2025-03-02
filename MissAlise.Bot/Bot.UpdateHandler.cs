@@ -1,15 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MissAlise.Application.Common;
 using MissAlise.Application.Interfaces;
-
-using MissAlise.Entities.OneDrive;
-using MissAlise.Interfaces;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 
 namespace MissAlise.Bot
 {
@@ -19,7 +14,7 @@ namespace MissAlise.Bot
 		{
 			private readonly ILogger<UpdateHandler> logger;
 			private readonly IServiceScopeFactory factory;
-			private readonly BotWorker bot;			
+			private readonly BotWorker bot;
 			public UpdateHandler(ILogger<UpdateHandler> logger, IServiceScopeFactory factory, BotWorker bot)
 			{
 				this.logger = logger;
@@ -42,14 +37,14 @@ namespace MissAlise.Bot
 					catch (Exception error)
 					{
 						logger.LogError(error, error.Message);
-					}					
+					}
 				}
-			}			
+			}
 
 			public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancel)
 			{
 				try
-				{					
+				{
 					using var handleScope = factory.CreateScope();
 					var services = handleScope.ServiceProvider;
 					//var manager = services.GetRequiredService<UserManager<AppUser>>();
@@ -75,7 +70,7 @@ namespace MissAlise.Bot
 					//}
 
 					var sender = update.GetCurrentUser();
-					var ctx = services.GetRequiredService<IHandleContext>();					
+					var ctx = services.GetRequiredService<IHandleContext>();
 					ctx.Set(update);
 					ctx.Set(new Claimant(sender.Id.ToString(), sender.Username));
 					ctx.Set(sender);
@@ -84,7 +79,7 @@ namespace MissAlise.Bot
 					{
 						//{ Command: not null } => HandleUpdateAsync(update, update.Command, stoppingToken),
 						{ CallbackQuery: not null } => InvokeHandlerAsync(services, update.CallbackQuery, cancel),
-						{ InlineQuery: not null } => InvokeHandlerAsync(services, update.InlineQuery, cancel),						
+						{ InlineQuery: not null } => InvokeHandlerAsync(services, update.InlineQuery, cancel),
 						//{ ChosenInlineResult: not null } => Task.CompletedTask,
 						_ => null
 						//{ EditedMessage: not null } => UpdateType.EditedMessage,
@@ -102,7 +97,7 @@ namespace MissAlise.Bot
 						//{ ChatBoost: not null } => UpdateType.ChatBoost,
 						//{ RemovedChatBoost: not null } => UpdateType.RemovedChatBoost
 					};
-				
+
 					currentTask ??= InvokeHandlerAsync(services, update.GetCurrentMessage(), cancel);
 					await currentTask.ConfigureAwait(false);
 				}
@@ -115,7 +110,7 @@ namespace MissAlise.Bot
 			private Task InvokeHandlerAsync<TUpdateItem>(IServiceProvider sp, TUpdateItem updateItem, CancellationToken cancel) where TUpdateItem : class
 			{
 				var handler = sp.GetRequiredService<IAsyncHandler<TUpdateItem>>();
-				return handler.InvokeAsync(updateItem , cancel);
+				return handler.InvokeAsync(updateItem, cancel);
 			}
 
 			private Task HandleSearchAsync(Update update, InlineQuery inlineQuery, object stoppingToken) => throw new NotImplementedException();

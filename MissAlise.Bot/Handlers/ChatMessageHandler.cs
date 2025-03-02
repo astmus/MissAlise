@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using MissAlise.Application;
 using MissAlise.Application.Common;
 using MissAlise.Application.Interfaces;
 using MissAlise.Application.Services.Authentication;
@@ -40,12 +39,12 @@ namespace MissAlise.Bot.Handlers
 				res = await mm.Send(new SyncCommand(), cancel).ConfigureAwait(false);
 			}
 
-				var info = await _oneService.GetOwnerInfo(cancel);
+			var info = await _oneService.GetOwnerInfo(cancel);
 			if (res is not Result<UnauthorizedAccessException> fail)
 			{
 				return;
 			}
-						
+
 			// нижележащее по хорошему бы в базовый класс так как "неавторизованность" может и не с Message начинаться
 			var tgUser = _ctx.GetCurrent<Telegram.Bot.Types.User>();
 			var appUser = _mapper.Map<AppUser>(tgUser);

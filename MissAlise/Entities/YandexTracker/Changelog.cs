@@ -103,13 +103,13 @@ namespace MissAlise.Entities.YandexTracker
 			switch (reader.TokenType)
 			{
 				case JsonToken.Null:
-				return new FromUnion { };
+					return new FromUnion { };
 				case JsonToken.StartObject:
-				var objectValue = serializer.Deserialize<Issue>(reader);
-				return new FromUnion { Issue = objectValue };
+					var objectValue = serializer.Deserialize<Issue>(reader);
+					return new FromUnion { Issue = objectValue };
 				case JsonToken.StartArray:
-				var arrayValue = serializer.Deserialize<FromElement[]>(reader);
-				return new FromUnion { FromElementArray = arrayValue };
+					var arrayValue = serializer.Deserialize<FromElement[]>(reader);
+					return new FromUnion { FromElementArray = arrayValue };
 			}
 			throw new Exception("Cannot deserialize type FromUnion");
 		}

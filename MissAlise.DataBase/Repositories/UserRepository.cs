@@ -37,14 +37,14 @@ namespace MissAlise.DataBase.Repositories
 					Mail = user.Mail,
 					PreferredLanguage = user.PreferredLanguage,
 					Surname = user.Surname,
-					UserPrincipalName = string.Empty					
+					UserPrincipalName = string.Empty
 				};
 				var result = await ctx.Users.AddAsync(owner, cancel);
 				await ctx.SaveChangesAsync(cancel).ConfigureAwait(false);
 			}
 			var userStroage = await ctx.Folders.Include(u => u.Children).AsSplitQuery().FirstOrDefaultAsync(u => u.Id.ToString() == user.Id).ConfigureAwait(false);
 
-			SaveAsync =()=> this.ctx.SaveChangesAsync(cancel);
+			SaveAsync = () => this.ctx.SaveChangesAsync(cancel);
 			return this;
 			//return new UserStorage()
 			//{
@@ -70,6 +70,7 @@ namespace MissAlise.DataBase.Repositories
 			{
 				RootFolder = new Folder()
 				{
+					Id = $"{appUser.Id} {appUser.UserName}",
 					Title = appUser.UserName,
 					CreatedDateTime = DateTimeOffset.UtcNow,
 					ModifieDateTime = DateTimeOffset.UtcNow,
@@ -81,5 +82,5 @@ namespace MissAlise.DataBase.Repositories
 			SaveAsync = () => ctx.SaveChangesAsync(cancel);
 			return this;
 		}
-	}	
+	}
 }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,13 +23,13 @@ namespace MissAlise.DataBase
 
 		public static IServiceCollection AddPersistanceServices(this IServiceCollection services, IConfiguration appConfig)
 		{
-			services.AddScoped<IBackgroundJobRepository, BackgroundJobRepository>()			
+			services.AddScoped<IBackgroundJobRepository, BackgroundJobRepository>()
 						//.AddScoped<IUserProfilesRepository, UserProfilesRepository>()
 						.AddScoped<IUserRepository, UserRepository>()
 						.AddScoped<IPhotoRepository, PhotoRepository>()
 						//.AddScoped<IUserStore<AppUser>, UserStore<AppUser>>()
 						.AddScoped<IVideoRepository, VideoRepository>();
-			
+
 			services.AddIdentityCore<AppUser>(options =>
 			{
 				options.SignIn.RequireConfirmedAccount = false;
@@ -43,11 +42,11 @@ namespace MissAlise.DataBase
 			services.AddDbContext<IdentityContext>(options =>
 				options.UseLazyLoadingProxies().EnableSensitiveDataLogging()
 							.UseSqlite(appConfig.GetConnectionString("DefaultIdentityConnection")));
-							
+
 			var settings = MongoClientSettings.FromConnectionString("mongodb://localhost:27017");
 #if DEBUG
 			settings.ServerSelectionTimeout = TimeSpan.FromSeconds(600);
-			settings.ConnectTimeout = TimeSpan.FromSeconds(600); 
+			settings.ConnectTimeout = TimeSpan.FromSeconds(600);
 #endif
 
 			var client = new MongoClient(settings);
@@ -57,7 +56,7 @@ namespace MissAlise.DataBase
 				var client = sp.GetRequiredService<IMongoClient>();
 				return client.GetDatabase("postgres");
 			});
-			
+
 			services.AddDbContextPool<UserMediaContext>(options =>
 				options.UseNpgsql(appConfig.GetConnectionString("postgres")));
 			return services;

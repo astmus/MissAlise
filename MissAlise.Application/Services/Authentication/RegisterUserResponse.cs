@@ -1,8 +1,8 @@
 ﻿namespace MissAlise.Application.Services.Authentication
 {
-    public class RegisterUserResponse
-    {
-        public bool Succeeded { get; set; }
-        public List<string> Errors { get; set; } = new();
-    }
+	public class RegisterUserResponse
+	{
+		public bool Succeeded { get; set; }
+		public List<string> Errors { get; set; } = new();
+	}
 }

@@ -4,6 +4,6 @@ namespace MissAlise.Interfaces
 {
 	public interface IPhotoRepository : IRepository<Photo>
 	{
-		
+
 	}
 }

@@ -23,7 +23,7 @@ namespace MissAlise.OneDrive.Drives.Item.Items.Item.Delta
 
 	[global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
 	#pragma warning disable CS1591
-	public partial class DriveItemsDelta : DriveDelta<DriveItem>
+	public partial class DriveDeltaItems : DriveDelta<DriveItem>
 	#pragma warning restore CS1591
 	{
 		/// <summary>

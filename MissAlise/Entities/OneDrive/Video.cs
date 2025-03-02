@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace MissAlise.Entities.OneDrive;
+﻿namespace MissAlise.Entities.OneDrive;
 
 public partial class Video : DataFile
-{	
+{
 	public int? Audiobitspersample { get; set; }
 
 	public int? Audiochannels { get; set; }

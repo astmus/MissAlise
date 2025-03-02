@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using LinqToDB.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -27,7 +26,7 @@ namespace MissAlise.DataBase
 			try
 			{
 				using var scope = factory.CreateScope();
-				using var context = scope.ServiceProvider.GetRequiredService<UserMediaContext>();	
+				using var context = scope.ServiceProvider.GetRequiredService<UserMediaContext>();
 				await context.Database.MigrateAsync(cancel);
 				LinqToDBForEFTools.Initialize();
 			}

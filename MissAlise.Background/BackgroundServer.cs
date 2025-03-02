@@ -20,13 +20,13 @@ namespace MissAlise.Background
 		int _currentPressure;
 		int _maxBackHandlers = 2;
 
-		public BackgroundServer(ILogger logger, IEventTriggersSource triggers) 
+		public BackgroundServer(ILogger logger, IEventTriggersSource triggers)
 		{
 			Current = this;
 			log = logger;
 			this.triggers = triggers;
 		}
-		
+
 		protected override async Task ExecuteAsync(CancellationToken cancellationToken)
 		{
 			do

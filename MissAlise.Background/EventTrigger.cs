@@ -12,14 +12,14 @@ namespace MissAlise.Background
 
 		public EventTrigger()
 		{
-			JobKey = Identity<TJob>.Discriminator;			
+			JobKey = Identity<TJob>.Discriminator;
 		}
 
 		public EventTrigger(TJob jobData = null) : this()
 		{
 			_jobData = jobData;
 		}
-		
+
 		public void Setup(BackgroundJob<TJob> job, Func<BackgroundJob<TJob>, CancellationToken, ValueTask> fireStarter)
 		{
 			_job = job;
@@ -55,6 +55,6 @@ namespace MissAlise.Background
 			return isOk;
 		}
 	}
-	
+
 #nullable restore
 }

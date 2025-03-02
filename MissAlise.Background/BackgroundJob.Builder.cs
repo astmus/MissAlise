@@ -41,9 +41,9 @@ namespace MissAlise.Background
 				_job.Triggers.Add(_trigger);
 				return this;
 			}
-			
+
 			public IBackgroundTriggerBuilder<TJob> SetDescription(in string description)
-			{				
+			{
 				_trigger.Description = description;
 				return this;
 			}

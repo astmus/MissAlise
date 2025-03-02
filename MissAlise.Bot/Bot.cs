@@ -10,11 +10,11 @@ namespace MissAlise.Bot
 {
 	internal partial class BotWorker
 	{
-		public HttpClient HttpConnection { get; }		
+		public HttpClient HttpConnection { get; }
 		public ITelegramBotClient Client { get; }
 
 		private User botInfo;
-		private BotConfiguration botOptions;		
+		private BotConfiguration botOptions;
 		private readonly ILogger<BotWorker> log;
 		private ReceiverOptions receiveOptions;
 		private readonly Channel<Update> pendingUpdates = Channel.CreateUnbounded<Update>(
@@ -32,12 +32,12 @@ namespace MissAlise.Bot
 			this.log = log;
 			//HttpConnection = factory.CreateClient("bot");
 			Client = new TelegramBotClient(botOptions.ApiKey, HttpConnection);
-			receiveOptions = new ReceiverOptions() { Limit = 100, AllowedUpdates = [UpdateType.Message, UpdateType.InlineQuery, UpdateType.CallbackQuery, UpdateType.ChosenInlineResult] };			
+			receiveOptions = new ReceiverOptions() { Limit = 100, AllowedUpdates = [UpdateType.Message, UpdateType.InlineQuery, UpdateType.CallbackQuery, UpdateType.ChosenInlineResult] };
 		}
 
 		public Task HandleErrorAsync(Exception exception, CancellationToken cancellationToken)
 		{
-			log.LogError(exception,exception.Message,default);
+			log.LogError(exception, exception.Message, default);
 			return Task.CompletedTask;
 		}
 	}

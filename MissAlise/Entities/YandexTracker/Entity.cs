@@ -1,8 +1,4 @@
-﻿using System.Linq;
-using System.Text.Json.Serialization;
-using Newtonsoft.Json;
-
-namespace MissAlise.Entities.YandexTracker
+﻿namespace MissAlise.Entities.YandexTracker
 {
 	public abstract record Entity
 	{

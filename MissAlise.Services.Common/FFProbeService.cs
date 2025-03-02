@@ -30,7 +30,7 @@ namespace MissAlise.Services
 				}
 			};
 
-			process.Start();			
+			process.Start();
 			await process.WaitForExitAsync(cancel);
 
 			if (process.ExitCode != 0)
@@ -49,10 +49,10 @@ namespace MissAlise.Services
 			var outputName = $"{args.Name}.{args.Format}";
 
 			var parameters = new StringBuilder($"-i \"{inputName}\" ");
-			
-			if (args.Height is int height && args.Width is int width)			
+
+			if (args.Height is int height && args.Width is int width)
 				parameters.Append($"-vf scale={width}x{height}");
-									
+
 			parameters.Append($" \"{args.Name}.{args.Format}\"");
 
 			var process = new Process
@@ -93,15 +93,15 @@ namespace MissAlise.Services
 
 			using var process = new Process { StartInfo = processInfo };
 			process.Start();
-			
+
 			string result = process.StandardOutput.ReadToEnd();
 			string error = process.StandardError.ReadToEnd();
 
-			process.WaitForExit();			
+			process.WaitForExit();
 
 			if (!string.IsNullOrWhiteSpace(error))
 			{
-			
+
 			}
 		}
 	}

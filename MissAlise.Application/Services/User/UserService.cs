@@ -7,14 +7,14 @@ namespace MissAlise.Application.Services.User
 	public class UserService : IUserService
 	{
 		private readonly UserManager<AppUser> _userManager;
-		private readonly IHttpContextAccessor _httpContextAccessor;        
+		private readonly IHttpContextAccessor _httpContextAccessor;
 		private readonly RoleManager<IdentityRole> _roleManager;
 
 		public UserService(IHttpContextAccessor httpContextAccessor, UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager)
 		{
-			_userManager = userManager;            
+			_userManager = userManager;
 			_httpContextAccessor = httpContextAccessor;
-			_roleManager = roleManager;            
+			_roleManager = roleManager;
 		}
 
 		public async Task AddRoleToUserAsync(string userId, string roleName)

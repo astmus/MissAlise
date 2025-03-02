@@ -35,7 +35,7 @@ namespace MissAlise.Application.Services.Sync
 			try
 			{
 				await Task.Delay(50);
-				
+
 				//	var items = await oneDrive.GetRootItems(cancel);				
 				//var sync = oneDrive.GetSynchronizator().ToBlockingEnumerable().Where(w=> w is Photo).ToList();
 				var i = 0;
@@ -53,7 +53,7 @@ namespace MissAlise.Application.Services.Sync
 				//	Surname = user.Surname
 				//}, cancel);
 				//var driveRoot = await client.Drives[drive.Id].Root.GetAsync().ConfigureAwait(false);
-				
+
 				//var userRoot = Path.Combine(ROOT_SYNC_PATH, drive.Owner.User.DisplayName);
 				//stroage.RootFolder ??= new Entities.OneDrive.Folder()
 				//{
@@ -99,22 +99,22 @@ namespace MissAlise.Application.Services.Sync
 		}
 
 		public async Task<Result> Handle(SyncCommand request, CancellationToken cancel)
-		{			
+		{
 			List<ItemInfo> Items = new List<ItemInfo>();
 			var repository = await usersRepository.LoadForCurrentUserAsync(cancel);
-			
-			await foreach (var item in oneDrive.GetSynchronizator(f=>new { f.Id,f.Name,f.File,f.FileSystemInfo,f.Video,f.Photo,f.Size,f.ParentReference}).WithCancellation(cancel))
-			{
-				if (item is not Photo && item is not Video)
-					continue;
 
-				if (item.Parent == null)
-				{
-					Items.Add(item);
-					repository.RootFolder.Children.Add(item);
-				}
-			}
-			var result = await repository.SaveAsync();
+			//await foreach (var item in oneDrive.GetSynchronizator(f => new { f.Id, f.Name, f.File, f.FileSystemInfo, f.Video, f.Photo, f.Size, f.ParentReference }).WithCancellation(cancel))
+			//{
+			//	if (item is not Photo && item is not Video)
+			//		continue;
+
+			//	if (item.Parent == null)
+			//	{
+			//		Items.Add(item);
+			//		repository.RootFolder.Children.Add(item);
+			//	}
+			//}
+			//var result = await repository.SaveAsync();
 			return Result.Successful;
 		}
 

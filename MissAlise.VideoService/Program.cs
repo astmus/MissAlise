@@ -23,8 +23,8 @@ namespace MissAlise.Services.Videos
 				options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 				options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
 				options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-			}); 
-						
+			});
+
 			//builder.Services.AddEndpointsApiExplorer();
 			//builder.Services.AddSwaggerGen();
 

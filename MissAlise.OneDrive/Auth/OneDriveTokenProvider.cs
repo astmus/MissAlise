@@ -1,11 +1,10 @@
-﻿using Microsoft.Extensions.Options;
-using MissAlise.Application.Interfaces;
-using MissAlise.Application;
-using MissAlise.Entities.OneDrive;
-using Azure.Core;
-using MissAlise.Interfaces;
+﻿using Azure.Core;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
+using MissAlise.Application;
 using MissAlise.Application.Common;
+using MissAlise.Application.Interfaces;
+using MissAlise.Entities.OneDrive;
 
 namespace MissAlise.OneDrive.Auth
 {

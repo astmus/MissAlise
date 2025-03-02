@@ -21,7 +21,7 @@ namespace MissAlise.Background
 		public virtual Task HandleJobAsync(BackgroundJob<TJobTask> job, CancellationToken cancel)
 		{
 			return HandleAsync(job.Data, cancel);
-		}		
-	}	
+		}
+	}
 #nullable enable
 }

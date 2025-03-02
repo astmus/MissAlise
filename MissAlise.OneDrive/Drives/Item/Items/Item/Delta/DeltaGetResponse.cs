@@ -28,7 +28,7 @@ namespace MissAlise.OneDrive.Drives.Item.Items.Item.Delta
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
         public static new global::MissAlise.OneDrive.Drives.Item.Items.Item.Delta.DeltaGetResponse CreateFromDiscriminatorValue(IParseNode parseNode)
         {
-            _ = parseNode ?? throw new ArgumentNullException(nameof(parseNode));
+            ArgumentNullException.ThrowIfNull(parseNode);
             return new global::MissAlise.OneDrive.Drives.Item.Items.Item.Delta.DeltaGetResponse();
         }
         /// <summary>

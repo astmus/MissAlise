@@ -32,8 +32,8 @@ public class ApplyVideoParams
 
 public class ApplyImageParams
 {
-	public string Name { get; set; }	
-	public int? Width { get; set; }	
+	public string Name { get; set; }
+	public int? Width { get; set; }
 	public int? Height { get; set; }
-	public ImageFormat? Format { get; set; }	
+	public ImageFormat? Format { get; set; }
 }

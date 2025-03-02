@@ -45,8 +45,8 @@ namespace MissAlise.Application.Services.Authentication
 		}
 
 		public async Task<RegisterUserResponse> AddUserAsync(AppUser pendingUser)
-		{			
-			var result = await _userManager.CreateAsync(pendingUser);			
+		{
+			var result = await _userManager.CreateAsync(pendingUser);
 			var response = new RegisterUserResponse
 			{
 				Succeeded = result.Succeeded,
@@ -55,8 +55,8 @@ namespace MissAlise.Application.Services.Authentication
 			return response;
 		}
 
-		public Task<bool> UserExistsAsync(AppUser user) 
-			=> _userManager.Users.AnyAsync(u=> u.Id == user.Id);
+		public Task<bool> UserExistsAsync(AppUser user)
+			=> _userManager.Users.AnyAsync(u => u.Id == user.Id);
 
 		public Task<AppUser> LoginUserAsync(string userId)
 			=> _userManager.FindByIdAsync(userId);

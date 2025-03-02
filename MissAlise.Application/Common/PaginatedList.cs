@@ -18,6 +18,6 @@ namespace MissAlise.Application.Common
 			TotalCount = count;
 			PerPage = perPage;
 			AddRange(items);
-		}		
+		}
 	}
 }

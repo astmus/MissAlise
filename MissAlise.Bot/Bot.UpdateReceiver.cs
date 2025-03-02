@@ -10,21 +10,21 @@ namespace MissAlise.Bot
 	{
 		internal class UpdateReceiver : BackgroundService
 		{
-			private readonly ILogger<UpdateReceiver> logger;			
+			private readonly ILogger<UpdateReceiver> logger;
 			private BotWorker bot;
 			private readonly IServiceScope scope;
 			public UpdateReceiver(ILogger<UpdateReceiver> logger, IServiceScopeFactory factory)
 			{
-				this.logger = logger;				
+				this.logger = logger;
 				scope = factory.CreateScope();
 			}
 			public override async Task StartAsync(CancellationToken cancellationToken)
 			{
 				try
 				{
-					bot = scope.ServiceProvider.GetRequiredService<BotWorker>();				
+					bot = scope.ServiceProvider.GetRequiredService<BotWorker>();
 					bot.botInfo = await bot.Client.GetMe(cancellationToken).ConfigureAwait(false);
-					await bot.Client.DeleteMyCommands(cancellationToken:cancellationToken);				
+					await bot.Client.DeleteMyCommands(cancellationToken: cancellationToken);
 				}
 				catch (Exception error)
 				{
@@ -33,19 +33,19 @@ namespace MissAlise.Bot
 					scope.Dispose();
 					return;
 				}
-				
-				await base.StartAsync(cancellationToken).ConfigureAwait(false); 
+
+				await base.StartAsync(cancellationToken).ConfigureAwait(false);
 			}
 
 			protected override async Task ExecuteAsync(CancellationToken cancel)
 			{
 				try
-				{					
+				{
 					logger.LogInformation("Bot {bot}", bot.botInfo);
 					var updatesQueue = new QueuedUpdateReceiver(bot.Client, bot.receiveOptions, bot.HandleErrorAsync);
-					
+
 					await foreach (var update in updatesQueue.WithCancellation(cancel))
-					{						
+					{
 						logger.LogInformation("Got update {Id}", update.Id);
 						await bot.pendingUpdates.Writer.WriteAsync(update).ConfigureAwait(false);
 					}
@@ -59,7 +59,7 @@ namespace MissAlise.Bot
 			public override Task StopAsync(CancellationToken cancellationToken)
 			{
 				scope.Dispose();
-				return	base.StopAsync(cancellationToken);
+				return base.StopAsync(cancellationToken);
 			}
 		}
 	}

@@ -9,6 +9,6 @@ namespace MissAlise.Background
 	}
 
 	public class EventTriggerCollection : BlockingCollection<EventTrigger>, IEventTriggersSource
-	{	
+	{
 	}
 }

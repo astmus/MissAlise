@@ -5,14 +5,14 @@ var builder = DistributedApplication.CreateBuilder(args);
 var username = builder.AddParameter("username", "postgres");
 var password = builder.AddParameter("password", "postgres");
 
-var cache = builder.AddRedis("cache",6606);
+var cache = builder.AddRedis("cache", 6606);
 var db = builder.AddPostgres("psserver", username, password)
 	.WithEndpoint(name: "postgresendpoint", scheme: "tcp", port: 5432, targetPort: 5432, isProxied: false)
 	.WithLifetime(ContainerLifetime.Persistent)
 	.WithImageTag("17.0")
 	// Set the name of the default database to auto-create on container startup.
 	.WithEnvironment(
-	env=>
+	env =>
 	{
 		env.EnvironmentVariables.Add("POSTGRES_DB", "missdb");
 		env.EnvironmentVariables.Add("PGDATA", "/var/lib/postgresql/data/pgdata");

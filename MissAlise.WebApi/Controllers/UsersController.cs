@@ -28,7 +28,7 @@ public class UsersController : ControllerBase
 	{
 		var users = await usersProfiles.AllAsync(cancel);
 		Thread.Sleep(100000);
-		cancel.ThrowIfCancellationRequested();		
+		cancel.ThrowIfCancellationRequested();
 		return users.Select(user => new User() { Id = user.Telegram.Id, DisplayName = user.Telegram.DisplayName }).ToArray();
 	}
 

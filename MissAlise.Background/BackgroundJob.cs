@@ -1,12 +1,12 @@
 using MissAlise.Utils;
 
 namespace MissAlise.Background
-{		
+{
 	public partial record BackgroundJob<TJob> : BackgroundJob where TJob : class
-	{		
+	{
 		public TJob Data { get; set; } = null!;
 		public override string Key { get; init; } = Identity<TJob>.Discriminator;
-		public ICollection<EventTrigger<TJob>> Triggers { get; set; } = new List<EventTrigger<TJob>>();	
+		public ICollection<EventTrigger<TJob>> Triggers { get; set; } = new List<EventTrigger<TJob>>();
 
 		JobState jobState = 0;
 		public JobState GetState()

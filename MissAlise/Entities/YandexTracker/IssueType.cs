@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace MissAlise.Entities.YandexTracker
+﻿namespace MissAlise.Entities.YandexTracker
 {
 	public record IssueType : UriEntity<int>
 	{

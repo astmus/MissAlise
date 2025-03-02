@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MissAlise.Application.Background;
 using MissAlise.Background;
 
 namespace MissAlise.Application.Background.Handlers
@@ -8,7 +7,7 @@ namespace MissAlise.Application.Background.Handlers
 	public class SyncBackgroundTaskHandler : BackgroundJobHandler<SyncDataJob>
 	{
 		private readonly ILogger<SyncBackgroundTaskHandler> logger;
-		private readonly IServiceScopeFactory factory;		
+		private readonly IServiceScopeFactory factory;
 
 		public SyncBackgroundTaskHandler(ILogger<SyncBackgroundTaskHandler> logger/*, GraphServiceClient graphServiceClient*/, IServiceScopeFactory factory)
 		{

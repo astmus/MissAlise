@@ -13,7 +13,7 @@
 		public virtual TimeOnly? EndAt { get; set; }
 		public virtual TimeSpan? Delay { get; set; }
 		public TimeSpan? FreezeTime { get; set; }
-		public abstract bool Check();	
+		public abstract bool Check();
 		public abstract ValueTask Fire(CancellationToken cancel);
 	}
 }

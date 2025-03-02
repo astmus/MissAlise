@@ -8,7 +8,17 @@ using System;
 using System.Text.Json.Serialization;
 namespace MissAlise.OneDrive.Models
 {
-    [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
+    public partial class BaseDeltaFunctionResponse<TParsable> : BaseDeltaFunctionResponse where TParsable:class, IParsable
+    { 
+        public static new TParsable CreateFromDiscriminatorValue(IParseNode parsable)
+		{
+			ArgumentNullException.ThrowIfNull(parsable);
+			return Activator.CreateInstance<TParsable>();
+		}
+
+	}
+
+	[global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
     public partial class BaseDeltaFunctionResponse : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591

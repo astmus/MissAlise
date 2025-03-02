@@ -2,6 +2,9 @@
 using Azure.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Microsoft.Kiota.Authentication.Azure;
+using Microsoft.Kiota.Http.HttpClientLibrary;
 using MissAlise.Application.Interfaces;
 using MissAlise.Entities.OneDrive;
 using MissAlise.OneDrive.Auth;
@@ -19,15 +22,6 @@ namespace MissAlise.OneDrive
 				{
 					PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
 					PropertyNameCaseInsensitive = true
-				})				
-			};
-
-			var camelCase = new RefitSettings()
-			{
-				ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions()
-				{
-					PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-					PropertyNameCaseInsensitive = true
 				})
 			};
 
@@ -35,9 +29,28 @@ namespace MissAlise.OneDrive
 						.AddScoped<TokenCredential, OneDriveTokenProvider>()
 						.AddOptions<AzureAd>().Bind(azureSection);
 
-			services.AddHttpClient("onedrive");
-			services.AddRefitClient<IOneDriveTokenService>(sp=>snakeCase,"onecredentials").ConfigureHttpClient(client => client.BaseAddress = new Uri("https://login.microsoftonline.com"));
-			services.AddRefitClient<IOneDriveClient>(camelCase).ConfigureHttpClient(client => client.BaseAddress = new Uri("https://graph.microsoft.com/v1.0/me/drive")).AddDefaultLogger();		
+			services.AddHttpClient<ApiClient>().AddTypedClient((httpClient, sp) =>
+				{
+					var credentials = sp.GetRequiredService<TokenCredential>();
+					var options = sp.GetRequiredService<IOptions<AzureAd>>().Value;
+					var authProvider = new AzureIdentityAuthenticationProvider(credentials, scopes: options.Scopes.Split(' '));
+					var requestAdapter = new HttpClientRequestAdapter(authProvider, httpClient: httpClient)
+					{ 
+						BaseUrl = "https://graph.microsoft.com/v1.0"
+					};
+
+					return new ApiClient(requestAdapter);
+				})
+				.ConfigurePrimaryHttpMessageHandler(_ =>
+				{
+					var defaultHandlers = KiotaClientFactory.CreateDefaultHandlers();
+					var defaultHttpMessageHandler = KiotaClientFactory.GetDefaultHttpMessageHandler();
+
+					return KiotaClientFactory.ChainHandlersCollectionAndGetFirstLink(
+						defaultHttpMessageHandler, [.. defaultHandlers])!;
+				});
+
+			services.AddRefitClient<IOneDriveTokenService>(sp => snakeCase).ConfigureHttpClient(client => client.BaseAddress = new Uri("https://login.microsoftonline.com"));
 			return services;
 		}
 	}

@@ -1,6 +1,4 @@
-﻿using System.Web;
-
-namespace MissAlise.Entities.OneDrive;
+﻿namespace MissAlise.Entities.OneDrive;
 
 public class AzureAd
 {
@@ -12,5 +10,5 @@ public class AzureAd
 	public string RedirectUri { get; set; }
 	public string Scopes { get; set; }
 	public string AuthPath { get; set; }
-	public string TokenPath { get; set; }	
+	public string TokenPath { get; set; }
 }

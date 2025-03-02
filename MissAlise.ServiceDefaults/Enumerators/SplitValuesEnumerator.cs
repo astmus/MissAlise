@@ -41,23 +41,23 @@
 			switch (index)
 			{
 				case > 0:
-				if (span[index + 1] is char next && !_separators.Contains(next))
-				{
-					var delimiter = span.Slice(index, 1);
-					span = span[(index + 1)..];
-					index = span.IndexOfAny(_separators);
-					if (index != -1)
-						Current = new SplitEntry(span[..index], delimiter);
-					else
-						Current = new SplitEntry(span, delimiter);
-				}
-				return true;
+					if (span[index + 1] is char next && !_separators.Contains(next))
+					{
+						var delimiter = span.Slice(index, 1);
+						span = span[(index + 1)..];
+						index = span.IndexOfAny(_separators);
+						if (index != -1)
+							Current = new SplitEntry(span[..index], delimiter);
+						else
+							Current = new SplitEntry(span, delimiter);
+					}
+					return true;
 				case 0:
-				Current = new SplitEntry(span.Slice(index, 1), span[++index..]);
-				_stringTarget = span.Slice(index + Current.Segment.Length);
-				return true;
+					Current = new SplitEntry(span.Slice(index, 1), span[++index..]);
+					_stringTarget = span.Slice(index + Current.Segment.Length);
+					return true;
 				default:
-				return false;
+					return false;
 			}
 		}
 		public SplitValuesEnumerator GetEnumerator() => this;

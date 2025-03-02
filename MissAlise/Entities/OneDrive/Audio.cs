@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace MissAlise.Entities.OneDrive;
+﻿namespace MissAlise.Entities.OneDrive;
 
 public partial class Audio : DataFile
 {

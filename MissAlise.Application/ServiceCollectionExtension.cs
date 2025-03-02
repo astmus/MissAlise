@@ -20,13 +20,13 @@ namespace MissAlise.Application
 				cfg.Lifetime = ServiceLifetime.Scoped;
 			});
 
-			services.AddScoped<IAuthenticationService, AuthenticationService>();			
+			services.AddScoped<IAuthenticationService, AuthenticationService>();
 			services.AddCascadingAuthenticationState();
 			services.AddAuthentication(options =>
 			{
 				options.DefaultScheme = IdentityConstants.ApplicationScheme;
 				options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-			});			
+			});
 			services.AddAuthorization();
 
 			return services;

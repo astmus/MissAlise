@@ -17,6 +17,7 @@ namespace MissAlise.OneDrive
 	[global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
 	public partial class ApiClient : BaseRequestBuilder
 	{
+		public IRequestAdapter Adapter { get; init; }
 		/// <summary>Provides operations to manage the collection of drive entities.</summary>
 		public global::MissAlise.OneDrive.Drives.DrivesRequestBuilder Drives
 		{
@@ -33,6 +34,7 @@ namespace MissAlise.OneDrive
 		/// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
 		public ApiClient(IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}", new Dictionary<string, object>())
 		{
+			Adapter = requestAdapter;
 			ApiClientBuilder.RegisterDefaultSerializer<JsonSerializationWriterFactory>();
 			//ApiClientBuilder.RegisterDefaultSerializer<TextSerializationWriterFactory>();
 			//ApiClientBuilder.RegisterDefaultSerializer<FormSerializationWriterFactory>();

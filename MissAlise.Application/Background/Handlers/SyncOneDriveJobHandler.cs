@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using MissAlise.Application.Background;
 using MissAlise.Background;
 
 namespace MissAlise.Application.Background.Handlers

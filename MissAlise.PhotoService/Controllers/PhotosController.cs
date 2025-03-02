@@ -79,9 +79,9 @@ namespace MissAlise.Services.Photos.Controllers
 				".bmp" => ImageFormat.bmp,
 				".tiff" => ImageFormat.tiff,
 				".webp" => ImageFormat.webp,
-				_ => throw new ArgumentException("File format exception "+img.Name)
+				_ => throw new ArgumentException("File format exception " + img.Name)
 			};
-			
+
 			var targetPath = Path.Combine(folder.Path, folder.Title ?? string.Empty, $"{args.Name}.{args.Format}");
 			if (System.IO.File.Exists(targetPath))
 				return Conflict($"File name conflict '{Path.GetFileName(targetPath)}'");

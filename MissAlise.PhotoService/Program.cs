@@ -12,9 +12,9 @@ namespace MissAlise.Services.Photos
 			var builder = WebApplication.CreateBuilder(args);
 			builder.AddServiceDefaults();
 			builder.AddRedisDistributedCache(connectionName: "cache");
-			builder.AddRedisOutputCache(connectionName: "cache", configureOptions: options => {});
+			builder.AddRedisOutputCache(connectionName: "cache", configureOptions: options => { });
 
-			builder.Services.AddApplicationServices().AddPersistanceServices(builder.Configuration);			
+			builder.Services.AddApplicationServices().AddPersistanceServices(builder.Configuration);
 			builder.Services.AddControllers().AddJsonOptions(options =>
 			{
 				options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
@@ -25,12 +25,12 @@ namespace MissAlise.Services.Photos
 			builder.Services.AddScoped<IMediaService, FFProbeService>();
 			//builder.Services.AddEndpointsApiExplorer();
 			//builder.Services.AddSwaggerGen();
-			
+
 			var app = builder.Build();
 			app.UseOutputCache();
 			// Configure the HTTP request pipeline.
 			if (app.Environment.IsDevelopment())
-			{				
+			{
 				app.UseDeveloperExceptionPage();
 				//app.UseSwagger();
 				//app.UseSwaggerUI();

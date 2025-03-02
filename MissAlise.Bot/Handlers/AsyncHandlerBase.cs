@@ -1,6 +1,4 @@
 ﻿using MissAlise.Application;
-using MissAlise.Application.Interfaces;
-using Telegram.Bot;
 
 namespace MissAlise.Bot
 {

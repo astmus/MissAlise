@@ -4,11 +4,11 @@ using MissAlise.Utils;
 
 namespace MissAlise.Application.Context
 {
-	internal class HandleContext : ContextItems,  IHandleContext
-	{		
+	internal class HandleContext : ContextItems, IHandleContext
+	{
 		public T GetCurrent<T>(string id = null, bool throwIfNull = false) where T : class
 		{
-			var result =	Get<T>(id ?? Identity<T>.Discrimonator);
+			var result = Get<T>(id ?? Identity<T>.Discrimonator);
 
 			if (throwIfNull)
 				ArgumentNullException.ThrowIfNull(result);
@@ -16,7 +16,7 @@ namespace MissAlise.Application.Context
 			return result;
 		}
 
-		public AppUser CurrentUser 
+		public AppUser CurrentUser
 			=> GetCurrent<AppUser>();
 	}
 }
