@@ -8,7 +8,7 @@ namespace MissAlise.DataBase.Repositories
 	{		
 		protected UserMediaContext ctx;
 
-		public Task<TItem?> GetById<TItem>(int itemId, CancellationToken cancel) where TItem : ItemInfo
+		public Task<TItem?> GetById<TItem>(string itemId, CancellationToken cancel) where TItem : ItemInfo
 			=> ctx.Set<TItem>().FirstOrDefaultAsyncEF(item => item.Id == itemId, cancel);
 		
 		public void Dispose() 

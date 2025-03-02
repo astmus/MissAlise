@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MissAlise.Application.Models;
+using MissAlise.Application.Common;
 using MissAlise.Background;
 using MissAlise.DataBase.Contexts;
 using MissAlise.DataBase.Repositories;
@@ -24,8 +24,8 @@ namespace MissAlise.DataBase
 
 		public static IServiceCollection AddPersistanceServices(this IServiceCollection services, IConfiguration appConfig)
 		{
-			services.AddScoped<IBackgroundJobRepository, BackgroundJobRepository>();
-			services.AddScoped<IUserProfilesRepository, UserProfilesRepository>()
+			services.AddScoped<IBackgroundJobRepository, BackgroundJobRepository>()			
+						//.AddScoped<IUserProfilesRepository, UserProfilesRepository>()
 						.AddScoped<IUserRepository, UserRepository>()
 						.AddScoped<IPhotoRepository, PhotoRepository>()
 						//.AddScoped<IUserStore<AppUser>, UserStore<AppUser>>()
@@ -41,7 +41,8 @@ namespace MissAlise.DataBase
 			.AddDefaultTokenProviders();
 
 			services.AddDbContext<IdentityContext>(options =>
-				options.UseSqlite(appConfig.GetConnectionString("DefaultIdentityConnection")));
+				options.UseLazyLoadingProxies().EnableSensitiveDataLogging()
+							.UseSqlite(appConfig.GetConnectionString("DefaultIdentityConnection")));
 							
 			var settings = MongoClientSettings.FromConnectionString("mongodb://localhost:27017");
 #if DEBUG
@@ -54,11 +55,11 @@ namespace MissAlise.DataBase
 			services.AddSingleton<IMongoDatabase>(sp =>
 			{
 				var client = sp.GetRequiredService<IMongoClient>();
-				return client.GetDatabase("missdb");
+				return client.GetDatabase("postgres");
 			});
 			
 			services.AddDbContextPool<UserMediaContext>(options =>
-				options.UseNpgsql(appConfig.GetConnectionString("missdb")));
+				options.UseNpgsql(appConfig.GetConnectionString("postgres")));
 			return services;
 		}
 	}

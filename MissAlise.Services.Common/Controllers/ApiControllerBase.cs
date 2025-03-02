@@ -2,7 +2,7 @@ using System.Net.Mime;
 using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MissAlise.Application.Requests;
+using MissAlise.Application.Common;
 using MissAlise.Interfaces;
 
 

@@ -7,11 +7,12 @@ using Azure.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.Graph;
+using Microsoft.Graph.Groups.Item.Onenote.Notebooks.GetNotebookFromWebUrl;
 using Microsoft.Kiota.Authentication.Azure;
 using Microsoft.Kiota.Http.HttpClientLibrary;
-using MissAlise.Application.Abstractions;
+using MissAlise.Application.Common;
 using MissAlise.Application.Interfaces;
-using MissAlise.Application.Models;
+using MissAlise.Application.Services.Authentication;
 using MissAlise.Entities.OneDrive;
 using MissAlise.OneDrive.Auth;
 using MissAlise.OneDrive.Drives.Item.Items.Item.Delta;
@@ -20,8 +21,7 @@ using User = MissAlise.Entities.OneDrive.User;
 
 namespace MissAlise.OneDrive
 {
-
-	public class OneDriveService : IOneDriveService
+	internal class OneDriveService : IOneDriveService
 	{
 		private readonly AzureAd azure;
 		private readonly IOneDriveClient oneDrive;
@@ -29,9 +29,9 @@ namespace MissAlise.OneDrive
 		private readonly TokenCredential tkn;
 		private readonly IHttpClientFactory fac;
 		private readonly IOneDriveTokenService _tokenService;
-		private readonly UserManager<AppUser> _manager;
+		private readonly IAuthenticationService _manager;
 
-		public OneDriveService(IOptions<AzureAd> azure, TokenCredential tkn, IOneDriveClient oneDrive, IHandleContext ctx, IHttpClientFactory fac, IOneDriveTokenService tokenService, UserManager<AppUser> manager)
+		public OneDriveService(IOptions<AzureAd> azure, TokenCredential tkn, IOneDriveClient oneDrive, IHandleContext ctx, IHttpClientFactory fac, IOneDriveTokenService tokenService, IAuthenticationService manager)
 		{
 			this.azure = azure.Value;
 			this.oneDrive = oneDrive;
@@ -71,6 +71,9 @@ namespace MissAlise.OneDrive
 					varo++;
 					sb.AppendLine(item.Name + " state" + item.Deleted?.State);
 					return true;
+				}, requestConfigurator:request=> {
+			
+					return request;
 				});
 			}
 			catch (Exception er)
@@ -87,14 +90,12 @@ namespace MissAlise.OneDrive
 			return null;
 		}
 
-		
-
 		public async Task<IEnumerable<ItemInfo>> GetRootItems(CancellationToken cancel)
 		{
 			//var resp = await client.Drives["ff"].Items[""].Delta.GetAsDeltaGetResponseAsync();
 			//var items = await oneClient.RootItems(ctx, cancel);
-
-			var res = await oneDrive.RootDelta(ctx, cancel);
+			
+			var res = await oneDrive.RootDelta(ctx.CurrentUser.AccessData.AccessToken, cancel);
 			List<ItemInfo> Items = new List<ItemInfo>();
 			await foreach (var item in GetSynchronizator().WithCancellation(cancel))
 			{
@@ -119,29 +120,34 @@ namespace MissAlise.OneDrive
 			return builder.Uri;
 		}
 
-		public DataSynchronizator GetSynchronizator()
+		public DataSynchronizator GetSynchronizator(Expression<Func<Microsoft.Graph.Models.DriveItem, object>> select = null)
 		{
-			return new OneDriveDataSynchronizator(oneDrive, ctx);
+			string selQuery = null;
+			if (select != null)
+			{
+				var visitor = new ODataVisitor();
+				visitor.Visit(select);
+				selQuery = visitor.QueryString;
+			}
+			return new OneDriveDataSynchronizator(oneDrive, ctx, selQuery?.ToLower());
 		}
 
 		public async Task<Result<AppUser>> RefreshUserAccessTokenAsync(AppUser user, CancellationToken cancel)
 		{
 			var response = await _tokenService.RefreshCredentials(azure, user.AccessData.RefreshToken, cancel).ConfigureAwait(false);
 			if (response.IsSuccessful)
-			{
+			{				
 				user.AccessData = response.Content;
 				user.AccessData.ExpiredAfter = DateTimeOffset.UtcNow.AddSeconds(response.Content.ExpiresIn);
-				await _manager.UpdateAsync(user).ConfigureAwait(false);
+				var result = await _manager.UpdateUserAsync(user).ConfigureAwait(false);
 				return user;
 			}
 			else
 				return Result.Fail<AppUser>(response.Error.Content);
-		}
-
-		public IOrderedQueryable<Microsoft.Graph.Models.DriveItem> DataContext { get; }
+		}	
 	}
 
-	public class DriveDataContext : OneDriveQueryable<DriveItem>
+	internal class DriveDataContext : OneDriveQueryable<Microsoft.Graph.Models.DriveItem>
 	{
 		public DriveDataContext(ODataQueryProvider provider) : base(provider)
 		{
@@ -152,7 +158,7 @@ namespace MissAlise.OneDrive
 		}
 	}
 
-	public class OneDriveQueryable<T> : IOrderedQueryable<T>
+	internal class OneDriveQueryable<T> : IOrderedQueryable<T>
 	{
 		protected readonly Expression expression;
 		protected ODataQueryProvider provider;
@@ -187,7 +193,7 @@ namespace MissAlise.OneDrive
 				var query = new StringBuilder(128);
 				foreach (string key in oData.Keys)
 				{
-					query.Append(key + "=");
+					//query.Append(key + "=");
 					query.AppendJoin(",", oData.GetValues(key));
 					query.Append("&");
 				}
@@ -270,15 +276,8 @@ namespace MissAlise.OneDrive
 			=> base.VisitDynamic(node);
 	}
 
-	public class ODataQueryProvider : IQueryProvider
-	{
-		private readonly IOneDriveClient client;
-
-		public ODataQueryProvider(IOneDriveClient client)
-		{
-			this.client = client;
-		}
-
+	internal class ODataQueryProvider : IQueryProvider
+	{	
 		public IQueryable CreateQuery(Expression expression)
 		{
 			ArgumentNullException.ThrowIfNull(expression);

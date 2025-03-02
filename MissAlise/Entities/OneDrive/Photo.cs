@@ -18,7 +18,7 @@ public partial class Photo : DataFile
 
 	public int? Orientation { get; set; }
 
-	public DateTime? Takendatetime { get; set; }
+	public DateTimeOffset? Takendatetime { get; set; }
 
 	public int? Height { get; set; }
 

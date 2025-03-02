@@ -1,6 +1,7 @@
 ﻿using MediatR;
+using MissAlise.Application.Common;
 
-namespace MissAlise.Application.Abstractions.RequestHandler
+namespace MissAlise.Application.Common.RequestHandler
 {
     public interface ICommand : IRequest<Result>
     {

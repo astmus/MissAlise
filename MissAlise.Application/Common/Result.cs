@@ -1,4 +1,4 @@
-﻿namespace MissAlise.Application.Abstractions
+﻿namespace MissAlise.Application.Common
 {
 	public class Result
 	{

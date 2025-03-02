@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Identity;
 using MissAlise.Entities.OneDrive;
 
-namespace MissAlise.Application.Models
+namespace MissAlise.Application.Common
 {
 	public record Claimant(string Id, string Name);
 	public class AppUser : IdentityUser
-	{
-		public AccessInformation? AccessData { get; set; }
+	{		
+		public virtual AccessInformation? AccessData { get; set; }
 	}
 }

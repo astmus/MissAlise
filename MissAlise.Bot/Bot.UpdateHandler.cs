@@ -2,8 +2,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MissAlise.Application.Common;
 using MissAlise.Application.Interfaces;
-using MissAlise.Application.Models;
+
 using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
 using Telegram.Bot;
@@ -76,7 +77,7 @@ namespace MissAlise.Bot
 					var sender = update.GetCurrentUser();
 					var ctx = services.GetRequiredService<IHandleContext>();					
 					ctx.Set(update);
-					ctx.Set(new Claimant(sender.Id.ToString(), sender.Username), "user.Id");
+					ctx.Set(new Claimant(sender.Id.ToString(), sender.Username));
 					ctx.Set(sender);
 
 					Task currentTask = update switch

@@ -1,4 +1,4 @@
-﻿namespace MissAlise.Application.Requests
+﻿namespace MissAlise.Application.Common
 {
 	/// <summary>
 	/// Параметры пейджинга

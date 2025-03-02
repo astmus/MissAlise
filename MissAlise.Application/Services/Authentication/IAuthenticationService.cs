@@ -1,4 +1,4 @@
-﻿using MissAlise.Application.Models;
+﻿using MissAlise.Application.Common;
 
 namespace MissAlise.Application.Services.Authentication
 {
@@ -8,6 +8,8 @@ namespace MissAlise.Application.Services.Authentication
 		Task<RegisterUserResponse> AddUserAsync(AppUser pendingUser);
 		Task<bool> UserExistsAsync(AppUser user);
 		Task<bool> LoginUserAsync(string username, string password);
+		Task<AppUser> LoginUserAsync(string userId);
+		Task<bool> UpdateUserAsync(AppUser user);
 		Task LogoutUserAsync();
 	}
 }

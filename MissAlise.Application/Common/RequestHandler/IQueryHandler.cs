@@ -1,6 +1,7 @@
 ﻿using MediatR;
+using MissAlise.Application.Common;
 
-namespace MissAlise.Application.Abstractions.RequestHandler
+namespace MissAlise.Application.Common.RequestHandler
 {
     // CQRS QUERY PATTERN
     // Query Handler responsible for handling queries of type IQuery<TResponse>

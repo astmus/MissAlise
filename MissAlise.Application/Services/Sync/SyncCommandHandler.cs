@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using MissAlise.Application.Abstractions;
-using MissAlise.Application.Abstractions.RequestHandler;
+using MissAlise.Application.Common;
+using MissAlise.Application.Common.RequestHandler;
 using MissAlise.Application.Interfaces;
 using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
@@ -99,13 +99,22 @@ namespace MissAlise.Application.Services.Sync
 		}
 
 		public async Task<Result> Handle(SyncCommand request, CancellationToken cancel)
-		{
+		{			
 			List<ItemInfo> Items = new List<ItemInfo>();
-			await foreach (var item in oneDrive.GetSynchronizator().WithCancellation(cancel))
-			{
-				Items.Add(item);
-			}
+			var repository = await usersRepository.LoadForCurrentUserAsync(cancel);
 			
+			await foreach (var item in oneDrive.GetSynchronizator(f=>new { f.Id,f.Name,f.File,f.FileSystemInfo,f.Video,f.Photo,f.Size,f.ParentReference}).WithCancellation(cancel))
+			{
+				if (item is not Photo && item is not Video)
+					continue;
+
+				if (item.Parent == null)
+				{
+					Items.Add(item);
+					repository.RootFolder.Children.Add(item);
+				}
+			}
+			var result = await repository.SaveAsync();
 			return Result.Successful;
 		}
 

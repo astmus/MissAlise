@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using MissAlise.Application.Models;
-using MissAlise.Application.Services.User;
+using MissAlise.Application.Common;
 
-namespace MissAlise.DataBase.Users
+namespace MissAlise.Application.Services.User
 {
 	public class UserService : IUserService
 	{
@@ -32,27 +31,6 @@ namespace MissAlise.DataBase.Users
 			var result = await _userManager.AddToRoleAsync(user, roleName);
 			if (!result.Succeeded)
 				throw new Exception("Failed to add user role.");
-		}
-
-		public async Task<bool> CurrentUserCanCreateArticleAsync()
-		{
-			var user = await GetCurrentUserAsync();
-			if (user is null)
-				throw new Exception("UserNotAuthorizedException()");
-			var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
-			var isWriter = await _userManager.IsInRoleAsync(user, "Writer");
-			return isAdmin || isWriter;
-		}
-
-		public async Task<bool> CurrentUserCanEditArticleAsync(int articleId)
-		{
-			var user = await GetCurrentUserAsync();
-			if (user is null)
-				return false;
-			var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
-			var isWriter = await _userManager.IsInRoleAsync(user, "Writer");
-			
-			return isAdmin || isWriter;
 		}
 
 		public async Task<string> GetCurrentUserIdAsync()

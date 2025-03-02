@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MissAlise.Application.Common;
+using MissAlise.Application.Interfaces;
 using MissAlise.DataBase.Contexts;
 using MissAlise.Interfaces;
 using MongoDB.Driver;
@@ -7,13 +9,20 @@ using User = MissAlise.Entities.OneDrive.User;
 
 namespace MissAlise.DataBase.Repositories
 {
-	internal class UserRepository : IUserRepository
+	internal class UserRepository : IUserRepository, IUserStorage
 	{
 		private readonly UserMediaContext ctx;
+		private readonly IHandleContext handleCtx;
 		const string defPath = @"m:\Sync\";
-		public UserRepository(UserMediaContext ctx)
+
+		public User? Owner { get; internal set; }
+		public Folder RootFolder { get; set; }
+		public Func<Task<int>> SaveAsync { get; internal set; }
+
+		public UserRepository(UserMediaContext ctx, IHandleContext handleCtx)
 		{
 			this.ctx = ctx;
+			this.handleCtx = handleCtx;
 		}
 
 		public async Task<IUserStorage> GetUserStorageAsync(User user, CancellationToken cancel)
@@ -35,24 +44,42 @@ namespace MissAlise.DataBase.Repositories
 			}
 			var userStroage = await ctx.Folders.Include(u => u.Children).AsSplitQuery().FirstOrDefaultAsync(u => u.Id.ToString() == user.Id).ConfigureAwait(false);
 
-			return new UserStorage()
+			SaveAsync =()=> this.ctx.SaveChangesAsync(cancel);
+			return this;
+			//return new UserStorage()
+			//{
+			//	RootFolder = new Folder()
+			//	{
+			//		Title = user.DisplayName,
+			//		CreatedDateTime = DateTime.UtcNow,
+			//		ModifieDateTime = DateTime.UtcNow,					
+			//		Path = Path.Combine(defPath, user.DisplayName)
+			//	},
+			//	SaveAsync = () => ctx.SaveChangesAsync(cancel)
+			//};
+		}
+
+		public async Task<IUserStorage?> LoadForCurrentUserAsync(CancellationToken cancel)
+		{
+			if (handleCtx.CurrentUser is not AppUser appUser)
+				return null;
+
+			if (await ctx.Folders.Include(u => u.Children).AsSplitQuery().FirstOrDefaultAsync(u => u.Title == appUser.UserName).ConfigureAwait(false) is Folder userFolder)
+				RootFolder = userFolder;
+			else
 			{
 				RootFolder = new Folder()
 				{
-					Title = user.DisplayName,
-					CreatedDateTime = DateTime.UtcNow,
-					ModifieDateTime = DateTime.UtcNow,					
-					Path = Path.Combine(defPath, user.DisplayName)
-				},
-				SaveAsync = () => ctx.SaveChangesAsync(cancel)
-			};
+					Title = appUser.UserName,
+					CreatedDateTime = DateTimeOffset.UtcNow,
+					ModifieDateTime = DateTimeOffset.UtcNow,
+					Path = Path.Combine(defPath, appUser.UserName ?? appUser.Id)
+				};
+				await ctx.Folders.AddAsync(RootFolder, cancel);
+				await ctx.SaveChangesAsync(cancel);
+			}
+			SaveAsync = () => ctx.SaveChangesAsync(cancel);
+			return this;
 		}
-	}
-
-	internal class UserStorage : IUserStorage
-	{
-		public User? Owner { get; internal set; }
-		public required Folder RootFolder { get; set; }
-		public required Func<Task<int>> SaveAsync { get; internal set; }
-	}
+	}	
 }

@@ -1,38 +1,54 @@
 ﻿using System.Web;
+using Microsoft.Graph.Drives.Item.Items.Item.Workbook.Worksheets.Item.Charts.ItemWithName;
 using MissAlise.Application.Interfaces;
 using MissAlise.Entities.OneDrive;
 using MissAlise.OneDrive.Drives.Item.Items.Item.Delta;
 using MissAlise.OneDrive.Models;
+using Refit;
 
 namespace MissAlise.OneDrive
 {
-	public class OneDriveDataSynchronizator : DataSynchronizator
+	internal class OneDriveDataSynchronizator : DataSynchronizator
 	{
 		private DriveItemsDelta driveDelta;
 		private readonly IOneDriveClient client;
 		private readonly IHandleContext ctx;
-		public OneDriveDataSynchronizator(IOneDriveClient client, IHandleContext ctx)
+		private readonly string _select;
+
+		public OneDriveDataSynchronizator(IOneDriveClient client, IHandleContext ctx, string select)
 		{
 			this.client = client;
-			this.ctx = ctx;			
+			this.ctx = ctx;
+			_select = select;
 		}
 
 		public override async IAsyncEnumerator<ItemInfo> GetAsyncEnumerator(CancellationToken cancellationToken = default)
 		{
-			var deltaResponse = await client.RootDelta(ctx, cancellationToken).ConfigureAwait(false);
+			ApiResponse<DriveItemsDelta> deltaResponse = null;
+			if (_select == null)
+				deltaResponse = await client.RootDelta(ctx.CurrentUser.AccessData.AccessToken, cancellationToken).ConfigureAwait(false);
+			else
+				deltaResponse = await client.RootDeltaSelect(ctx.CurrentUser.AccessData.AccessToken,_select, cancellationToken).ConfigureAwait(false);
+
 			driveDelta = deltaResponse.Content;
 
 			while (driveDelta != null && driveDelta.Value.Any() && !cancellationToken.IsCancellationRequested)
 			{
 				foreach (var item in driveDelta.Value)
-					yield return CreateItem(item);
+				{
+					var localItem = CreateItem(item);
+					if (localItem == null || item.ParentReference.Id == null)
+						continue;
+
+					yield return localItem;
+				}
 
 				if (Uri.TryCreate(driveDelta.OdataNextLink, default, out var nextUrl) == false)
 					yield break;
 
 				string token = HttpUtility.ParseQueryString(nextUrl.Query).Get("token");
 
-				var response = await client.DeltaShift(token, ctx, cancellationToken).ConfigureAwait(false);
+				var response = await client.DeltaShift(token, ctx.CurrentUser.AccessData.AccessToken, cancellationToken).ConfigureAwait(false);
 				driveDelta = response.Content;
 			}
 		}
@@ -42,9 +58,9 @@ namespace MissAlise.OneDrive
 			ItemInfo result = item switch
 			{
 				{ Folder: not null } => new Entities.OneDrive.Folder()
-				{					
+				{
 					Title = $"[{item.Name}]",
-					Path = item.ParentReference.Path,
+					Path = Path.Combine(item.ParentReference.Path ?? string.Empty, item.Name),
 					MimeType = "folder"
 				},
 				{ Image: not null } => new Entities.OneDrive.Photo()
@@ -56,7 +72,7 @@ namespace MissAlise.OneDrive
 					Iso = item.Photo.Iso,
 					Cameramake = item.Photo.CameraMake,
 					Cameramodel = item.Photo.CameraModel,
-					Takendatetime = item.Photo.TakenDateTime?.DateTime
+					Takendatetime = item.Photo.TakenDateTime
 				},
 				{ Video: not null } => new Entities.OneDrive.Video()
 				{
@@ -80,9 +96,11 @@ namespace MissAlise.OneDrive
 					Year = item.Audio.Year,
 					Genre = item.Audio.Genre
 				},
-				{ File: not null } => new Entities.OneDrive.DataFile()
+				{ File: not null } => new Entities.OneDrive.DataFile(),
+				_ => null
 			};
-
+			if (result == null)
+				return result;
 			result.Title = item.Name;
 			result.MimeType = item.File?.MimeType;
 			result.CreatedDateTime = item.FileSystemInfo.CreatedDateTime;

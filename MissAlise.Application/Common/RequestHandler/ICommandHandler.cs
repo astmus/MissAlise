@@ -1,6 +1,7 @@
 ﻿using MediatR;
+using MissAlise.Application.Common;
 
-namespace MissAlise.Application.Abstractions.RequestHandler
+namespace MissAlise.Application.Common.RequestHandler
 {
     // CQRS Pattern
     // Command Handler for commands that do not return any specific result other than success or failure

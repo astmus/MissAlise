@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
+using MissAlise.Application.Common;
 using MissAlise.Application.Dto;
-using MissAlise.Application.Requests;
 using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
 using MissAlise.Services.Controllers;
@@ -32,21 +32,21 @@ namespace MissAlise.Services.Photos.Controllers
 			return Ok(result);
 		}
 
-		[HttpGet("{id:int}")]
+		[HttpGet("{id:string}")]
 		[OutputCache(Duration = 60)]
-		public async Task<ActionResult<IEnumerable<Application.Dto.Photo>>> GetPhoto([FromRoute] int id, CancellationToken cancel)
+		public async Task<ActionResult<IEnumerable<Application.Dto.Photo>>> GetPhoto([FromRoute] string id, CancellationToken cancel)
 		{
 			var photo = await db.FirstAsync(photo => photo.Id == id, cancel).ConfigureAwait(false);
 			if (photo == null)
 				return NotFound(id);
 
-			photo.Folder = null;
+			photo.Parent = null;
 			return Ok(photo);
 		}
 
-		[HttpGet("{id:int}/details")]
+		[HttpGet("{id:string}/details")]
 		[OutputCache(Duration = 60)]
-		public async Task<ActionResult<MediaInfo>> GetPhotoDetails([FromServices] IMediaService media, [FromRoute] int id, CancellationToken cancel)
+		public async Task<ActionResult<MediaInfo>> GetPhotoDetails([FromServices] IMediaService media, [FromRoute] string id, CancellationToken cancel)
 		{
 			var photo = await db.FirstAsync(photo => photo.Id == id, cancel).ConfigureAwait(false);
 			if (photo == null)
@@ -62,8 +62,8 @@ namespace MissAlise.Services.Photos.Controllers
 			return Ok(info);
 		}
 
-		[HttpPost("{id:int}")]
-		public async Task<ActionResult<MediaInfo>> CreateImage([FromServices] IMediaService media, [FromRoute] int id, [FromBody] ApplyImageParams args, CancellationToken cancel)
+		[HttpPost("{id:string}")]
+		public async Task<ActionResult<MediaInfo>> CreateImage([FromServices] IMediaService media, [FromRoute] string id, [FromBody] ApplyImageParams args, CancellationToken cancel)
 		{
 			var img = await db.FirstAsync(photo => photo.Id == id, cancel).ConfigureAwait(false);
 			if (img == null)
@@ -103,7 +103,7 @@ namespace MissAlise.Services.Photos.Controllers
 				Cameramodel = img.Cameramodel,
 				Name = info.Format.Filename,
 				Size = int.Parse(info.Format.Size),
-				Folder = folder,
+				Parent = folder,
 				MimeType = "image/" + info.Streams[0].CodecName,
 				CreatedDateTime = DateTimeOffset.UtcNow,
 				ModifieDateTime = DateTimeOffset.UtcNow

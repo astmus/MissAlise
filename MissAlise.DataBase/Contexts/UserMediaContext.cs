@@ -57,5 +57,5 @@ public partial class UserMediaContext : DbContext
 	//protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	//	=> optionsBuilder.UseNpgsql("Host=192.168.0.3;Database=missdb;Username=postgres;Password=postgres");
 	//protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-	//	=> optionsBuilder.UseNpgsql("Host=localhost;Database=missdb;Username=postgres;Password=postgres");
+		//=> optionsBuilder.UseNpgsql("Host=localhost:5432;Database=postgres;Username=postgres;Password=postgres");
 }

@@ -1,5 +1,5 @@
-﻿using MissAlise.Application.Interfaces;
-using MissAlise.Application.Models;
+﻿using MissAlise.Application.Common;
+using MissAlise.Application.Interfaces;
 using MissAlise.Utils;
 
 namespace MissAlise.Application.Context

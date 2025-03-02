@@ -1,8 +1,8 @@
-﻿using MissAlise.Application.Models;
+﻿using MissAlise.Application.Common;
 using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
 
-namespace MissAlise
+namespace MissAlise.Application
 {
 	public static class ApplicationExtensions
 	{

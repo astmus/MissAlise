@@ -1,6 +1,7 @@
 ﻿using MediatR;
+using MissAlise.Application.Common;
 
-namespace MissAlise.Application.Abstractions.RequestHandler
+namespace MissAlise.Application.Common.RequestHandler
 {
     // CQRS QUERY PATTERN
     // The IQuery interface inherits from the IRequest interface, meaning it can be processed by a mediator.

@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using MissAlise.Application.Models;
+using MissAlise.Application.Common;
 using MissAlise.Entities.OneDrive;
-
 
 namespace MissAlise.DataBase.Contexts
 {
@@ -22,10 +21,11 @@ namespace MissAlise.DataBase.Contexts
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			base.OnModelCreating(modelBuilder);
+			base.OnModelCreating(modelBuilder);			
 			modelBuilder.Entity<User>().ToTable("PendingUsers");
-			modelBuilder.Entity<AccessInformation>().HasKey(acc=>acc.IdToken);
-			modelBuilder.Entity<AppUser>().HasOne(e => e.AccessData).WithOne().HasForeignKey<AccessInformation>("UserId")/*.OnDelete(DeleteBehavior.Cascade)*/;
+			modelBuilder.Entity<AccessInformation>().HasKey(c=> c.IdToken);
+			modelBuilder.Entity<AppUser>().HasOne(e => e.AccessData).WithOne().HasForeignKey<AccessInformation>("UserId").IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+
 			//.HasForeignKey<UserCredentials>(c => c.AppUserId);
 		}
 	}

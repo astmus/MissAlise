@@ -1,16 +1,15 @@
-﻿using Microsoft.Graph;
+﻿using System.Linq.Expressions;
+using Microsoft.Graph;
 using Microsoft.Graph.Models;
-using MissAlise.Application.Abstractions;
-using MissAlise.Application.Models;
+using MissAlise.Application.Common;
 using MissAlise.Entities.OneDrive;
 using User = MissAlise.Entities.OneDrive.User;
 
 namespace MissAlise.Application.Interfaces
 {
 	public interface IOneDriveService
-	{
-		IOrderedQueryable<DriveItem> DataContext { get; }
-		DataSynchronizator GetSynchronizator();
+	{		
+		DataSynchronizator GetSynchronizator(Expression<Func<DriveItem, object>> select = null);
 		Task<User> GetOwnerInfo(CancellationToken cancel);
 		Uri CreateAuthorizeLink(object stateIdentifier);
 		Task<IEnumerable<ItemInfo>> GetRootItems(CancellationToken cancel);

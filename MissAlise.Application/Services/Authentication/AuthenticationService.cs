@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using MissAlise.Application.Models;
+using MissAlise.Application.Common;
 
 namespace MissAlise.Application.Services.Authentication
 {
@@ -57,5 +57,14 @@ namespace MissAlise.Application.Services.Authentication
 
 		public Task<bool> UserExistsAsync(AppUser user) 
 			=> _userManager.Users.AnyAsync(u=> u.Id == user.Id);
+
+		public Task<AppUser> LoginUserAsync(string userId)
+			=> _userManager.FindByIdAsync(userId);
+
+		public async Task<bool> UpdateUserAsync(AppUser user)
+		{
+			var result = await _userManager.UpdateAsync(user);
+			return result.Succeeded;
+		}
 	}
 }

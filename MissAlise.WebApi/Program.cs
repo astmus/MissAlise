@@ -8,8 +8,8 @@ using Microsoft.Extensions.Options;
 using MissAlise.Application;
 using MissAlise.Application.Background;
 using MissAlise.Application.Background.Handlers;
+using MissAlise.Application.Common;
 using MissAlise.Application.Interfaces;
-using MissAlise.Application.Models;
 using MissAlise.Application.Services.User;
 using MissAlise.Background;
 using MissAlise.Bot;
@@ -95,17 +95,16 @@ public class Program
 		var appUser = await manager.Users.Include(user => user.AccessData).SingleOrDefaultAsync(user => user.Id == state);
 		appUser.AccessData = null;
 		var result = await manager.UpdateAsync(appUser);
-		// AccessData будет множится в таблице, потому что у токена будет новый id. Порешать с EF как нить потом
+		
 		appUser.AccessData = response.Content;
 		appUser.AccessData.ExpiredAfter = DateTimeOffset.UtcNow.AddSeconds(response.Content.ExpiresIn);
-		appUser.EmailConfirmed = true;		
+		appUser.EmailConfirmed = true;	
 		result = await manager.UpdateAsync(appUser);
 		if (result.Succeeded)
 			return Results.Text("<html><body>Авторизация закончена успешно. Вы можете закрыть это окно</body></html>", "text/html", Encoding.UTF8, 200);
 		else
 			return Results.Text($"<html><body>Ошибка авторизации. {string.Join('\n', result.Errors.Select(sel=> sel.Description))}</body></html>", "text/html", Encoding.UTF8, 401);
 	}
-	//await ctx.RequestServices.GetService<IAuthorizationCompleter>()?.AuthorizationCompleted(state, response.Content, cancel);
 
 	static void ApplyMapping(IServiceCollection services)
 	{

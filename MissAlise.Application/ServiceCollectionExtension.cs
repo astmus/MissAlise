@@ -16,17 +16,18 @@ namespace MissAlise.Application
 			services.AddMediatR(cfg =>
 			{
 				cfg.RegisterServicesFromAssemblyContaining<ContextItems>();
-				cfg.AddBehavior<AuthBehavior>();				
+				cfg.AddBehavior<AuthBehavior>(ServiceLifetime.Scoped);
+				cfg.Lifetime = ServiceLifetime.Scoped;
 			});
 
 			services.AddScoped<IAuthenticationService, AuthenticationService>();			
 			services.AddCascadingAuthenticationState();
-			services.AddAuthorization();
 			services.AddAuthentication(options =>
 			{
 				options.DefaultScheme = IdentityConstants.ApplicationScheme;
 				options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
 			});			
+			services.AddAuthorization();
 
 			return services;
 		}

@@ -10,6 +10,6 @@ namespace MissAlise.Interfaces
 		Task<T> AddAsync(T item, CancellationToken cancel);
 		Task<T?> FirstAsync(Expression<Func<T, bool>> predicate, CancellationToken cancel);
 		Task DeleteAsync(Expression<Func<T, bool>> predicate, CancellationToken cancel);
-		Task<TItem?> GetById<TItem>(int itemId, CancellationToken cancel) where TItem : ItemInfo;
+		Task<TItem?> GetById<TItem>(string itemId, CancellationToken cancel) where TItem : ItemInfo;
 	}
 }

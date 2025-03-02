@@ -2,9 +2,8 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using MissAlise.Application;
-using MissAlise.Application.Abstractions;
+using MissAlise.Application.Common;
 using MissAlise.Application.Interfaces;
-using MissAlise.Application.Models;
 using MissAlise.Application.Services.Authentication;
 using MissAlise.Application.Services.Sync;
 using Telegram.Bot;
@@ -35,21 +34,21 @@ namespace MissAlise.Bot.Handlers
 		protected override async Task HandleAsync(Message data, CancellationToken cancel)
 		{
 			Result res = null;
+
 			if (data.Text == "/sync")
 			{
 				res = await mm.Send(new SyncCommand(), cancel).ConfigureAwait(false);
 			}
 
+				var info = await _oneService.GetOwnerInfo(cancel);
 			if (res is not Result<UnauthorizedAccessException> fail)
 			{
-				var info = await _oneService.GetOwnerInfo(cancel);
 				return;
 			}
-
+						
 			// нижележащее по хорошему бы в базовый класс так как "неавторизованность" может и не с Message начинаться
 			var tgUser = _ctx.GetCurrent<Telegram.Bot.Types.User>();
 			var appUser = _mapper.Map<AppUser>(tgUser);
-
 			if (await _authService.UserExistsAsync(appUser) == false)
 			{
 				var result = await _authService.AddUserAsync(appUser).ConfigureAwait(false);
@@ -59,7 +58,7 @@ namespace MissAlise.Bot.Handlers
 					return;
 				}
 			}
-			
+
 			var link = _oneService.CreateAuthorizeLink(data.Chat.Id);
 			await _bot.Client.DeleteMyCommands().ConfigureAwait(false);
 			await _bot.Client.SetChatMenuButton(data.Chat.Id, new MenuButtonWebApp() { Text = "Авторизоваться", WebApp = new WebAppInfo(link.ToString()) }, cancel).ConfigureAwait(false);

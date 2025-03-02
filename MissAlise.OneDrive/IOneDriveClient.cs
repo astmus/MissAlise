@@ -5,19 +5,23 @@ using Refit;
 
 namespace MissAlise.OneDrive
 {
-	public interface IOneDriveClient
+	[Headers("Authorization: Bearer")]
+	internal interface IOneDriveClient
 	{
 		[Get("/root/children")]
-		Task<ApiResponse<IEnumerable<DriveItem>>> RootChildren([Property] IHandleContext ctx, CancellationToken cancel);
+		Task<ApiResponse<IEnumerable<DriveItem>>> RootChildren([Authorize] string authToken, CancellationToken cancel);
 
-		[Get("/root/delta?$select=name,folder,parentReference,size,id,createdDateTime,file,@microsoft.graph.downloadUrl,fileSystemInfo,photo,image,audio,video")]
-		Task<ApiResponse<DriveItemsDelta>> RootDelta([Property] IHandleContext ctx, CancellationToken cancel);
+		[Get("/root/delta")]//?$select=name,folder,parentReference,size,id,createdDateTime,file,@microsoft.graph.downloadUrl,fileSystemInfo,photo,image,audio,video
+		Task<ApiResponse<DriveItemsDelta>> RootDelta([Authorize] string authToken, CancellationToken cancel);
 
 		[Get("/root/delta")]
-		Task<ApiResponse<DriveItemsDelta>> DeltaShift(string token, [Property] IHandleContext ctx, CancellationToken cancel);
+		Task<ApiResponse<DriveItemsDelta>> RootDeltaSelect([Authorize] string authToken, [AliasAs("$select")]string select, CancellationToken cancel);
+
+		[Get("/root/delta")]
+		Task<ApiResponse<DriveItemsDelta>> DeltaShift(string token, [Authorize] string authToken, CancellationToken cancel);
 
 		[Get("/root/delta?{query}")]
 		[QueryUriFormat(UriFormat.Unescaped)]
-		Task<ApiResponse<DriveItemsDelta>> DeltaQuery(string query, [Property] IHandleContext ctx, CancellationToken cancel);
+		Task<ApiResponse<DriveItemsDelta>> DeltaQuery(string query, [Authorize] string authToken, CancellationToken cancel);
 	}
 }

@@ -13,7 +13,7 @@ namespace MissAlise.OneDrive
 	{
 		public static IServiceCollection AddOneDriveService(this IServiceCollection services, IConfiguration azureSection)
 		{
-			var settings = new RefitSettings()
+			var snakeCase = new RefitSettings()
 			{
 				ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions()
 				{
@@ -21,7 +21,8 @@ namespace MissAlise.OneDrive
 					PropertyNameCaseInsensitive = true
 				})				
 			};
-			var settings2 = new RefitSettings()
+
+			var camelCase = new RefitSettings()
 			{
 				ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions()
 				{
@@ -32,11 +33,11 @@ namespace MissAlise.OneDrive
 
 			services.AddScoped<IOneDriveService, OneDriveService>()
 						.AddScoped<TokenCredential, OneDriveTokenProvider>()
-						.AddTransient<AuthHeaderHandler>().AddOptions<AzureAd>().Bind(azureSection);
+						.AddOptions<AzureAd>().Bind(azureSection);
 
 			services.AddHttpClient("onedrive");
-			services.AddRefitClient<IOneDriveTokenService>(sp=>settings,"onecredentials").ConfigureHttpClient(client => client.BaseAddress = new Uri("https://login.microsoftonline.com"));
-			services.AddRefitClient<IOneDriveClient>(settings2).ConfigureHttpClient(client => client.BaseAddress = new Uri("https://graph.microsoft.com/v1.0/me/drive")).AddHttpMessageHandler<AuthHeaderHandler>().AddDefaultLogger();		
+			services.AddRefitClient<IOneDriveTokenService>(sp=>snakeCase,"onecredentials").ConfigureHttpClient(client => client.BaseAddress = new Uri("https://login.microsoftonline.com"));
+			services.AddRefitClient<IOneDriveClient>(camelCase).ConfigureHttpClient(client => client.BaseAddress = new Uri("https://graph.microsoft.com/v1.0/me/drive")).AddDefaultLogger();		
 			return services;
 		}
 	}

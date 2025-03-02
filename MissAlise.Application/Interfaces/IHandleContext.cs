@@ -1,4 +1,4 @@
-﻿using MissAlise.Application.Models;
+﻿using MissAlise.Application.Common;
 
 namespace MissAlise.Application.Interfaces
 {
