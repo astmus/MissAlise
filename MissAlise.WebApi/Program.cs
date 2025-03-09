@@ -85,19 +85,16 @@ public class Program
 			return Results.Forbid();
 
 		var response = await ctx.RequestServices.GetRequiredService<IOneDriveTokenService>().GetCredentialsByCode(config, code, cancel);
-
 		if (!response.IsSuccessful)
 			return Results.Problem(response.Error.ToString(), null, (int)response.StatusCode);
-		UserManager<AppUser> manager = ctx.RequestServices.GetRequiredService<UserManager<AppUser>>();
-		//var userSrv = ctx.RequestServices.GetRequiredService<IUserService>();
-		var appUser = await manager.Users.Include(user => user.AccessData).SingleOrDefaultAsync(user => user.Id == state);
-		appUser.AccessData = null;
-		var result = await manager.UpdateAsync(appUser);
 
+		var manager = ctx.RequestServices.GetRequiredService<UserManager<AppUser>>();
+		var appUser = await manager.Users.Include(user => user.AccessData).SingleOrDefaultAsync(user => user.Id == state);
 		appUser.AccessData = response.Content;
 		appUser.AccessData.ExpiredAfter = DateTimeOffset.UtcNow.AddSeconds(response.Content.ExpiresIn);
 		appUser.EmailConfirmed = true;
-		result = await manager.UpdateAsync(appUser);
+
+		var result = await manager.UpdateAsync(appUser);		
 		if (result.Succeeded)
 			return Results.Text("<html><body>Авторизация закончена успешно. Вы можете закрыть это окно</body></html>", "text/html", Encoding.UTF8, 200);
 		else

@@ -43,44 +43,30 @@ namespace MissAlise.OneDrive.Models
             _ = parseNode ?? throw new ArgumentNullException(nameof(parseNode));
             var mappingValue = parseNode.GetChildNode("@odata.type")?.GetStringValue();
             return mappingValue switch
-            {
-               
+            {               
                 "#microsoft.graph.baseItem" => new global::MissAlise.OneDrive.Models.BaseItem(),
-                "#microsoft.graph.baseItemVersion" => new global::MissAlise.OneDrive.Models.BaseItemVersion(),       
-           
+                "#microsoft.graph.baseItemVersion" => new global::MissAlise.OneDrive.Models.BaseItemVersion(),           
                 "#microsoft.graph.columnDefinition" => new global::MissAlise.OneDrive.Models.ColumnDefinition(),           
-                "#microsoft.graph.contentType" => new global::MissAlise.OneDrive.Models.ContentType(),
-              
+                "#microsoft.graph.contentType" => new global::MissAlise.OneDrive.Models.ContentType(),              
                 "#microsoft.graph.directoryObject" => new global::MissAlise.OneDrive.Models.DirectoryObject(),             
                 "#microsoft.graph.drive" => new global::MissAlise.OneDrive.Models.Drive(),
                 "#microsoft.graph.driveItem" => new global::MissAlise.OneDrive.Models.DriveItem(),
-                "#microsoft.graph.driveItemVersion" => new global::MissAlise.OneDrive.Models.DriveItemVersion(),
-            
-  
-      
+                "#microsoft.graph.driveItemVersion" => new global::MissAlise.OneDrive.Models.DriveItemVersion(),       
                 "#microsoft.graph.itemRetentionLabel" => new global::MissAlise.OneDrive.Models.ItemRetentionLabel(),               
                 "#microsoft.graph.list" => new global::MissAlise.OneDrive.Models.List(),
-                "#microsoft.graph.listItem" => new global::MissAlise.OneDrive.Models.ListItem(),
-            
-                "#microsoft.graph.longRunningOperation" => new global::MissAlise.OneDrive.Models.LongRunningOperation(),
-          
+                "#microsoft.graph.listItem" => new global::MissAlise.OneDrive.Models.ListItem(),            
+                "#microsoft.graph.longRunningOperation" => new global::MissAlise.OneDrive.Models.LongRunningOperation(),          
                 "#microsoft.graph.profilePhoto" => new global::MissAlise.OneDrive.Models.ProfilePhoto(),              
                 "#microsoft.graph.richLongRunningOperation" => new global::MissAlise.OneDrive.Models.RichLongRunningOperation(),              
                 "#microsoft.graph.search.acronym" => new global::MissAlise.OneDrive.Models.Search.Acronym(),
                 "#microsoft.graph.search.qna" => new global::MissAlise.OneDrive.Models.Search.Qna(),
                 "#microsoft.graph.search.searchAnswer" => new global::MissAlise.OneDrive.Models.Search.SearchAnswer(),
-                "#microsoft.graph.searchEntity" => new global::MissAlise.OneDrive.Models.SearchEntity(),
-              
-                "#microsoft.graph.security.search" => new global::MissAlise.OneDrive.Models.Security.Search(),
-            
-                "#microsoft.graph.sharedDriveItem" => new global::MissAlise.OneDrive.Models.SharedDriveItem(),
-               
-                "#microsoft.graph.subscription" => new global::MissAlise.OneDrive.Models.Subscription(),
-            
-                "#microsoft.graph.thumbnailSet" => new global::MissAlise.OneDrive.Models.ThumbnailSet(),
-             
-                "#microsoft.graph.user" => new global::MissAlise.OneDrive.Models.User(),
-            
+                "#microsoft.graph.searchEntity" => new global::MissAlise.OneDrive.Models.SearchEntity(),              
+                "#microsoft.graph.security.search" => new global::MissAlise.OneDrive.Models.Security.Search(),            
+                "#microsoft.graph.sharedDriveItem" => new global::MissAlise.OneDrive.Models.SharedDriveItem(),               
+                "#microsoft.graph.subscription" => new global::MissAlise.OneDrive.Models.Subscription(),            
+                "#microsoft.graph.thumbnailSet" => new global::MissAlise.OneDrive.Models.ThumbnailSet(),             
+                "#microsoft.graph.user" => new global::MissAlise.OneDrive.Models.User(),            
                 _ => new global::MissAlise.OneDrive.Models.Entity(),
             };
         }

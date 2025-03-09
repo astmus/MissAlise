@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -15,11 +17,6 @@ using Telegram.Bot.Types.Enums;
 
 namespace MissAlise.Bot
 {
-	internal class UpdateExt : Update
-	{ 
-		public ICommand Command { get; set; }
-	}
-
 	internal class UpdatesSource<TUpdate> : QueuedUpdateReceiver, IAsyncEnumerable<TUpdate> where TUpdate : Update
 	{
 		private readonly ITelegramBotClient _botClient;

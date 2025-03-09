@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MissAlise.Application.Common.RequestHandler;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -43,11 +44,19 @@ namespace MissAlise.Bot
 				try
 				{
 					logger.LogInformation("Bot {bot}", bot.Information);
-					//var updatesQueue = new QueuedUpdateReceiver(bot.Client, bot.receiveOptions, bot.HandleErrorAsync);
+					
 					IAsyncEnumerable<TUpdate> updates = bot.UpdatesSource;
 					await foreach (TUpdate update in updates/*.WithCancellation(cancel)*/)
 					{
 						logger.LogInformation("Got update {Id}", update.Id);
+						if (update.IsBotCommand())
+						{
+							if (update is UpdateExt ext && bot.Create(update.Message.Text) is ICommand command) // временное решение
+								ext.Command = command;
+							else
+								continue;
+						}
+
 						await bot.Updates.Writer.WriteAsync(update, cancel).ConfigureAwait(false);
 					}
 

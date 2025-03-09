@@ -23,7 +23,7 @@ namespace MissAlise.OneDrive
 {
 	internal class OneDriveService : IOneDriveService
 	{
-		private readonly AzureAd _azure;		
+		private readonly AzureAd _azure;
 		private readonly IHandleContext _ctx;
 		private readonly ApiClient _client;
 		private readonly IOneDriveTokenService _tokenService;
@@ -41,25 +41,25 @@ namespace MissAlise.OneDrive
 		public async Task<User> GetOwnerInfo(CancellationToken cancel)
 		{
 			var childrenRequest = _client.Drives["Me"].Items["Root"].Delta;
-			var items = await childrenRequest.GetAsDeltaGetResponseAsync<DriveDeltaItems>(r => r.QueryParameters.Select = "Id Name File FileSystemInfo Video Photo Size ParentReference".ToLower().Split(' '),cancellationToken: cancel);			
+			var items = await childrenRequest.GetAsDeltaGetResponseAsync<DriveDeltaItems>(r => r.QueryParameters.Select = "Id Name File FileSystemInfo Video Photo Size ParentReference".ToLower().Split(' '), cancellationToken: cancel);
 			PageIterator<DriveItem, DriveDeltaItems> iterator = null;
 
 			int varo = 0;
 			StringBuilder sb = new StringBuilder();
 
-				var list = await _client.Drives["Me"].Items["Root"].ListItem.GetAsync();
-				iterator = PageIterator<DriveItem, DriveDeltaItems>.CreatePageIterator(_client.Adapter, items, callback:
-				item =>
-				{
-					varo++;
-					sb.AppendLine(item.Name + " state" + item.Deleted?.State);
-					return true;
-				}
-				//}, requestConfigurator: request =>
-				//{
-				//	return request;
-				//}
-				);
+			var list = await _client.Drives["Me"].Items["Root"].ListItem.GetAsync();
+			iterator = PageIterator<DriveItem, DriveDeltaItems>.CreatePageIterator(_client.Adapter, items, callback:
+			item =>
+			{
+				varo++;
+				sb.AppendLine(item.Name + " state" + item.Deleted?.State);
+				return true;
+			}
+			//}, requestConfigurator: request =>
+			//{
+			//	return request;
+			//}
+			);
 
 			await iterator.IterateAsync(cancel);
 			string str = sb.ToString();
@@ -72,7 +72,7 @@ namespace MissAlise.OneDrive
 		}
 
 		public Task<IEnumerable<ItemInfo>> GetRootItems(CancellationToken cancel)
-		{			
+		{
 			return default;
 		}
 
@@ -88,7 +88,7 @@ namespace MissAlise.OneDrive
 			query["state"] = stateIdentifier.ToString();
 			builder.Query = query.ToString();
 			return builder.Uri;
-		}		
+		}
 
 		public async Task<Result<AppUser>> RefreshUserAccessTokenAsync(AppUser user, CancellationToken cancel)
 		{

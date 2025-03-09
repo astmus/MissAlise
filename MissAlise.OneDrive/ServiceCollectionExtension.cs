@@ -50,7 +50,7 @@ namespace MissAlise.OneDrive
 						defaultHttpMessageHandler, [.. defaultHandlers])!;
 				});
 
-			services.AddRefitClient<IOneDriveTokenService>(sp => snakeCase).ConfigureHttpClient(client => client.BaseAddress = new Uri("https://login.microsoftonline.com"));
+			services.AddRefitClient<IOneDriveTokenService>(snakeCase).ConfigureHttpClient(client => client.BaseAddress = new Uri("https://login.microsoftonline.com"));
 			return services;
 		}
 	}

@@ -81,7 +81,7 @@ namespace MissAlise.Bot
 						{ CallbackQuery: not null } => InvokeHandlerAsync(services, update.CallbackQuery, cancel),
 						{ InlineQuery: not null } => InvokeHandlerAsync(services, update.InlineQuery, cancel),
 						//{ ChosenInlineResult: not null } => Task.CompletedTask,
-						_ => null
+						_ => InvokeHandlerAsync(services, update.GetCurrentMessage(), cancel)
 						//{ EditedMessage: not null } => UpdateType.EditedMessage,
 						//{ ChannelPost: not null } => UpdateType.ChannelPost,
 						//{ EditedChannelPost: not null } => UpdateType.EditedChannelPost,
@@ -98,7 +98,7 @@ namespace MissAlise.Bot
 						//{ RemovedChatBoost: not null } => UpdateType.RemovedChatBoost
 					};
 
-					currentTask ??= InvokeHandlerAsync(services, update.GetCurrentMessage(), cancel);
+					//currentTask ??= InvokeHandlerAsync(services, update.GetCurrentMessage(), cancel);
 					await currentTask.ConfigureAwait(false);
 				}
 				catch (Exception error)

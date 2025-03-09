@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using MissAlise.Application.Common;
+using MissAlise.Application.Common.RequestHandler;
 using MissAlise.Application.Interfaces;
 using MissAlise.Application.Services.Authentication;
 using MissAlise.Application.Services.Sync;
@@ -32,12 +33,9 @@ namespace MissAlise.Bot.Handlers
 
 		protected override async Task HandleAsync(Message data, CancellationToken cancel)
 		{
-			Result res = null;
-
-			if (data.Text == "/sync")
-			{
-				res = await mm.Send(new SyncCommand(), cancel).ConfigureAwait(false);
-			}
+			Result res = null;			
+			if (_ctx.GetCurrent<Update>() is UpdateExt update && update.Command is ICommand cmd)			
+				res = await mm.Send(cmd, cancel).ConfigureAwait(false);
 
 			var info = await _oneService.GetOwnerInfo(cancel);
 			if (res is not Result<UnauthorizedAccessException> fail)

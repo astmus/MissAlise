@@ -39,6 +39,7 @@ namespace MissAlise.DataBase.Repositories
 					Surname = user.Surname,
 					UserPrincipalName = string.Empty
 				};
+
 				var result = await ctx.Users.AddAsync(owner, cancel);
 				await ctx.SaveChangesAsync(cancel).ConfigureAwait(false);
 			}
@@ -46,17 +47,6 @@ namespace MissAlise.DataBase.Repositories
 
 			SaveAsync = () => this.ctx.SaveChangesAsync(cancel);
 			return this;
-			//return new UserStorage()
-			//{
-			//	RootFolder = new Folder()
-			//	{
-			//		Title = user.DisplayName,
-			//		CreatedDateTime = DateTime.UtcNow,
-			//		ModifieDateTime = DateTime.UtcNow,					
-			//		Path = Path.Combine(defPath, user.DisplayName)
-			//	},
-			//	SaveAsync = () => ctx.SaveChangesAsync(cancel)
-			//};
 		}
 
 		public async Task<IUserStorage?> LoadForCurrentUserAsync(CancellationToken cancel)
