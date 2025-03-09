@@ -40,27 +40,14 @@ namespace MissAlise.OneDrive
 
 		public async Task<User> GetOwnerInfo(CancellationToken cancel)
 		{
-			//var allowedHosts = new[] { "graph.microsoft.com" };
-			//var graphScopes = _azure.Scopes.Split(" ");
-			////var credential = tkn;
-
-			//using var http = _fac.CreateClient("onedrive");
-
-			//var authProvider = new AzureIdentityAuthenticationProvider(_tkn, allowedHosts, scopes: graphScopes);
-			//using var requestAdapter = new HttpClientRequestAdapter(authProvider, httpClient: http);
-			//var client = new ApiClient(requestAdapter);
-
 			var childrenRequest = _client.Drives["Me"].Items["Root"].Delta;
-			var sel = childrenRequest.ToGetRequestInformation(r => r.QueryParameters.Select = "Id Name File FileSystemInfo Video Photo Size ParentReference".ToLower().Split(' '));
-			//sel.
-			//client.Drives[root.ParentReference.DriveId].Items[root.Id].Delta;
-
 			var items = await childrenRequest.GetAsDeltaGetResponseAsync<DriveDeltaItems>(r => r.QueryParameters.Select = "Id Name File FileSystemInfo Video Photo Size ParentReference".ToLower().Split(' '),cancellationToken: cancel);			
 			PageIterator<DriveItem, DriveDeltaItems> iterator = null;
 
 			int varo = 0;
 			StringBuilder sb = new StringBuilder();
 
+				var list = await _client.Drives["Me"].Items["Root"].ListItem.GetAsync();
 				iterator = PageIterator<DriveItem, DriveDeltaItems>.CreatePageIterator(_client.Adapter, items, callback:
 				item =>
 				{

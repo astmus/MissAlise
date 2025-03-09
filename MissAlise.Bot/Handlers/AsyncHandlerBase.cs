@@ -4,8 +4,8 @@ namespace MissAlise.Bot
 {
 	internal abstract class BotAsyncHandlerBase<TData> : AsyncHandlerBase<TData>
 	{
-		protected readonly BotWorker _bot;
-		internal BotAsyncHandlerBase(BotWorker bot)
+		protected readonly Bot _bot;
+		internal BotAsyncHandlerBase(Bot bot)
 		{
 			_bot = bot;
 		}

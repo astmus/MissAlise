@@ -8,14 +8,14 @@ using Telegram.Bot.Types;
 
 namespace MissAlise.Bot
 {
-	internal partial class BotWorker
+	internal partial class Bot<TUpdate> where TUpdate: Update
 	{
 		public class UpdateHandler : BackgroundService
 		{
 			private readonly ILogger<UpdateHandler> logger;
 			private readonly IServiceScopeFactory factory;
-			private readonly BotWorker bot;
-			public UpdateHandler(ILogger<UpdateHandler> logger, IServiceScopeFactory factory, BotWorker bot)
+			private readonly Bot<TUpdate> bot;
+			public UpdateHandler(ILogger<UpdateHandler> logger, IServiceScopeFactory factory, Bot<TUpdate> bot)
 			{
 				this.logger = logger;
 				this.factory = factory;
@@ -28,7 +28,7 @@ namespace MissAlise.Bot
 				{
 					try
 					{
-						await foreach (var update in bot.pendingUpdates.Reader.ReadAllAsync(cancel))
+						await foreach (var update in bot.Updates.Reader.ReadAllAsync(cancel))
 						{
 							logger.LogInformation("Got update {Id}", update.Id);
 							_ = HandleUpdateAsync(bot.Client, update, cancel);

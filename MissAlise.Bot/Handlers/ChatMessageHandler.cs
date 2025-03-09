@@ -20,7 +20,7 @@ namespace MissAlise.Bot.Handlers
 		private readonly IMapper _mapper;
 		private readonly IAuthenticationService _authService;
 
-		public ChatMessageHandler(IHandleContext ctx, IOneDriveService oneService, ILogger<ChatMessageHandler> log, IMediator mm, BotWorker bot, IMapper mapper, IAuthenticationService authService) : base(bot)
+		public ChatMessageHandler(IHandleContext ctx, IOneDriveService oneService, ILogger<ChatMessageHandler> log, IMediator mm, Bot<UpdateExt> bot, IMapper mapper, IAuthenticationService authService) : base(bot)
 		{
 			this.log = log;
 			this.mm = mm;

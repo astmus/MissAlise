@@ -11,9 +11,9 @@ namespace MissAlise.Bot
 		public static IServiceCollection AddBotService(this IServiceCollection services, IConfigurationSection botConfig)
 		{
 			services
-				.AddSingleton<BotWorker>()
-				.AddHostedService<BotWorker.UpdateReceiver>()
-				.AddHostedService<BotWorker.UpdateHandler>()
+				.AddSingleton<Bot<UpdateExt>>()
+				.AddHostedService<Bot<UpdateExt>.UpdateReceiver>()
+				.AddHostedService<Bot<UpdateExt>.UpdateHandler>()
 				.Configure<BotConfiguration>(botConfig);
 
 			services.AddScoped<IAsyncHandler<Message>, ChatMessageHandler>();

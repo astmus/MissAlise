@@ -8,16 +8,20 @@ using Telegram.Bot.Types.Enums;
 
 namespace MissAlise.Bot
 {
-	internal partial class BotWorker
+	internal partial class Bot
 	{
 		public HttpClient HttpConnection { get; }
-		public ITelegramBotClient Client { get; }
+		public ITelegramBotClient Client { get; init; }
+	}
 
-		private User botInfo;
+	internal partial class Bot<TUpdate> : Bot where TUpdate: Update
+	{
+		private User Information;
 		private BotConfiguration botOptions;
-		private readonly ILogger<BotWorker> log;
+		private readonly ILogger<Bot<TUpdate>> log;
 		private ReceiverOptions receiveOptions;
-		private readonly Channel<Update> pendingUpdates = Channel.CreateUnbounded<Update>(
+		private UpdatesSource<TUpdate> updatesSource;
+		private readonly Channel<TUpdate> Updates = Channel.CreateUnbounded<TUpdate>(
 			new()
 			{
 				SingleReader = true,
@@ -26,7 +30,7 @@ namespace MissAlise.Bot
 		);
 
 		public IEnumerable<BotCommand> Commands => [new BotCommand() { Command = "sync", Description = "синхронизировать файлы" }];
-		public BotWorker(IOptions<BotConfiguration> options, ILogger<BotWorker> log)
+		public Bot(IOptions<BotConfiguration> options, ILogger<Bot<TUpdate>> log)
 		{
 			botOptions = options.Value;
 			this.log = log;
@@ -35,10 +39,13 @@ namespace MissAlise.Bot
 			receiveOptions = new ReceiverOptions() { Limit = 100, AllowedUpdates = [UpdateType.Message, UpdateType.InlineQuery, UpdateType.CallbackQuery, UpdateType.ChosenInlineResult] };
 		}
 
-		public Task HandleErrorAsync(Exception exception, CancellationToken cancellationToken)
+		public virtual Task HandleErrorAsync(Exception exception, CancellationToken cancellationToken)
 		{
 			log.LogError(exception, exception.Message, default);
 			return Task.CompletedTask;
 		}
+
+		public virtual UpdatesSource<TUpdate> UpdatesSource
+			=> updatesSource ?? (updatesSource = new UpdatesSource<TUpdate>(Client, receiveOptions, HandleErrorAsync));
 	}
 }

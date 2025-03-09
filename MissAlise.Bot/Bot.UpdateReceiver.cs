@@ -3,15 +3,16 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
+using Telegram.Bot.Types;
 
 namespace MissAlise.Bot
 {
-	internal partial class BotWorker
+	internal partial class Bot<TUpdate> where TUpdate: Update
 	{
 		internal class UpdateReceiver : BackgroundService
 		{
 			private readonly ILogger<UpdateReceiver> logger;
-			private BotWorker bot;
+			private Bot<TUpdate> bot;
 			private readonly IServiceScope scope;
 			public UpdateReceiver(ILogger<UpdateReceiver> logger, IServiceScopeFactory factory)
 			{
@@ -22,8 +23,8 @@ namespace MissAlise.Bot
 			{
 				try
 				{
-					bot = scope.ServiceProvider.GetRequiredService<BotWorker>();
-					bot.botInfo = await bot.Client.GetMe(cancellationToken).ConfigureAwait(false);
+					bot = scope.ServiceProvider.GetRequiredService<Bot<TUpdate>>();
+					bot.Information = await bot.Client.GetMe(cancellationToken).ConfigureAwait(false);
 					await bot.Client.DeleteMyCommands(cancellationToken: cancellationToken);
 				}
 				catch (Exception error)
@@ -41,14 +42,15 @@ namespace MissAlise.Bot
 			{
 				try
 				{
-					logger.LogInformation("Bot {bot}", bot.botInfo);
-					var updatesQueue = new QueuedUpdateReceiver(bot.Client, bot.receiveOptions, bot.HandleErrorAsync);
-
-					await foreach (var update in updatesQueue.WithCancellation(cancel))
+					logger.LogInformation("Bot {bot}", bot.Information);
+					//var updatesQueue = new QueuedUpdateReceiver(bot.Client, bot.receiveOptions, bot.HandleErrorAsync);
+					IAsyncEnumerable<TUpdate> updates = bot.UpdatesSource;
+					await foreach (TUpdate update in updates/*.WithCancellation(cancel)*/)
 					{
 						logger.LogInformation("Got update {Id}", update.Id);
-						await bot.pendingUpdates.Writer.WriteAsync(update).ConfigureAwait(false);
+						await bot.Updates.Writer.WriteAsync(update, cancel).ConfigureAwait(false);
 					}
+
 				}
 				catch (Exception error)
 				{
