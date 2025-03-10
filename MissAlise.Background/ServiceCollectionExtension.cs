@@ -17,7 +17,6 @@ namespace MissAlise.Background
 			this IServiceCollection services,
 			Action<IBackgroundJobBuilder<TJob>> jobConfigurator
 		)
-
 		where TJob : class where THandler : BackgroundJobHandler<TJob>
 		{
 			services.AddHostedService<BackgroundJobService<TJob>>()

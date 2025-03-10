@@ -25,5 +25,10 @@ namespace MissAlise.DataBase
 			var _filter = Builders<BackgroundJob>.Filter.Eq(r => r.Key, backgroundJob.Key);
 			var res = await _backgroundJobs.ReplaceOneAsync(_filter, backgroundJob, options, cancel);
 		}
+
+		public async Task<IEnumerable<BackgroundJob>> AllJobsAsync(CancellationToken cancel)
+		{
+			return await _backgroundJobs.Find(_ => true).Project<BackgroundJob>(Builders<BackgroundJob>.Projection.Exclude("_id")).ToListAsync();
+		}
 	}
 }

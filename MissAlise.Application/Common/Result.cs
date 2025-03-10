@@ -9,7 +9,7 @@
 			=> Error = error;
 
 		public static Result Fail(string error) => new(error);
-		public static Result<T> Ok<T>(T value) => new(value, string.Empty);
+		public static Result<T> Ok<T>(T value) => new(value, default);
 		public static Result<T> Fail<T>(string error) => new(default, error);
 		public static Result<T> FromValue<T>(T? value) => value != null ? Ok(value) : Fail<T>("Provided value is null.");
 	}

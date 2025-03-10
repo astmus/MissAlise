@@ -4,5 +4,6 @@ namespace MissAlise.Background
 	{
 		Task AddOrReplaceAsync<TJob>(TJob backgroundJob, CancellationToken cancel) where TJob : BackgroundJob;
 		Task<TJob> LoadAsync<TJob>(string jobKey, CancellationToken cancel) where TJob : BackgroundJob;
+		Task<IEnumerable<BackgroundJob>> AllJobsAsync(CancellationToken cancel);
 	}
 }

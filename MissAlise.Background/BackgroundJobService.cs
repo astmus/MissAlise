@@ -35,9 +35,11 @@ namespace MissAlise.Background
 				if (dbJob?.ToString() != backJob.ToString()) // сравниваем строки потому что Triggers есть указатели на List которые конечно же будут разными, хорошо бы сравнивать и эти коллекции если они изменились, но это как нить потом
 					await jobsRepository.AddOrReplaceAsync(backJob, cancellationToken);
 
+				BackgroundServer.Current.AddJob(backJob);
 				foreach (var trigger in backJob.Triggers)
 				{
 					var job = backJob with { };
+					BackgroundServer.Current.AddUserJob(job);
 					trigger.Setup(job, jobsChannel.Writer.WriteAsync);
 					triggers.Add(trigger with { Description = $"{job.Description} {trigger.Description}" });
 				}

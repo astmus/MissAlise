@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using MissAlise.Application.Common;
 
-namespace MissAlise.Application.Services.User
+namespace MissAlise.Application.Users
 {
 	public class UserService : IUserService
 	{

@@ -47,9 +47,9 @@ namespace MissAlise.Background
 			var isOk =
 					   (Weeks is null || Weeks.Contains(weekOfMonth))
 				&& (Days is null || Days.Contains(now.DayOfWeek))
-				&& (StartAt is null || StartAt.Value <= Time.OnlyDate(now))
-				&& (RunAt is null || RunAt.Value < Time.OnlyTime(now))
-				&& (EndAt is null || EndAt.Value > Time.OnlyTime(now))
+				&& (StartAt is null || StartAt.Value<= Time.OnlyDate(now))
+				&& (RunAt is null || RunAt.Value		< Time.OnlyTime(now))
+				&& (EndAt is null || EndAt.Value		> Time.OnlyTime(now))
 				&& (Job.LastStart is null || now - Job.LastStart.Value >= Delay || Delay is null && now.Day != (Job.LastStart?.Day ?? -1));
 
 			return isOk;

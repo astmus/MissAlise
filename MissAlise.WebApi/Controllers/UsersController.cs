@@ -1,6 +1,10 @@
 using System.Net.Mime;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MissAlise.Application.Dto;
+using MissAlise.Application.Services.Sync;
+using MissAlise.Application.Users.Requests;
+using MissAlise.Background;
 using MissAlise.Interfaces;
 
 namespace MissAlise.WebApi.Controllers;
@@ -11,12 +15,14 @@ namespace MissAlise.WebApi.Controllers;
 public class UsersController : ControllerBase
 {
 	private readonly ILogger<UsersController> logger;
-	private readonly IUserProfilesRepository usersProfiles;
+	private readonly IBackgroundJobRepository _jobs;
+	private readonly IMediator _mm;
 
-	public UsersController(ILogger<UsersController> logger, IUserProfilesRepository usersProfiles)
+	public UsersController(ILogger<UsersController> logger, IBackgroundJobRepository jobs, IMediator mm)
 	{
 		this.logger = logger;
-		this.usersProfiles = usersProfiles;
+		_jobs = jobs;
+		_mm = mm;
 	}
 
 	/// <summary>
@@ -24,12 +30,17 @@ public class UsersController : ControllerBase
 	/// </summary>
 	/// <returns></returns>
 	[HttpGet]
-	public async Task<IEnumerable<User>> Get(CancellationToken cancel)
+	public Task<IEnumerable<User>> Get(CancellationToken cancel)
 	{
-		var users = await usersProfiles.AllAsync(cancel);
-		Thread.Sleep(100000);
-		cancel.ThrowIfCancellationRequested();
-		return users.Select(user => new User() { Id = user.Telegram.Id, DisplayName = user.Telegram.DisplayName }).ToArray();
+		return Task.FromResult(Enumerable.Empty<User>());
+	}
+
+	[HttpGet("{userId:int}/jobs")]
+	public async Task<IEnumerable<BackgroundJobDto>> GetTasks(int userId, CancellationToken cancel)
+	{
+		var users = await _jobs.AllJobsAsync(cancel);
+		var res = await _mm.Send(new GetBackgroundJobsQuery(userId), cancel);		
+		return res.Value;
 	}
 
 	/// <summary>

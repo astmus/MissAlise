@@ -106,9 +106,10 @@ namespace MissAlise.Bot
 					}
 				}
 
+						int? id = 307409070;
 				var getUpdatesRequest = new GetUpdatesRequest<TUpdate>
 				{
-					Offset = _messageOffset,
+					Offset = id ?? _messageOffset,
 					Limit = _limit,
 					Timeout = (int)_receiver._botClient.Timeout.TotalSeconds,
 					AllowedUpdates = _allowedUpdates,
@@ -124,12 +125,10 @@ namespace MissAlise.Bot
 						{
 							_messageOffset = updateArray[^1].Id + 1;
 							Interlocked.Add(ref _pendingUpdates, updateArray.Length);
-
-							ChannelWriter<TUpdate> writer = _channel.Writer;
+														
 							foreach (TUpdate update in updateArray)
 							{
-								// ReSharper disable once RedundantAssignment
-								var success = writer.TryWrite(update);
+								var success = _channel.Writer.TryWrite(update);
 								Debug.Assert(success, "TryWrite should succeed as we are using an unbounded channel");
 							}
 							getUpdatesRequest.Offset = _messageOffset;

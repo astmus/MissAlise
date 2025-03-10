@@ -1,4 +1,4 @@
-﻿namespace MissAlise.Application.Services.User
+﻿namespace MissAlise.Application.Users
 {
 	public interface IUserService
 	{

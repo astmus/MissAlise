@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -51,12 +52,12 @@ public class Program
 				options.LowercaseQueryStrings = true;
 			});
 
-		//builder.Services.AddEndpointsApiExplorer(); это только для minimal api
-		//builder.Services.AddSwaggerGen(options=> {
-		//	var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-		//	options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
-		//}
-		//);
+		builder.Services.AddEndpointsApiExplorer(); //это только для minimal api
+		builder.Services.AddSwaggerGen(options=> {
+			var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+			options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+		});
+
 		ApplyMapping(builder.Services);
 		var app = builder.Build();
 
@@ -65,8 +66,8 @@ public class Program
 		if (app.Environment.IsDevelopment())
 		{
 			app.UseDeveloperExceptionPage();
-			//app.UseSwagger();
-			//app.UseSwaggerUI();
+			app.UseSwagger();
+			app.UseSwaggerUI();
 		}
 
 		app.UseHttpsRedirection();
@@ -78,6 +79,7 @@ public class Program
 		await app.RunAsync();
 	}
 
+	[ApiExplorerSettings(IgnoreApi = true)]
 	static async Task<IResult> Signin([FromServices] IOptions<AzureAd> options, [FromQuery] string code, [FromQuery] string state, HttpContext ctx, CancellationToken cancel)
 	{
 		AzureAd config = options.Value;
