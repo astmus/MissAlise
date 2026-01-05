@@ -17,6 +17,7 @@ using MissAlise.Entities.OneDrive;
 using MissAlise.OneDrive.Auth;
 using MissAlise.OneDrive.Drives.Item.Items.Item.Delta;
 using MissAlise.OneDrive.Models;
+using Newtonsoft.Json.Linq;
 using User = MissAlise.Entities.OneDrive.User;
 
 namespace MissAlise.OneDrive
@@ -40,41 +41,141 @@ namespace MissAlise.OneDrive
 
 		public async Task<User> GetOwnerInfo(CancellationToken cancel)
 		{
-			var childrenRequest = _client.Drives["Me"].Items["Root"].Delta;
-			var items = await childrenRequest.GetAsDeltaGetResponseAsync<DriveDeltaItems>(r => r.QueryParameters.Select = "Id Name File FileSystemInfo Video Photo Size ParentReference".ToLower().Split(' '), cancellationToken: cancel);
-			PageIterator<DriveItem, DriveDeltaItems> iterator = null;
+			var me = await _client.Me.GetAsync(cancellationToken: cancel);			
 
-			int varo = 0;
-			StringBuilder sb = new StringBuilder();
-
-			var list = await _client.Drives["Me"].Items["Root"].ListItem.GetAsync();
-			iterator = PageIterator<DriveItem, DriveDeltaItems>.CreatePageIterator(_client.Adapter, items, callback:
-			item =>
-			{
-				varo++;
-				sb.AppendLine(item.Name + " state" + item.Deleted?.State);
-				return true;
-			}
-			//}, requestConfigurator: request =>
-			//{
-			//	return request;
-			//}
-			);
-
-			await iterator.IterateAsync(cancel);
-			string str = sb.ToString();
-			//var items = await oneDrive.RootChildren(ctx, cancel);
-			//var me = await client.Me.GetAsync(cancellationToken: cancel);
-			//if (me != null)
-			//	return new User() { Id = me.Id, DisplayName = me.DisplayName, GivenName = me.GivenName, Mail = me.Mail, PreferredLanguage = me.PreferredLanguage, Surname = me.Surname };
+			if (me != null)
+				return new User() { Id = me.Id, DisplayName = me.DisplayName, GivenName = me.GivenName, Mail = me.Mail, PreferredLanguage = me.PreferredLanguage, Surname = me.Surname };
 
 			return null;
 		}
 
-		public Task<IEnumerable<ItemInfo>> GetRootItems(CancellationToken cancel)
-		{
-			return default;
+		public Task<Stream?> GetItemContent(string parentId, string itemId, CancellationToken cancel)
+		{ 
+			return _client.Drives[parentId].Items[itemId].Content.GetAsync(cancellationToken: cancel);
 		}
+
+		public async Task<string> HandleDeltaDriveItemsAsync(Action<ItemInfo> handleDelegate, CancellationToken cancel)
+		{
+			//var childrenRequest = _client.Drives["Me"].Items["Root"].Delta;
+			var childrenRequest = _client.Drives["Me"].Items["Root"].Delta;
+			var items = await childrenRequest.GetAsDeltaGetResponseAsync<DriveDeltaItems>(r => r.QueryParameters.Select = new[]
+				{
+					"id",
+					"name",
+					"description",
+					"createdDateTime",
+					"lastModifiedDateTime",
+					"createdBy",
+					"lastModifiedBy",
+					"parentReference",
+					"file",
+					"image",
+					"video",
+					"photo",
+					"folder",
+					"size",
+					"webUrl",
+					"deleted",
+					"fileSystemInfo"
+				});
+
+			PageIterator<DriveItem, DriveDeltaItems> iterator = null;
+
+			int varo = 0;
+			
+			iterator = PageIterator<DriveItem, DriveDeltaItems>.CreatePageIterator(_client.Adapter, items, callback: 
+				item =>
+					{
+						varo++;
+						if (item.Folder != null)
+							return true;
+				
+						var itemInfo = CreateItemIinfo(item);
+						if (itemInfo != null)
+							handleDelegate(itemInfo);
+						return true;
+					}
+			);
+
+			await iterator.IterateAsync(cancel);
+			
+			if (iterator.State == PagingState.Complete)			
+				return iterator.Deltalink;
+			else				
+				return null;
+		}
+
+		public async Task<string> HandleActualDriveItemsAsync(Action<ItemInfo> handleDelegate, CancellationToken cancel)
+		{
+			//var childrenRequest = _client.Drives["Me"].Items["Root"].Delta;
+			var childrenRequest = _client.Drives["Me"].Items["Root"].Delta;
+			var items = await childrenRequest.GetAsDeltaGetResponseAsync<DriveDeltaItems>(r => r.QueryParameters.Select = new[]
+				{
+					"id",
+					"name",
+					"description",
+					"createdDateTime",
+					"lastModifiedDateTime",
+					"createdBy",
+					"lastModifiedBy",
+					"parentReference",
+					"file",
+					"image",
+					"video",
+					"photo",
+					"folder",
+					"size",
+					"webUrl",
+					"deleted",
+					"fileSystemInfo"
+				});
+
+			PageIterator<DriveItem, DriveDeltaItems> iterator = null;
+
+			int varo = 0;
+			
+			iterator = PageIterator<DriveItem, DriveDeltaItems>.CreatePageIterator(_client.Adapter, items, callback: 
+				item =>
+					{
+						varo++;
+						if (item.Folder != null)
+							return true;
+				
+						var itemInfo = CreateItemIinfo(item);
+						if (itemInfo != null)
+							handleDelegate(itemInfo);
+						return true;
+					}
+			);
+
+			await iterator.IterateAsync(cancel);
+			
+			if (iterator.State == PagingState.Complete)			
+				return iterator.Deltalink;
+			else				
+				return null;
+		}
+
+		ItemInfo CreateItemIinfo(DriveItem item)
+		{
+			if (item.Deleted != null)							
+				return new ItemInfo() { Id = item.Id };
+
+			try
+			{
+				var jObj = JObject.FromObject(item);
+
+				var resObj = jObj.ToObject<ItemInfo>();
+				resObj.Parent = jObj.SelectToken("ParentReference").ToObject<ParentInfo>();
+				resObj.Sha256Hash = item.File?.Hashes?.Sha256Hash;
+				return resObj;
+			}
+			catch (Exception)
+			{
+				return null;
+			}
+		}
+		
 
 		public Uri CreateAuthorizeLink(object stateIdentifier)
 		{

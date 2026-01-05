@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MissAlise.DataBase.Contexts;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MissAlise.DataBase.Migrations
 {
     [DbContext(typeof(UserMediaContext))]
-    partial class UserMediaContextModelSnapshot : ModelSnapshot
+    [Migration("20251228213737_ExtendItemInfoEntity")]
+    partial class ExtendItemInfoEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -139,17 +142,6 @@ namespace MissAlise.DataBase.Migrations
                     b.ToTable("Folders");
                 });
 
-            modelBuilder.Entity("MissAlise.Entities.OneDrive.ParentInfo", b =>
-                {
-                    b.HasBaseType("MissAlise.Entities.OneDrive.ItemInfo");
-
-                    b.Property<string>("DriveId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.ToTable("ParentInfo");
-                });
-
             modelBuilder.Entity("MissAlise.Entities.OneDrive.Audio", b =>
                 {
                     b.HasBaseType("MissAlise.Entities.OneDrive.DataFile");
@@ -270,7 +262,7 @@ namespace MissAlise.DataBase.Migrations
                         .WithMany("Children")
                         .HasForeignKey("FolderId");
 
-                    b.HasOne("MissAlise.Entities.OneDrive.ParentInfo", "Parent")
+                    b.HasOne("MissAlise.Entities.OneDrive.ItemInfo", "Parent")
                         .WithMany()
                         .HasForeignKey("ParentId");
 
@@ -303,15 +295,6 @@ namespace MissAlise.DataBase.Migrations
                     b.HasOne("MissAlise.Entities.OneDrive.ItemInfo", null)
                         .WithOne()
                         .HasForeignKey("MissAlise.Entities.OneDrive.Folder", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("MissAlise.Entities.OneDrive.ParentInfo", b =>
-                {
-                    b.HasOne("MissAlise.Entities.OneDrive.ItemInfo", null)
-                        .WithOne()
-                        .HasForeignKey("MissAlise.Entities.OneDrive.ParentInfo", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

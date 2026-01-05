@@ -25,8 +25,8 @@ namespace MissAlise.Bot
 				try
 				{
 					bot = scope.ServiceProvider.GetRequiredService<Bot<TUpdate>>();
-					bot.Information = await bot.Client.GetMe(cancellationToken).ConfigureAwait(false);
-					await bot.Client.DeleteMyCommands(cancellationToken: cancellationToken);
+					bot.Information = await bot.ApiClient.GetMe(cancellationToken).ConfigureAwait(false);
+					await bot.ApiClient.DeleteMyCommands(cancellationToken: cancellationToken);
 				}
 				catch (Exception error)
 				{

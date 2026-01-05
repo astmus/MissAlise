@@ -12,32 +12,20 @@ using Telegram.Bot.Types.Enums;
 
 namespace MissAlise.Bot
 {
-	internal class ParentCommand : Command
-	{
-		public ParentCommand(string name, string? description = null) : base(name, description)
-		{
-		}
-
-		public Func<ICommand> CreateSubcommand { get; set; }
-	}
-
-	internal interface ICommandParent
-	{
-		public ICommand CreateSubcommand();
-	}
-
 	internal partial class Bot
 	{
 		public HttpClient HttpConnection { get; }
-		public ITelegramBotClient Client { get; init; }
+		public ITelegramBotClient ApiClient { get; init; }
+
+		protected User Information { get; set; }
+		protected BotConfiguration botOptions { get; set; }
+		protected ReceiverOptions receiveOptions { get; set; }
 	}
 
-	internal partial class Bot<TUpdate> : Bot where TUpdate : Update
+	internal abstract partial class Bot<TUpdate> : Bot where TUpdate : Update
 	{
-		private User Information;
-		private BotConfiguration botOptions;
+		private RootCommand botCommandRoot;
 		private readonly ILogger<Bot<TUpdate>> log;
-		private ReceiverOptions receiveOptions;
 		private UpdatesSource<TUpdate> updatesSource;
 		private readonly Channel<TUpdate> Updates = Channel.CreateUnbounded<TUpdate>(
 			new()
@@ -47,17 +35,14 @@ namespace MissAlise.Bot
 			}
 		);
 
-		public IEnumerable<BotCommand> Commands { get; } =
-		[
-			new BotCommand<SyncCommand>() { Command = "sync", Description = "синхронизировать файлы" }
-		];
+		protected abstract IEnumerable<RelayCommand> BotCommands { get; }
 
 		public Bot(IOptions<BotConfiguration> options, ILogger<Bot<TUpdate>> log)
 		{
 			botOptions = options.Value;
 			this.log = log;
 
-			Client = new TelegramBotClient(botOptions.ApiKey, HttpConnection);
+			ApiClient = new TelegramBotClient(botOptions.ApiKey, HttpConnection);
 			receiveOptions = new ReceiverOptions() { Limit = 100, AllowedUpdates = [UpdateType.Message, UpdateType.InlineQuery, UpdateType.CallbackQuery, UpdateType.ChosenInlineResult] };
 		}
 
@@ -67,34 +52,30 @@ namespace MissAlise.Bot
 			return Task.CompletedTask;
 		}
 
-		RootCommand root;
 		public ICommand Create(string rawCommand)
 		{
 			ICommand resultCommand = null;
-			if (root == null)
+			if (botCommandRoot == null)
 			{
-				root = new RootCommand();
-				var commands = Commands.Select(bc =>
-					new ParentCommand(bc.Command, description: bc.Description) { CreateSubcommand = (bc as ICommandParent).CreateSubcommand });
+				botCommandRoot = new RootCommand();				
 
-				foreach (var cmd in commands)
-				{
-					cmd.AddAlias("/" + cmd.Name);
-					root.AddCommand(cmd);
-					//cmd.AddArgument(new Argument<DateTime>("f"));
+				foreach (var cmd in BotCommands)
+				{					
+					botCommandRoot.AddCommand(cmd);					
 				}
 			}
 
-			var result = root.Parse(rawCommand);
+			var result = botCommandRoot.Parse(rawCommand);
+
 			if (result.Errors.Any())
 				_ = HandleErrorAsync(new AggregateException(result.Errors.Select(error => new Exception(error.Message))), default);
 			else
-				resultCommand = (result.CommandResult.Command as ParentCommand).CreateSubcommand();
+				resultCommand = (result.CommandResult.Command as RelayCommand).CommandObject;
 
 			return resultCommand;
 		}
 
 		public virtual UpdatesSource<TUpdate> UpdatesSource
-			=> updatesSource ?? (updatesSource = new UpdatesSource<TUpdate>(Client, receiveOptions, HandleErrorAsync));
+			=> updatesSource ?? (updatesSource = new UpdatesSource<TUpdate>(ApiClient, receiveOptions, HandleErrorAsync));
 	}
 }

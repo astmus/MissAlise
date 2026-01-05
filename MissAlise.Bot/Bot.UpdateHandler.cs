@@ -10,7 +10,7 @@ namespace MissAlise.Bot
 {
 	internal partial class Bot<TUpdate> where TUpdate: Update
 	{
-		public class UpdateHandler : BackgroundService
+		internal class UpdateHandler : BackgroundService
 		{
 			private readonly ILogger<UpdateHandler> logger;
 			private readonly IServiceScopeFactory factory;
@@ -31,7 +31,7 @@ namespace MissAlise.Bot
 						await foreach (var update in bot.Updates.Reader.ReadAllAsync(cancel))
 						{
 							logger.LogInformation("Got update {Id}", update.Id);
-							_ = HandleUpdateAsync(bot.Client, update, cancel);
+							_ = HandleUpdateAsync(bot.ApiClient, update, cancel);
 						}
 					}
 					catch (Exception error)

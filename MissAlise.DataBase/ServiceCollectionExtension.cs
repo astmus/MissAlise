@@ -43,7 +43,8 @@ namespace MissAlise.DataBase
 				options.UseLazyLoadingProxies().EnableSensitiveDataLogging()
 							.UseSqlite(appConfig.GetConnectionString("DefaultIdentityConnection")));
 
-			var settings = MongoClientSettings.FromConnectionString("mongodb://localhost:27017");
+			var mongoCS = appConfig.GetConnectionString("missdb-mongo");
+			var settings = MongoClientSettings.FromConnectionString(mongoCS);
 #if DEBUG
 			settings.ServerSelectionTimeout = TimeSpan.FromSeconds(600);
 			settings.ConnectTimeout = TimeSpan.FromSeconds(600);
@@ -54,11 +55,11 @@ namespace MissAlise.DataBase
 			services.AddSingleton<IMongoDatabase>(sp =>
 			{
 				var client = sp.GetRequiredService<IMongoClient>();
-				return client.GetDatabase("postgres");
+				return client.GetDatabase("missdb");
 			});
 
 			services.AddDbContextPool<UserMediaContext>(options =>
-				options.UseNpgsql(appConfig.GetConnectionString("postgres")));
+				options.UseNpgsql(appConfig.GetConnectionString("missdb")));
 			return services;
 		}
 	}

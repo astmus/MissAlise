@@ -15,13 +15,13 @@
 
 	<ItemGroup>
 		<PackageReference Include="Aspire.Hosting.AppHost" Version="9.0.0" />
+		<PackageReference Include="Aspire.Hosting.MongoDB" Version="9.0.0" />
 		<PackageReference Include="Aspire.Hosting.Redis" Version="9.0.0" />
 		<PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\MissAlise.Background\MissAlise.Background.csproj" IsAspireProjectResource="false" />
-		<ProjectReference Include="..\MissAlise.DataBase\MissAlise.DataBase.csproj" IsAspireProjectResource="false" />
 		<ProjectReference Include="..\MissAlise.PhotoService\MissAlise.PhotoService.csproj" />
 		<ProjectReference Include="..\MissAlise.VideoService\MissAlise.VideoService.csproj" />
 		<ProjectReference Include="..\MissAlise.WebApi\MissAlise.WebApi.csproj" />

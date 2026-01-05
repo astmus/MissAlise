@@ -8,7 +8,9 @@ namespace MissAlise.Application.Interfaces
 	{		
 		Task<User> GetOwnerInfo(CancellationToken cancel);
 		Uri CreateAuthorizeLink(object stateIdentifier);
-		Task<IEnumerable<ItemInfo>> GetRootItems(CancellationToken cancel);
+		Task<string> HandleDeltaDriveItemsAsync(Action<ItemInfo> handleDelegate, CancellationToken cancel);
+		Task<string> HandleActualDriveItemsAsync(Action<ItemInfo> handleDelegate, CancellationToken cancel);
 		Task<Result<AppUser>> RefreshUserAccessTokenAsync(AppUser user, CancellationToken cancel);
+		Task<Stream?> GetItemContent(string parentId, string itemId, CancellationToken cancel);
 	}	
 }

@@ -19,7 +19,7 @@ namespace MissAlise.Application.Services.Sync
 		private readonly IUserRepository usersRepository;
 		private readonly IOneDriveService oneDrive;
 		private readonly IHandleContext ctx;
-		const string ROOT_SYNC_PATH = @"M:\Sync\"; // и вот это барахло тоже убрать
+		const string ROOT_SYNC_PATH = @"D:\Sync\"; // и вот это барахло тоже убрать
 		public SyncCommandHandler(IHttpClientFactory factory, ILogger<SyncCommandHandler> log, IUserRepository usersRepository, IOneDriveService oneDrive, IHandleContext ctx)
 		{
 			this.factory = factory;
@@ -100,21 +100,26 @@ namespace MissAlise.Application.Services.Sync
 
 		public async Task<Result> Handle(SyncCommand request, CancellationToken cancel)
 		{
-			List<ItemInfo> Items = new List<ItemInfo>();
 			var repository = await usersRepository.LoadForCurrentUserAsync(cancel);
 
-			//await foreach (var item in oneDrive.GetSynchronizator(f => new { f.Id, f.Name, f.File, f.FileSystemInfo, f.Video, f.Photo, f.Size, f.ParentReference }).WithCancellation(cancel))
-			//{
-			//	if (item is not Photo && item is not Video)
-			//		continue;
+			await using var pipeline = new DriveSyncPipeline(
+				oneDrive,
+				ROOT_SYNC_PATH,
+				ROOT_SYNC_PATH,
+				cancel,
+				parallelism: 4);
 
-			//	if (item.Parent == null)
-			//	{
-			//		Items.Add(item);
-			//		repository.RootFolder.Children.Add(item);
-			//	}
-			//}
-			//var result = await repository.SaveAsync();
+			// 1️⃣ Подаём элементы в pipeline
+			await oneDrive.HandleDeltaDriveItemsAsync(
+				item => pipeline.PostAsync(item, cancel),
+				cancel);
+
+			// 2️⃣ Закрываем вход (важно!)
+			await pipeline.CompleteAsync();
+
+			// 3️⃣ Дожидаемся полной обработки
+			await pipeline.Completion;
+
 			return Result.Successful;
 		}
 

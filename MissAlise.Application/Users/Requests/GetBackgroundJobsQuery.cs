@@ -17,7 +17,7 @@ namespace MissAlise.Application.Users.Requests
 		private readonly IUserRepository usersRepository;
 		private readonly IOneDriveService oneDrive;
 		private readonly IHandleContext ctx;
-		const string ROOT_SYNC_PATH = @"M:\Sync\"; // и вот это барахло тоже убрать
+		const string ROOT_SYNC_PATH = @"D:\Sync\"; // и вот это барахло тоже убрать
 		public GetBackgroundJobsQueryHandler(ILogger<GetBackgroundJobsQueryHandler> log, IHandleContext ctx)
 		{
 			this.log = log;

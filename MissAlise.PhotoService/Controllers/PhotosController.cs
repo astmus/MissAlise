@@ -103,7 +103,7 @@ namespace MissAlise.Services.Photos.Controllers
 				Cameramodel = img.Cameramodel,
 				Name = info.Format.Filename,
 				Size = int.Parse(info.Format.Size),
-				Parent = folder,
+				//Parent = folder,
 				MimeType = "image/" + info.Streams[0].CodecName,
 				CreatedDateTime = DateTimeOffset.UtcNow,
 				ModifieDateTime = DateTimeOffset.UtcNow

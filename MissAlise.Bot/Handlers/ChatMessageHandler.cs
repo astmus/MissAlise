@@ -51,15 +51,15 @@ namespace MissAlise.Bot.Handlers
 				var result = await _authService.AddUserAsync(appUser).ConfigureAwait(false);
 				if (!result.Succeeded)
 				{
-					await _bot.Client.SendMessage(data.Chat, "Ошибка при создании пользователя", parseMode: ParseMode.MarkdownV2, cancellationToken: cancel).ConfigureAwait(false);
+					await _bot.ApiClient.SendMessage(data.Chat, "Ошибка при создании пользователя", parseMode: ParseMode.MarkdownV2, cancellationToken: cancel).ConfigureAwait(false);
 					return;
 				}
 			}
 
 			var link = _oneService.CreateAuthorizeLink(data.Chat.Id);
-			await _bot.Client.DeleteMyCommands().ConfigureAwait(false);
-			await _bot.Client.SetChatMenuButton(data.Chat.Id, new MenuButtonWebApp() { Text = "Авторизоваться", WebApp = new WebAppInfo(link.ToString()) }, cancel).ConfigureAwait(false);
-			await _bot.Client.SendMessage(data.Chat, "Необходима авторизация", parseMode: ParseMode.MarkdownV2, cancellationToken: cancel).ConfigureAwait(false);
+			await _bot.ApiClient.DeleteMyCommands().ConfigureAwait(false);
+			await _bot.ApiClient.SetChatMenuButton(data.Chat.Id, new MenuButtonWebApp() { Text = "Авторизоваться", WebApp = new WebAppInfo(link.ToString()) }, cancel).ConfigureAwait(false);
+			await _bot.ApiClient.SendMessage(data.Chat, "Необходима авторизация", parseMode: ParseMode.MarkdownV2, cancellationToken: cancel).ConfigureAwait(false);
 		}
 	}
 }

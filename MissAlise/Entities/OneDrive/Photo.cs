@@ -1,4 +1,6 @@
-﻿namespace MissAlise.Entities.OneDrive;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace MissAlise.Entities.OneDrive;
 
 public partial class Photo : DataFile
 {
@@ -19,8 +21,16 @@ public partial class Photo : DataFile
 	public int? Orientation { get; set; }
 
 	public DateTimeOffset? Takendatetime { get; set; }
-
 	public int? Height { get; set; }
 
+	public int? Width { get; set; }
+}
+
+public partial class Image
+{
+	[NotMapped]
+	public IDictionary<string, object> AdditionalData { get; set; }
+	public int? Height { get; set; }
+	string OdataType { get; set; }
 	public int? Width { get; set; }
 }

@@ -24,6 +24,7 @@ public partial class UserMediaContext : DbContext
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
+		//modelBuilder.Entity<Hash>().HasNoKey();
 		modelBuilder.Entity<ItemInfo>().UseTptMappingStrategy();
 		//modelBuilder.Entity<ItemInfo>(item =>
 		//{
@@ -53,9 +54,4 @@ public partial class UserMediaContext : DbContext
 		modelBuilder.Entity<Video>();
 		modelBuilder.Entity<User>();
 	}
-
-	//protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-	//	=> optionsBuilder.UseNpgsql("Host=192.168.0.3;Database=missdb;Username=postgres;Password=postgres");
-	//protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-	//=> optionsBuilder.UseNpgsql("Host=localhost:5432;Database=postgres;Username=postgres;Password=postgres");
 }
