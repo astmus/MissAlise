@@ -3,14 +3,16 @@ using System.CommandLine.Parsing;
 using System.Threading.Channels;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MissAlise.Application.Commands;
+using MissAlise.Application.Common;
 using MissAlise.Application.Common.RequestHandler;
-using MissAlise.Application.Services.Sync;
+using MissAlise.Application.Interfaces;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace MissAlise.Bot
+namespace MissAlise.TelegramBot
 {
 	internal class MissAliseBot : Bot<UpdateExt>
 	{			
@@ -31,10 +33,13 @@ namespace MissAlise.Bot
 				{
 					return new StartCommand();
 				}),
-
 			new RelayCommand("sync", "синхронизировать файлы", cmd =>
 				{
 					return new SyncCommand();
+				}),
+			new RelayCommand("test", "тестовая комманда", cmd =>
+				{
+					return new TestCommand();
 				})
 		];
 

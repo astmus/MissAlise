@@ -1,7 +1,7 @@
 ﻿using MissAlise.Application.Common.RequestHandler;
 using Telegram.Bot.Types;
 
-namespace MissAlise.Bot
+namespace MissAlise.TelegramBot
 {
 	internal class UpdateExt : Update
 	{ 

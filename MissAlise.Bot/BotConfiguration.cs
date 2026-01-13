@@ -1,4 +1,4 @@
-﻿namespace MissAlise.Bot
+﻿namespace MissAlise.TelegramBot
 {
 	internal class BotConfiguration
 	{

@@ -15,7 +15,7 @@ namespace MissAlise.Application
 			services.TryAddScoped<IContextItems, ContextItems>();
 			services.AddMediatR(cfg =>
 			{
-				cfg.RegisterServicesFromAssemblyContaining<ContextItems>();
+				cfg.RegisterServicesFromAssemblyContaining<ContextItems>();				
 				cfg.AddBehavior<AuthBehavior>(ServiceLifetime.Scoped);
 				cfg.Lifetime = ServiceLifetime.Scoped;
 			});

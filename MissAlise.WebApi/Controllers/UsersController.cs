@@ -2,7 +2,6 @@ using System.Net.Mime;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MissAlise.Application.Dto;
-using MissAlise.Application.Services.Sync;
 using MissAlise.Application.Users.Requests;
 using MissAlise.Background;
 using MissAlise.Interfaces;

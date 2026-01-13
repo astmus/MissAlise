@@ -24,7 +24,7 @@
             "dotnetRunMessages": true,
             "launchBrowser": true,
             "launchUrl": "swagger",
-            "applicationUrl": "https://localhost:5001;http://alise.com:5329",
+            "applicationUrl": "https://192.168.0.3:5001;http://alise.com:5329",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development"
             }

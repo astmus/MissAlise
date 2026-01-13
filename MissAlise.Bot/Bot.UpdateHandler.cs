@@ -1,12 +1,15 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.CommandLine;
+using System.Windows.Input;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MissAlise.Application.Commands;
 using MissAlise.Application.Common;
 using MissAlise.Application.Interfaces;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace MissAlise.Bot
+namespace MissAlise.TelegramBot
 {
 	internal partial class Bot<TUpdate> where TUpdate: Update
 	{
@@ -25,62 +28,37 @@ namespace MissAlise.Bot
 			protected override async Task ExecuteAsync(CancellationToken cancel)
 			{
 				while (!cancel.IsCancellationRequested)
-				{
-					try
+				{					
+					await foreach (var update in bot.Updates.Reader.ReadAllAsync(cancel))
 					{
-						await foreach (var update in bot.Updates.Reader.ReadAllAsync(cancel))
-						{
-							logger.LogInformation("Got update {Id}", update.Id);
-							_ = HandleUpdateAsync(bot.ApiClient, update, cancel);
-						}
-					}
-					catch (Exception error)
-					{
-						logger.LogError(error, error.Message);
-					}
+						logger.LogInformation("Got update {Id}", update.Id);
+						_ = HandleUpdateAsync(bot.ApiClient, update, cancel);
+					}					
 				}
 			}
 
-			public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancel)
+			public async Task HandleUpdateAsync(ITelegramBotClient botClient, TUpdate update, CancellationToken cancel)
 			{
 				try
 				{
 					using var handleScope = factory.CreateScope();
 					var services = handleScope.ServiceProvider;
-					//var manager = services.GetRequiredService<UserManager<AppUser>>();
-					//var user = await manager.FindByIdAsync(update.GetCurrentMessage().From.Id.ToString());
-
-					//if (user == null)
-					//{
-					//	var profiles = services.GetRequiredService<IUserProfilesRepository>();
-					//	var tmpUser = update.GetCurrentMessage().From;
-					//	await profiles.AddPendingUser(new Entities.OneDrive.User()
-					//	{
-					//		Id = tmpUser.Id.ToString(),
-					//		DisplayName = tmpUser.Username,
-					//		GivenName = tmpUser.FirstName,
-					//		Surname = tmpUser.LastName ?? string.Empty
-					//	}, cancel);
-
-					//	var link = services.GetRequiredService<AzureAd>().AuthorizeLink(update.Message.Chat.Id.ToString());
-					//	await bot.Client.DeleteMyCommands().ConfigureAwait(false);
-					//	await bot.Client.SetChatMenuButton(update.Message.Chat.Id, new MenuButtonWebApp() { Text = "Авторизоваться", WebApp = new WebAppInfo(link.ToString()) }, cancel).ConfigureAwait(false); 
-					//	await bot.Client.SendMessage(update.Message.Chat, "Необходима авторизация", parseMode: ParseMode.MarkdownV2, cancellationToken: cancel).ConfigureAwait(false);
-					//	return;
-					//}
 
 					var sender = update.GetCurrentUser();
 					var ctx = services.GetRequiredService<IHandleContext>();
-					ctx.Set(update);
+					ctx.Set(update, "update");
 					ctx.Set(new Claimant(sender.Id.ToString(), sender.Username));
 					ctx.Set(sender);
+					ctx.Set(bot, "bot");
 
-					Task currentTask = update switch
-					{
-						//{ Command: not null } => HandleUpdateAsync(update, update.Command, stoppingToken),
+					var task = update.IsBotCommand("/start") ? InvokeHandlerAsync(services, bot.ParseCommand(update.GetCurrentMessage()) as StartCommand, cancel) : Task.CompletedTask;
+
+					Task basicTask = (update as UpdateExt) switch
+					{						
 						{ CallbackQuery: not null } => InvokeHandlerAsync(services, update.CallbackQuery, cancel),
 						{ InlineQuery: not null } => InvokeHandlerAsync(services, update.InlineQuery, cancel),
-						//{ ChosenInlineResult: not null } => Task.CompletedTask,
+						//{ ChosenInlineResult: not null } => Task.CompletedTask,						
+						//{ Message: not null } => InvokeHandlerAsync(services, update.GetCurrentMessage(), cancel),
 						_ => InvokeHandlerAsync(services, update.GetCurrentMessage(), cancel)
 						//{ EditedMessage: not null } => UpdateType.EditedMessage,
 						//{ ChannelPost: not null } => UpdateType.ChannelPost,
@@ -99,7 +77,7 @@ namespace MissAlise.Bot
 					};
 
 					//currentTask ??= InvokeHandlerAsync(services, update.GetCurrentMessage(), cancel);
-					await currentTask.ConfigureAwait(false);
+					await task.ContinueWith(t => basicTask).ConfigureAwait(false);					
 				}
 				catch (Exception error)
 				{

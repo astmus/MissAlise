@@ -1,8 +1,8 @@
 ﻿using MediatR;
+using MissAlise.Application.Commands;
 using MissAlise.Application.Common;
 using MissAlise.Application.Interfaces;
 using MissAlise.Application.Services.Authentication;
-using MissAlise.Application.Services.Sync;
 namespace MissAlise.Application
 {
 	public class AuthBehavior : IPipelineBehavior<SyncCommand, Result>

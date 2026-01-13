@@ -15,11 +15,11 @@ namespace MissAlise.Background
 		public bool IsOverdosed => CurrentPressure > MaxPressure;
 		public IEnumerable<BackgroundJob> Jobs => _jobs.AsReadOnly();
 		public IEnumerable<BackgroundJob> UserJobs => _userJobs.AsReadOnly();
-		public IEnumerable<EventTrigger> Triggers => triggers;
+		public IEnumerable<EventTrigger> Triggers => _triggers;
 
 		static SemaphoreSlim _workers = new SemaphoreSlim(2, 128);
-		protected readonly ILogger log;
-		private readonly IEventTriggersSource triggers;
+		protected readonly ILogger _log;
+		private readonly IEventTriggersSource _triggers;
 		private readonly List<BackgroundJob> _jobs = new List<BackgroundJob>();
 		private readonly List<BackgroundJob> _userJobs = new List<BackgroundJob>();
 		int _currentPressure;
@@ -28,8 +28,8 @@ namespace MissAlise.Background
 		public BackgroundServer(ILogger logger, IEventTriggersSource triggers)
 		{
 			Current = this;
-			log = logger;
-			this.triggers = triggers;
+			_log = logger;
+			_triggers = triggers;
 		}
 
 		internal void AddJob(BackgroundJob job)
@@ -42,7 +42,7 @@ namespace MissAlise.Background
 		{
 			do
 			{
-				foreach (var trigger in triggers.OrderBy(b => b.Job.LastStart ?? DateTime.MinValue).ThenBy(o => o.Job.Weight))
+				foreach (var trigger in _triggers.OrderBy(b => b.Job.LastStart ?? DateTime.MinValue).ThenBy(o => o.Job.Weight))
 
 					if (trigger.Check())
 						await trigger.Fire(cancellationToken);

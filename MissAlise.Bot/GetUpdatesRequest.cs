@@ -4,7 +4,7 @@ using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace MissAlise.Bot
+namespace MissAlise.TelegramBot
 {
 	internal class GetUpdatesRequest<TUpdate> : RequestBase<TUpdate[]> where TUpdate : Update
 	{

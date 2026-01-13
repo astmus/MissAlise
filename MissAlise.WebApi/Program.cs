@@ -11,7 +11,7 @@ using MissAlise.Application.Background;
 using MissAlise.Application.Background.Handlers;
 using MissAlise.Application.Common;
 using MissAlise.Background;
-using MissAlise.Bot;
+using MissAlise.TelegramBot;
 using MissAlise.DataBase;
 using MissAlise.Entities.OneDrive;
 using MissAlise.OneDrive;

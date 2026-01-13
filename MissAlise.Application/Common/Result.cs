@@ -16,6 +16,7 @@
 
 	public class Result<T> : Result
 	{
+		public static new Result<T> Fail(string error) => new Result<T>(default, error);
 		public T? Value { get; }
 		internal Result(T? value, string error) : base(error)
 			=> Value = value;

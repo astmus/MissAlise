@@ -5,7 +5,7 @@ using MissAlise.Application.Interfaces;
 using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
 
-namespace MissAlise.Application.Services.Sync
+namespace MissAlise.Application.Commands
 {
 	public record SyncCommand() : ICommand;
 
@@ -109,7 +109,6 @@ namespace MissAlise.Application.Services.Sync
 				cancel,
 				parallelism: 4);
 
-			// 1️⃣ Подаём элементы в pipeline
 			await oneDrive.HandleDeltaDriveItemsAsync(
 				item => pipeline.PostAsync(item, cancel),
 				cancel);

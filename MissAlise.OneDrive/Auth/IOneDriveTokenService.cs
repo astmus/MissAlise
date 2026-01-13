@@ -17,7 +17,7 @@ namespace MissAlise.OneDrive.Auth
 			};
 
 			return await RequestCredentials(content, cancel);
-		}
+		       }
 
 		async Task<ApiResponse<AccessInformation>> RefreshCredentials(AzureAd azure, string refreshToken, CancellationToken cancel)
 		{

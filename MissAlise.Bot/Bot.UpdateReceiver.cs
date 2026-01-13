@@ -6,7 +6,7 @@ using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 
-namespace MissAlise.Bot
+namespace MissAlise.TelegramBot
 {
 	internal partial class Bot<TUpdate> where TUpdate: Update
 	{
@@ -36,7 +36,7 @@ namespace MissAlise.Bot
 					return;
 				}
 
-				await base.StartAsync(cancellationToken).ConfigureAwait(false);
+				_ = base.StartAsync(cancellationToken).ConfigureAwait(false);
 			}
 
 			protected override async Task ExecuteAsync(CancellationToken cancel)
@@ -49,14 +49,7 @@ namespace MissAlise.Bot
 					await foreach (TUpdate update in updates/*.WithCancellation(cancel)*/)
 					{
 						logger.LogInformation("Got update {Id}", update.Id);
-						if (update.IsBotCommand())
-						{
-							if (update is UpdateExt ext && bot.Create(update.Message.Text) is ICommand command) // временное решение
-								ext.Command = command;
-							else
-								continue;
-						}
-
+						
 						await bot.Updates.Writer.WriteAsync(update, cancel).ConfigureAwait(false);
 					}
 

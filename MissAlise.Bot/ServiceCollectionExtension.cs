@@ -1,10 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MissAlise.Application.Commands;
 using MissAlise.Application.Interfaces;
-using MissAlise.Bot.Handlers;
+using MissAlise.TelegramBot.Handlers;
 using Telegram.Bot.Types;
 
-namespace MissAlise.Bot
+namespace MissAlise.TelegramBot
 {
 	public static class ServiceCollectionExtension
 	{
@@ -17,6 +18,7 @@ namespace MissAlise.Bot
 				.Configure<BotConfiguration>(botConfig);
 
 			services.AddScoped<IAsyncHandler<Message>, ChatMessageHandler>();
+			services.AddScoped<IAsyncHandler<StartCommand>, StartCommandHandler>();
 			return services;
 		}
 
@@ -28,6 +30,9 @@ namespace MissAlise.Bot
 
 		static internal bool IsBotCommand(this Update update)
 			=> update.Message.Entities?.Any(e => e.Type == Telegram.Bot.Types.Enums.MessageEntityType.BotCommand) == true;
+
+		static internal bool IsBotCommand(this Update update, string commandName)
+			=> update.IsBotCommand() && update.Message.Text == commandName;
 
 		static internal Chat GetCurrentChat(this Update update)
 			=> update.GetCurrentMessage()?.Chat ?? new Chat() { Id = update.GetCurrentMessage()?.From?.Id ?? update.InlineQuery?.From.Id ?? update.CallbackQuery?.From.Id ?? update.ChosenInlineResult.From.Id };

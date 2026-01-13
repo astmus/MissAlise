@@ -8,14 +8,13 @@ using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using MissAlise.Application.Common.RequestHandler;
-using MissAlise.Application.Services.Sync;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace MissAlise.Bot
+namespace MissAlise.TelegramBot
 {
 	internal class UpdatesSource<TUpdate> : QueuedUpdateReceiver, IAsyncEnumerable<TUpdate> where TUpdate : Update
 	{
@@ -106,10 +105,10 @@ namespace MissAlise.Bot
 					}
 				}
 
-						int? id = 307409070;
+						//int? id = 307409070;
 				var getUpdatesRequest = new GetUpdatesRequest<TUpdate>
 				{
-					Offset = id ?? _messageOffset,
+					Offset = _messageOffset,
 					Limit = _limit,
 					Timeout = (int)_receiver._botClient.Timeout.TotalSeconds,
 					AllowedUpdates = _allowedUpdates,

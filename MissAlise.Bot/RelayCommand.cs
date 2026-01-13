@@ -2,11 +2,11 @@
 using MissAlise.Application.Common.RequestHandler;
 using Telegram.Bot.Types;
 
-namespace MissAlise.Bot
+namespace MissAlise.TelegramBot
 {
 	internal class RelayCommand : Command
 	{
-		public ICommand CommandObject => commandAdapter(this);
+		public ICommand Command => commandAdapter(this);
 		private Func<RelayCommand, ICommand> commandAdapter { get; }
 
 		public RelayCommand(string Command, string? description, Func<RelayCommand, ICommand> commandAdapter) : base(Command, description)

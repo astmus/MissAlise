@@ -8,7 +8,7 @@ namespace MissAlise.Application.Context
 	{
 		public T GetCurrent<T>(string id = null, bool throwIfNull = false) where T : class
 		{
-			var result = Get<T>(id ?? Identity<T>.Discrimonator);
+			var result = Get<T>(id ?? Identity<T>.Discriminator);
 
 			if (throwIfNull)
 				ArgumentNullException.ThrowIfNull(result);

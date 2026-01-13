@@ -13,7 +13,7 @@ namespace MissAlise.Application
 			return Task.CompletedTask;
 		}
 
-		public async Task InvokeAsync(TData data, CancellationToken cancel)
+		public virtual async Task InvokeAsync(TData data, CancellationToken cancel)
 		{
 			if (Interlocked.CompareExchange(ref isWork, 1, 0) == 1) return;
 			try
