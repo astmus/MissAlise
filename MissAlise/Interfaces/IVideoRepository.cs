@@ -1,4 +1,4 @@
-﻿using MissAlise.Entities.OneDrive;
+﻿using MissAlise.Entities.Media;
 
 namespace MissAlise.Interfaces
 {

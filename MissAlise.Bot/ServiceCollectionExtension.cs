@@ -17,8 +17,14 @@ namespace MissAlise.TelegramBot
 				.AddHostedService<MissAliseBot.UpdateHandler>()
 				.Configure<BotConfiguration>(botConfig);
 
+			services.AddMediatR(cfg =>
+			{
+				cfg.RegisterServicesFromAssemblyContaining<StartCommand>();
+				cfg.Lifetime = ServiceLifetime.Scoped;
+			});
+
 			services.AddScoped<IAsyncHandler<Message>, ChatMessageHandler>();
-			services.AddScoped<IAsyncHandler<StartCommand>, StartCommandHandler>();
+			//services.AddScoped<IAsyncHandler<StartCommand>, StartCommandHandler>();
 			return services;
 		}
 

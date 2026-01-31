@@ -16,7 +16,7 @@ using Telegram.Bot.Types.Enums;
 
 namespace MissAlise.TelegramBot
 {
-	internal class UpdatesSource<TUpdate> : QueuedUpdateReceiver, IAsyncEnumerable<TUpdate> where TUpdate : Update
+	internal class UpdatesSource<TUpdate> : IAsyncEnumerable<TUpdate> where TUpdate : Update
 	{
 		private readonly ITelegramBotClient _botClient;
 		private readonly ReceiverOptions? _receiverOptions;
@@ -24,14 +24,14 @@ namespace MissAlise.TelegramBot
 		private int _inProcess;
 		private Enumerator _enumerator;
 
-		public UpdatesSource(ITelegramBotClient botClient, ReceiverOptions? receiverOptions = null, Func<Exception, CancellationToken, Task>? pollingErrorHandler = null) : base(botClient, receiverOptions, pollingErrorHandler)
+		public UpdatesSource(ITelegramBotClient botClient, ReceiverOptions? receiverOptions = null, Func<Exception, CancellationToken, Task>? pollingErrorHandler = null)
 		{
 			_botClient = botClient;
 			_receiverOptions = receiverOptions;
 			_pollingErrorHandler = pollingErrorHandler;
 		}
 
-		public new IAsyncEnumerator<TUpdate> GetAsyncEnumerator(CancellationToken cancellationToken) 
+		public IAsyncEnumerator<TUpdate> GetAsyncEnumerator(CancellationToken cancellationToken) 
 		 {
 			if (Interlocked.CompareExchange(ref _inProcess, 1, 0) is 1)
 				throw new InvalidOperationException(nameof(GetAsyncEnumerator) + " may only be called once");

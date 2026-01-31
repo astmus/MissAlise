@@ -1,13 +1,12 @@
-﻿using System.Text;
+using System.Text;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Mvc;
-using MissAlise.Application;
-using MissAlise.Application.Interfaces;
+using Microsoft.Extensions.Options;
+using MissAlise.Application.Services.Authentication;
+using MissAlise.Interfaces;
 using MissAlise.Background;
-using MissAlise.Bot;
-using MissAlise.DataBase;
-using MissAlise.Entities.OneDrive;
 using MissAlise.OneDrive;
+using MissAlise.OneDrive.Auth;
 using MissAlise.Utils;
 using MissAlise.Worker.Background;
 using MissAlise.Worker.Background.Handlers;
@@ -49,18 +48,26 @@ namespace MissAlise.Worker
 			host.Run();
 		}
 
-		static async Task<IResult> Signin([FromServices] AzureAd config, [FromServices] HttpClient client, [FromQuery] string code, [FromQuery] string state, HttpContext ctx, CancellationToken cancel)
+		static async Task<IResult> Signin([FromServices] IOptions<AzureAd> options, [FromQuery] string code, [FromQuery] string state, HttpContext ctx, CancellationToken cancel)
 		{
+			AzureAd config = options.Value;
 			if (ctx.Request.Headers.Referer.Any(refer => refer == config.Instance || refer == "https://login.live.com/" || refer == "https://account.live.com/") == false)
 				return Results.Forbid();
 
-			var response = await ctx.RequestServices.GetRequiredService<IOneDriveCredentialsService>().GetCredentialsByCode(config, code, cancel);
-
+			var response = await ctx.RequestServices.GetRequiredService<IOneDriveTokenService>().GetCredentialsByCode(config, code, cancel);
 			if (!response.IsSuccessful)
 				return Results.Problem(response.Error.ToString(), null, (int)response.StatusCode);
 
-			_ = ctx.RequestServices.GetService<IAuthorizationCompleter>()?.AuthorizationCompleted(state, response.Content, cancel);
-			return Results.Text("<html><body>Авторизация закончена успешно. Вы можете закрыть это окно</body></html>", "text/html", Encoding.UTF8, 200);
+			var ownerResolver = ctx.RequestServices.GetRequiredService<IOwnerResolver>();
+			var accessStore = ctx.RequestServices.GetRequiredService<IAccessCredentialsStore>();
+			var identity = new MissAlise.ValueObjects.Identity.ExternalIdentity("telegram", state);
+			var userId = await ownerResolver.ResolveOwnerIdAsync(identity, cancel);
+
+			var access = response.Content;
+			access.ExpiredAfter = DateTimeOffset.UtcNow.AddSeconds(access.ExpiresIn);
+			await accessStore.SaveAsync(userId, access, cancel);
+
+			return Results.Text("<html><body>Можете закрыть это окно</body></html>", "text/html", Encoding.UTF8, 200);
 		}
 	}
 }

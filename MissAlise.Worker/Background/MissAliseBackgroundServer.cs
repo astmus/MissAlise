@@ -17,7 +17,7 @@ namespace MissAlise.Worker.Background
 			// здесь всякие приготовления перед стартом фоновой обработки
 			
 
-			log.LogInformation("Start service {Name}", nameof(MissAliseBackgroundServer));
+			_log.LogInformation("Start service {Name}", nameof(MissAliseBackgroundServer));
 			await base.StartAsync(cancellationToken);
 		}
 	}

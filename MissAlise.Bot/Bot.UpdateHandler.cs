@@ -1,11 +1,13 @@
 ﻿using System.CommandLine;
 using System.Windows.Input;
+using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MissAlise.Application.Commands;
 using MissAlise.Application.Common;
 using MissAlise.Application.Interfaces;
+using MissAlise.Entities.Identity;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -18,11 +20,14 @@ namespace MissAlise.TelegramBot
 			private readonly ILogger<UpdateHandler> logger;
 			private readonly IServiceScopeFactory factory;
 			private readonly Bot<TUpdate> bot;
-			public UpdateHandler(ILogger<UpdateHandler> logger, IServiceScopeFactory factory, Bot<TUpdate> bot)
+			private readonly IMapper _mapper;
+
+			public UpdateHandler(ILogger<UpdateHandler> logger, IServiceScopeFactory factory, Bot<TUpdate> bot, IMapper mapper)
 			{
 				this.logger = logger;
 				this.factory = factory;
 				this.bot = bot;
+				_mapper = mapper;
 			}
 
 			protected override async Task ExecuteAsync(CancellationToken cancel)
@@ -46,12 +51,10 @@ namespace MissAlise.TelegramBot
 
 					var sender = update.GetCurrentUser();
 					var ctx = services.GetRequiredService<IHandleContext>();
-					ctx.Set(update, "update");
-					ctx.Set(new Claimant(sender.Id.ToString(), sender.Username));
+					ctx.Set(update);
+					ctx.Set(_mapper.Map<UserProfile>(sender));
 					ctx.Set(sender);
-					ctx.Set(bot, "bot");
-
-					var task = update.IsBotCommand("/start") ? InvokeHandlerAsync(services, bot.ParseCommand(update.GetCurrentMessage()) as StartCommand, cancel) : Task.CompletedTask;
+					ctx.Set(bot, "bot");					
 
 					Task basicTask = (update as UpdateExt) switch
 					{						
@@ -77,7 +80,7 @@ namespace MissAlise.TelegramBot
 					};
 
 					//currentTask ??= InvokeHandlerAsync(services, update.GetCurrentMessage(), cancel);
-					await task.ContinueWith(t => basicTask).ConfigureAwait(false);					
+					await basicTask.ConfigureAwait(false);					
 				}
 				catch (Exception error)
 				{

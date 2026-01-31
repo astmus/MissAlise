@@ -15,8 +15,5 @@ namespace MissAlise.Application.Context
 
 			return result;
 		}
-
-		public AppUser CurrentUser
-			=> GetCurrent<AppUser>();
 	}
 }

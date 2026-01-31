@@ -6,7 +6,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.Kiota.Authentication.Azure;
 using Microsoft.Kiota.Http.HttpClientLibrary;
 using MissAlise.Application.Interfaces;
-using MissAlise.Entities.OneDrive;
 using MissAlise.OneDrive.Auth;
 using Refit;
 

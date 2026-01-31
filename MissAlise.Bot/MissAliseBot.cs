@@ -16,15 +16,15 @@ namespace MissAlise.TelegramBot
 {
 	internal class MissAliseBot : Bot<UpdateExt>
 	{			
-		private readonly ILogger<MissAliseBot> log;		
+		private readonly ILogger<MissAliseBot> _log;		
 
 		public MissAliseBot(IOptions<BotConfiguration> options, ILogger<MissAliseBot> log) : base(options,log)
 		{
 			botOptions = options.Value;
-			this.log = log;
+			_log = log;
 
-			ApiClient = new TelegramBotClient(botOptions.ApiKey, HttpConnection);
-			receiveOptions = new ReceiverOptions() { Limit = 100, AllowedUpdates = [UpdateType.Message, UpdateType.InlineQuery, UpdateType.CallbackQuery, UpdateType.ChosenInlineResult] };
+			//ApiClient = new TelegramBotClient(botOptions.ApiKey, HttpConnection);
+			//receiveOptions = new ReceiverOptions() { Limit = 100, AllowedUpdates = [UpdateType.Message, UpdateType.InlineQuery, UpdateType.CallbackQuery, UpdateType.ChosenInlineResult] };
 		}
 
 		protected override IEnumerable<RelayCommand> BotCommands =>
@@ -35,7 +35,7 @@ namespace MissAlise.TelegramBot
 				}),
 			new RelayCommand("sync", "синхронизировать файлы", cmd =>
 				{
-					return new SyncCommand();
+					return new SyncCommand(default);
 				}),
 			new RelayCommand("test", "тестовая комманда", cmd =>
 				{

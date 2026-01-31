@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MissAlise.Application.Context;
 using MissAlise.Application.Interfaces;
-using MissAlise.Application.Services.Authentication;
 
 namespace MissAlise.Application
 {
@@ -19,15 +17,6 @@ namespace MissAlise.Application
 				cfg.AddBehavior<AuthBehavior>(ServiceLifetime.Scoped);
 				cfg.Lifetime = ServiceLifetime.Scoped;
 			});
-
-			services.AddScoped<IAuthenticationService, AuthenticationService>();
-			services.AddCascadingAuthenticationState();
-			services.AddAuthentication(options =>
-			{
-				options.DefaultScheme = IdentityConstants.ApplicationScheme;
-				options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-			});
-			services.AddAuthorization();
 
 			return services;
 		}

@@ -1,10 +1,10 @@
-﻿using System.Linq.Expressions;
-using LinqToDB;
-using LinqToDB.EntityFrameworkCore;
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MissAlise.DataBase.Contexts;
-using MissAlise.Entities.OneDrive;
+using MissAlise.DataBase.Mapping;
+using MissAlise.DataBase.Models;
+using MissAlise.Entities.Media;
 using MissAlise.Interfaces;
 
 namespace MissAlise.DataBase.Repositories
@@ -21,19 +21,31 @@ namespace MissAlise.DataBase.Repositories
 
 		public async Task<IItemsPage<Video>> GetPageAsync(int page, int perPage, CancellationToken cancel)
 		{
-			return await ctx.Videos.AsNoTracking().LoadPageOfItemsAsync(page, perPage, cancel);
+			var pageDb = await ctx.Videos.AsNoTracking().LoadPageOfItemsAsync<DbVideo>(page, perPage, cancel);
+			var items = pageDb.Select(MediaDbMapper.ToVideo).ToArray();
+			return new Application.Common.PaginatedList<Video>(items, pageDb.TotalCount, page, perPage);
 		}
 
-		public Task<Video?> FirstAsync(Expression<Func<Video, bool>> predicate, CancellationToken cancel)
-			=> ctx.Videos.AsNoTracking().FirstOrDefaultAsyncEF(predicate, cancel);
+		public async Task<Video?> FirstAsync(Expression<Func<Video, bool>> predicate, CancellationToken cancel)
+		{
+			var list = await ctx.Videos.AsNoTracking().ToListAsync(cancel);
+			return list.Select(MediaDbMapper.ToVideo).FirstOrDefault(predicate.Compile());
+		}
 
 		public async Task DeleteAsync(Expression<Func<Video, bool>> predicate, CancellationToken cancel)
 		{
-			await ctx.Videos.Where(predicate).DeleteAsync(cancel).ConfigureAwait(false);
+			var list = await ctx.Videos.ToListAsync(cancel);
+			var toRemove = list.Where(db => predicate.Compile()(MediaDbMapper.ToVideo(db))).ToList();
+			ctx.Videos.RemoveRange(toRemove);
+			await ctx.SaveChangesAsync(cancel);
 		}
 
 		public async Task<bool> IsExistsAsync(Expression<Func<Video, bool>> predicate, CancellationToken cancel)
-			=> await ctx.Videos.AnyAsyncEF(predicate, cancel);
+		{
+			var list = await ctx.Videos.AsNoTracking().ToListAsync(cancel);
+			return list.Select(MediaDbMapper.ToVideo).Any(predicate.Compile());
+		}
+
 		public Task<Video> AddAsync(Video item, CancellationToken cancel)
 			=> throw new NotImplementedException();
 	}

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using MissAlise.Application.Common;
 using MissAlise.Application.Dto;
-using MissAlise.Entities.OneDrive;
+using MissAlise.Entities.Media;
 using MissAlise.Interfaces;
 using MissAlise.Services.Controllers;
 
@@ -40,7 +40,6 @@ namespace MissAlise.Services.Photos.Controllers
 			if (photo == null)
 				return NotFound(id);
 
-			photo.Parent = null;
 			return Ok(photo);
 		}
 
@@ -92,24 +91,24 @@ namespace MissAlise.Services.Photos.Controllers
 			if (info.Anomaly != null)
 				return Problem(info.Anomaly);
 
-			var photo = new Entities.OneDrive.Photo()
-			{
-				Width = info.Streams[0].Width,
-				Height = info.Streams[0].Height,
-				Orientation = img.Orientation,
-				Fnumber = img.Fnumber,
-				Iso = img.Iso,
-				Cameramake = img.Cameramake,
-				Cameramodel = img.Cameramodel,
-				Name = info.Format.Filename,
-				Size = int.Parse(info.Format.Size),
-				//Parent = folder,
-				MimeType = "image/" + info.Streams[0].CodecName,
-				CreatedDateTime = DateTimeOffset.UtcNow,
-				ModifieDateTime = DateTimeOffset.UtcNow
-			};
+			//var photo = new Entities.Media.Photo()
+			//{
+			//	Width = info.Streams[0].Width,
+			//	Height = info.Streams[0].Height,
+			//	Orientation = img.Orientation,
+			//	Fnumber = img.Fnumber,
+			//	Iso = img.Iso,
+			//	Cameramake = img.Cameramake,
+			//	Cameramodel = img.Cameramodel,
+			//	Name = info.Format.Filename,
+			//	Size = int.Parse(info.Format.Size),
+			//	//Parent = folder,
+			//	MimeType = "image/" + info.Streams[0].CodecName,
+			//	CreatedDateTime = DateTimeOffset.UtcNow,
+			//	ModifieDateTime = DateTimeOffset.UtcNow
+			//};
 
-			folder.Children.Add(photo);
+			//folder.Children.Add(photo);
 			return Ok(info);
 		}
 	}

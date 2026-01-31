@@ -10,61 +10,75 @@ namespace MissAlise.TelegramBot
 {
 	internal partial class Bot<TUpdate> where TUpdate: Update
 	{
-		internal class UpdateReceiver : BackgroundService
+		internal sealed class UpdateReceiver : BackgroundService
 		{
-			private readonly ILogger<UpdateReceiver> logger;
-			private Bot<TUpdate> bot;
-			private readonly IServiceScope scope;
-			public UpdateReceiver(ILogger<UpdateReceiver> logger, IServiceScopeFactory factory)
-			{
-				this.logger = logger;
-				scope = factory.CreateScope();
-			}
-			public override async Task StartAsync(CancellationToken cancellationToken)
-			{
-				try
-				{
-					bot = scope.ServiceProvider.GetRequiredService<Bot<TUpdate>>();
-					bot.Information = await bot.ApiClient.GetMe(cancellationToken).ConfigureAwait(false);
-					await bot.ApiClient.DeleteMyCommands(cancellationToken: cancellationToken);
-				}
-				catch (Exception error)
-				{
-					logger.LogError(error, "Connect to bot failed");
-					await StopAsync(cancellationToken);
-					scope.Dispose();
-					return;
-				}
+			private readonly ILogger<UpdateReceiver> _log;
+			private readonly IServiceScopeFactory _scopeFactory;
 
-				_ = base.StartAsync(cancellationToken).ConfigureAwait(false);
+			private IServiceScope? _scope;
+			private Bot<TUpdate>? _bot;
+
+			public UpdateReceiver(ILogger<UpdateReceiver> log, IServiceScopeFactory scopeFactory)
+			{
+				_log = log;
+				_scopeFactory = scopeFactory;
 			}
 
-			protected override async Task ExecuteAsync(CancellationToken cancel)
+			private async Task InitializeAsync(CancellationToken ct)
 			{
+				_scope = _scopeFactory.CreateScope();
+
 				try
 				{
-					logger.LogInformation("Bot {bot}", bot.Information);
-					
-					IAsyncEnumerable<TUpdate> updates = bot.UpdatesSource;
-					await foreach (TUpdate update in updates/*.WithCancellation(cancel)*/)
+					_bot = _scope.ServiceProvider.GetRequiredService<Bot<TUpdate>>();
+					_bot.Information = await _bot.ApiClient.GetMe(ct);
+					await _bot.ApiClient.DeleteMyCommands(cancellationToken: ct);
+
+					_log.LogInformation("Connected as {Bot}", _bot.Information);
+				}
+				catch
+				{
+					_scope.Dispose();
+					_scope = null;
+					_bot = null;
+					throw;
+				}
+			}
+
+			protected override async Task ExecuteAsync(CancellationToken ct)
+			{
+				await InitializeAsync(ct);
+
+				try
+				{
+					if (_bot is null) return;
+
+					await foreach (var update in _bot.UpdatesSource.WithCancellation(ct))
 					{
-						logger.LogInformation("Got update {Id}", update.Id);
-						
-						await bot.Updates.Writer.WriteAsync(update, cancel).ConfigureAwait(false);
+						_log.LogInformation("Got update {Id}", update.Id);
+						await _bot.Updates.Writer.WriteAsync(update, ct);
 					}
-
 				}
-				catch (Exception error)
+				catch (OperationCanceledException) when (ct.IsCancellationRequested)
 				{
-					logger.LogError(error, error.Message);
+					// normal stop
+				}
+				catch (Exception ex)
+				{
+					_log.LogError(ex, "UpdateReceiver crashed");
+					throw; // опционально: чтобы хост остановился/перезапустился
 				}
 			}
 
-			public override Task StopAsync(CancellationToken cancellationToken)
+			public override async Task StopAsync(CancellationToken cancellationToken)
 			{
-				scope.Dispose();
-				return base.StopAsync(cancellationToken);
+				await base.StopAsync(cancellationToken);
+
+				_scope?.Dispose();
+				_scope = null;
+				_bot = null;
 			}
 		}
+
 	}
 }

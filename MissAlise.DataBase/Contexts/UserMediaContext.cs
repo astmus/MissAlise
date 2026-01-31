@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MissAlise.Entities.OneDrive;
+using Microsoft.EntityFrameworkCore;
+using MissAlise.DataBase.Models;
 
 namespace MissAlise.DataBase.Contexts;
 
@@ -12,46 +12,49 @@ public partial class UserMediaContext : DbContext
 	public UserMediaContext(DbContextOptions<UserMediaContext> options)
 		: base(options)
 	{
-
 	}
 
-	public virtual DbSet<Audio> Audios { get; set; }
-	public virtual DbSet<DataFile> Files { get; set; }
-	public virtual DbSet<Folder> Folders { get; set; }
-	public virtual DbSet<Photo> Photos { get; set; }
-	public virtual DbSet<Video> Videos { get; set; }
-	public virtual DbSet<User> Users { get; set; }
+	public DbSet<DbMediaItem> MediaItems => Set<DbMediaItem>();
+	public DbSet<DbPhoto> Photos => Set<DbPhoto>();
+	public DbSet<DbVideo> Videos => Set<DbVideo>();
+	public DbSet<DbAudio> Audios => Set<DbAudio>();
+	public DbSet<DbMediaLibrary> MediaLibraries => Set<DbMediaLibrary>();
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
-		//modelBuilder.Entity<Hash>().HasNoKey();
-		modelBuilder.Entity<ItemInfo>().UseTptMappingStrategy();
-		//modelBuilder.Entity<ItemInfo>(item =>
-		//{
-		//	item.HasKey(p => p.Id).HasName("Id");
-		//	item.Property(p => p.MimeType).HasColumnName("Mimetype");
-		//	item.Property(p => p.CreatedDateTime).HasColumnName("Createddatetime");
-		//	item.Property(p => p.ModifieDateTime).HasColumnName("Modifiedatetime");
-		//});
+		base.OnModelCreating(modelBuilder);
 
-		modelBuilder.Entity<DataFile>().UseTptMappingStrategy();
-		//modelBuilder.Entity<File>(file =>
-		//{
-		//	file.HasKey(p => p.Id).HasName("Itemid");			
-		//});
-		modelBuilder.Entity<Folder>();
-		//modelBuilder.Entity<Folder>(folder =>
-		//{
-		//	folder.HasOne(c => c.Parent)
-		//	  .WithMany(c => c.Folders)
-		//	  .HasForeignKey(c => c.Parentfolderid)
-		//	  .OnDelete(DeleteBehavior.Cascade);
-		//	folder.HasMany(file => file.Files).WithOne(f => f.Folder);
-		//});
+		modelBuilder.Entity<DbMediaItem>(b =>
+		{
+			b.ToTable("MediaItems");
 
-		modelBuilder.Entity<Audio>();
-		modelBuilder.Entity<Photo>();
-		modelBuilder.Entity<Video>();
-		modelBuilder.Entity<User>();
+			b.Property(x => x.Kind).HasConversion<byte>().HasColumnType("smallint").IsRequired();
+			b.Property(x => x.Provider).HasConversion<byte>().HasColumnType("smallint").IsRequired();
+			b.Property(x => x.RemoteItemId).IsRequired();
+			b.Property(x => x.Name).IsRequired();
+			b.Property(x => x.MimeType).IsRequired();
+
+			// Helpful for deltas / updates:
+			b.HasIndex(x => new { x.Provider, x.RemoteItemId, x.DriveId, x.OwnerId }).IsUnique();
+			b.HasIndex(x => new { x.Kind, x.IsDeleted, x.TakenAt });
+			b.HasIndex(x => new { x.Kind, x.IsDeleted, x.ModifiedAt });
+		});
+
+		modelBuilder.Entity<DbMediaLibrary>(b =>
+		{
+			b.ToTable("MediaLibraries");
+
+			b.Property(x => x.OwnerId).IsRequired();
+			b.Property(x => x.Provider).IsRequired();
+			b.Property(x => x.CreatedAt).IsRequired();
+			b.Property(x => x.UpdatedAt).IsRequired();
+
+			b.HasIndex(x => new { x.OwnerId, x.Provider }).IsUnique();
+		});
+
+		modelBuilder.Entity<DbMediaItem>().UseTptMappingStrategy();
+		modelBuilder.Entity<DbPhoto>().ToTable("Photos");
+		modelBuilder.Entity<DbVideo>().ToTable("Videos");
+		modelBuilder.Entity<DbAudio>().ToTable("Audios");
 	}
 }

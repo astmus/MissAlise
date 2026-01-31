@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,9 +9,10 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using MissAlise.Application.Common;
 using MissAlise.Application.Common.RequestHandler;
 using MissAlise.Application.Interfaces;
-using MissAlise.Application.Services.Authentication;
+using MissAlise.Entities.Identity;
+using MissAlise.Interfaces;
 using MissAlise.TelegramBot;
-using SQLitePCL;
+using MissAlise.ValueObjects.Identity;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -19,41 +20,40 @@ using Telegram.Bot.Types.Enums;
 namespace MissAlise.Application.Commands
 {
 	public record StartCommand() : ICommand;
-	public class StartCommandHandler : AsyncHandlerBase<StartCommand>
+	public class StartCommandHandler : ICommandHandler<StartCommand>
 	{
 		private readonly IHandleContext _ctx;
-		private readonly IMapper _mapper;
-		private readonly IAuthenticationService _authService;
+		private readonly IUserProfilesRepository _userProfiles;
 		private readonly IOneDriveService _oneService;
+		private readonly MissAlise.Interfaces.IOwnerResolver _ownerResolver;
 
-		public StartCommandHandler(IHandleContext ctx, IMapper mapper, IAuthenticationService authService, IOneDriveService oneService)
+		public StartCommandHandler(IHandleContext ctx, IUserProfilesRepository authService, IOneDriveService oneService, MissAlise.Interfaces.IOwnerResolver ownerResolver)
 		{
 			_ctx = ctx;
-			_mapper = mapper;
-			_authService = authService;
+			_userProfiles = authService;
 			_oneService = oneService;
+			_ownerResolver = ownerResolver;
 		}
-		
-		protected override async Task HandleAsync(StartCommand data, CancellationToken cancel)
+
+		public async Task<Result> Handle(StartCommand request, CancellationToken cancellationToken)
 		{
 			var tgUser = _ctx.GetCurrent<Telegram.Bot.Types.User>();
-			var appUser = _mapper.Map<AppUser>(tgUser);
-			var _bot = _ctx.Get<Bot>();
-			var _update = _ctx.Get<UpdateExt>("update");
-			Result<StartCommand> result = null;
+			var _update = _ctx.Get<UpdateExt>();
+			var identity = new ExternalIdentity("telegram", tgUser.Id.ToString());
+			var bot = _ctx.Get<MissAliseBot>("bot");
+			var userId = await _ownerResolver.ResolveOwnerIdAsync(identity, cancellationToken);
 
-			if (await _authService.UserExistsAsync(appUser) == false)
+			var profile = await _userProfiles.FindByOwnerIdAsync(userId, cancellationToken);
+			if (profile is null)
 			{
-				var res = await _authService.AddUserAsync(appUser).ConfigureAwait(false);
-				if (!res.Succeeded)				
-					result = Result<StartCommand>.Fail(string.Join(", ", res.Errors));					
+				var newProfile = new UserProfile(userId, [identity]);
+				await _userProfiles.SaveAsync(newProfile, cancellationToken).ConfigureAwait(false);
 			}
-			else
-				result = Result<StartCommand>.Ok(data);
 
-			_ctx.Set(result);
 			var link = _oneService.CreateAuthorizeLink(_update.Message.Chat.Id);
+			await bot.ApiClient.SetChatMenuButton(_update.Message.Chat.Id, new MenuButtonWebApp() { Text = "Àâòîðèçàöèÿ", WebApp = new WebAppInfo(link.ToString()) }, cancellationToken);
 			_ctx.Set(link);
+			return Result.Successful;
 		}
 	}
 }

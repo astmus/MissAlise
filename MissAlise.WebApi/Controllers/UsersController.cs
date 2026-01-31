@@ -2,7 +2,6 @@ using System.Net.Mime;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MissAlise.Application.Dto;
-using MissAlise.Application.Users.Requests;
 using MissAlise.Background;
 using MissAlise.Interfaces;
 
@@ -34,13 +33,13 @@ public class UsersController : ControllerBase
 		return Task.FromResult(Enumerable.Empty<User>());
 	}
 
-	[HttpGet("{userId:int}/jobs")]
-	public async Task<IEnumerable<BackgroundJobDto>> GetTasks(int userId, CancellationToken cancel)
-	{
-		var users = await _jobs.AllJobsAsync(cancel);
-		var res = await _mm.Send(new GetBackgroundJobsQuery(userId), cancel);		
-		return res.Value;
-	}
+	//[HttpGet("{userId:int}/jobs")]
+	//public async Task<IEnumerable<BackgroundJobDto>> GetTasks(int userId, CancellationToken cancel)
+	//{
+	//	var users = await _jobs.AllJobsAsync(cancel);
+	//	var res = await _mm.Send(new GetBackgroundJobsQuery(userId), cancel);		
+	//	return res.Value;
+	//}
 
 	/// <summary>
 	/// Поиск пользователя по id

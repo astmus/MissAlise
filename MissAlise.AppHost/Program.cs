@@ -40,7 +40,7 @@ var mongo = builder.AddMongoDB("mongo", port: 27017, mongoUser, mongoPass)
 var mongoDb = mongo.AddDatabase("missdb-mongo", databaseName: "missdb");
 
 // WebApi
-builder.AddProject<Projects.MissAlise_WebApi>("webapi")
+builder.AddProject<Projects.MissAlise_WebApi>("webapi")	
 	.WithExternalHttpEndpoints()
 	.WithReference(cache)
 	.WithReference(pgDb)

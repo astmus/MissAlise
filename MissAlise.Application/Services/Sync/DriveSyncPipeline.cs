@@ -1,21 +1,21 @@
 ﻿using System.Security.Cryptography;
 using System.Threading.Tasks.Dataflow;
 using MissAlise.Application.Interfaces;
-using MissAlise.Entities.OneDrive;
+using MissAlise.Entities.Media;
 
 public sealed class DriveSyncPipeline : IAsyncDisposable
 {
     private readonly IOneDriveService _graph;
     private readonly CancellationToken cancel;
 
-    private readonly BufferBlock<ItemInfo> _ingress;
-    private readonly BroadcastBlock<ItemInfo> _router;
+    private readonly BufferBlock<MediaItem> _ingress;
+    private readonly BroadcastBlock<MediaItem> _router;
 
-    private readonly TransformManyBlock<ItemInfo, ItemInfo> _photoFilter;
-    private readonly TransformManyBlock<ItemInfo, ItemInfo> _videoFilter;
+    private readonly TransformManyBlock<MediaItem, MediaItem> _photoFilter;
+    private readonly TransformManyBlock<MediaItem, MediaItem> _videoFilter;
 
-    private readonly ActionBlock<ItemInfo> _photoProcessor;
-    private readonly ActionBlock<ItemInfo> _videoProcessor;
+    private readonly ActionBlock<MediaItem> _photoProcessor;
+    private readonly ActionBlock<MediaItem> _videoProcessor;
 
     private bool _completed;
 
@@ -40,27 +40,27 @@ public sealed class DriveSyncPipeline : IAsyncDisposable
             CancellationToken = ct
         };
 
-        _ingress = new BufferBlock<ItemInfo>(new DataflowBlockOptions
+        _ingress = new BufferBlock<MediaItem>(new DataflowBlockOptions
         {
             BoundedCapacity = 100,
             CancellationToken = ct
         });
 
-        _router = new BroadcastBlock<ItemInfo>(i => i);
+        _router = new BroadcastBlock<MediaItem>(i => i);
 
-        _photoFilter = new TransformManyBlock<ItemInfo, ItemInfo>(
-            i => IsPhoto(i) ? new[] { i } : Array.Empty<ItemInfo>(),
+        _photoFilter = new TransformManyBlock<MediaItem, MediaItem>(
+            i => IsPhoto(i) ? new[] { i } : Array.Empty<MediaItem>(),
             filterOptions);
 
-        _videoFilter = new TransformManyBlock<ItemInfo, ItemInfo>(
-            i => IsVideo(i) ? new[] { i } : Array.Empty<ItemInfo>(),
+        _videoFilter = new TransformManyBlock<MediaItem, MediaItem>(
+            i => IsVideo(i) ? new[] { i } : Array.Empty<MediaItem>(),
             filterOptions);
 
-        _photoProcessor = new ActionBlock<ItemInfo>(
+        _photoProcessor = new ActionBlock<MediaItem>(
             i => SafeProcessAsync(i, photoRoot),
             processorOptions);
 
-        _videoProcessor = new ActionBlock<ItemInfo>(
+        _videoProcessor = new ActionBlock<MediaItem>(
             i => SafeProcessAsync(i, videoRoot),
             processorOptions);
 
@@ -73,7 +73,7 @@ public sealed class DriveSyncPipeline : IAsyncDisposable
         _videoFilter.LinkTo(_videoProcessor, link);
     }
 
-    public Task PostAsync(ItemInfo item, CancellationToken ct)
+    public Task PostAsync(MediaItem item, CancellationToken ct)
     {
         if (_completed)
             throw new InvalidOperationException("Pipeline already completed");
@@ -103,7 +103,7 @@ public sealed class DriveSyncPipeline : IAsyncDisposable
             await CompleteAsync();
     }
 
-    private async Task SafeProcessAsync(ItemInfo item, string root)
+    private async Task SafeProcessAsync(MediaItem item, string root)
     {
         for (int attempt = 1; attempt <= 3; attempt++)
         {
@@ -121,7 +121,7 @@ public sealed class DriveSyncPipeline : IAsyncDisposable
         }
     }
 
-    private async Task ProcessMediaAsync(ItemInfo item, string root)
+    private async Task ProcessMediaAsync(MediaItem item, string root)
     {
         var date = GetItemDate(item);
 
@@ -137,7 +137,7 @@ public sealed class DriveSyncPipeline : IAsyncDisposable
         try
         {
             using var remoteStream =
-                await _graph.GetItemContent(item.Parent.DriveId, item.Id, cancel);
+                await _graph.GetItemContent("item.Parent.DriveId", item.Id, cancel);
 
             using var fs = new FileStream(
                 path,
@@ -152,8 +152,8 @@ public sealed class DriveSyncPipeline : IAsyncDisposable
             using var sha = SHA256.Create();
             var hash = Convert.ToHexString(sha.ComputeHash(fs));
 
-            if (item.Sha256Hash != null &&
-                !hash.Equals(item.Sha256Hash, StringComparison.OrdinalIgnoreCase))
+            if (item.Hash != null &&
+                !hash.Equals(item.Hash.Value, StringComparison.OrdinalIgnoreCase))
             {
                 File.Delete(path);
                 throw new InvalidDataException("SHA256 hash mismatch");
@@ -165,15 +165,14 @@ public sealed class DriveSyncPipeline : IAsyncDisposable
         }
     }
 
-    private static bool IsPhoto(ItemInfo i) =>
-        i.Photo != null || i.Image != null;
+    private static bool IsPhoto(MediaItem i) =>
+        i is Photo;
 
-    private static bool IsVideo(ItemInfo i) =>
-        i.Video != null;
+    private static bool IsVideo(MediaItem i) =>
+        i is Video;
 
-    private static DateTime GetItemDate(ItemInfo item) =>
-        item.Photo?.Takendatetime?.DateTime
-        //?? item.FileSystemInfo?.CreatedDateTime?.DateTime
-        ?? item.LastModifiedDateTime?.DateTime
+    private static DateTime GetItemDate(MediaItem item) =>
+        item.Timestamps?.TakenAt?.DateTime
+        ?? item.Timestamps?.ModifiedAt.DateTime
         ?? DateTime.UtcNow;
 }

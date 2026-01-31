@@ -1,10 +1,8 @@
-﻿using Azure.Core;
-using Microsoft.AspNetCore.Identity;
+using Azure.Core;
 using Microsoft.Extensions.Options;
-using MissAlise.Application;
-using MissAlise.Application.Common;
 using MissAlise.Application.Interfaces;
-using MissAlise.Entities.OneDrive;
+using MissAlise.Entities.Identity;
+using MissAlise.Interfaces;
 
 namespace MissAlise.OneDrive.Auth
 {
@@ -12,40 +10,45 @@ namespace MissAlise.OneDrive.Auth
 	{
 		private readonly IOneDriveTokenService credentialService;
 		private readonly AzureAd config;
-		private readonly UserManager<AppUser> _manager;
 		private readonly IHandleContext ctx;
-		private AppUser appUser;
+		private readonly IAccessCredentialsStore _accessStore;
+		private SyncPrincipal? _principal;
 
-		public OneDriveTokenProvider(IOneDriveTokenService credentialService, IOptions<AzureAd> config, UserManager<AppUser> manager, IHandleContext ctx)
+		public OneDriveTokenProvider(IOneDriveTokenService credentialService, IOptions<AzureAd> config, IHandleContext ctx, IAccessCredentialsStore accessStore)
 		{
 			this.credentialService = credentialService;
 			this.config = config.Value;
-			this._manager = manager;
 			this.ctx = ctx;
+			_accessStore = accessStore;
 		}
 
 		public override async ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
 		{
-			appUser = ctx.CurrentUser;
-			if (appUser == null)
+			_principal = ctx.Get<SyncPrincipal>();
+			if (_principal is null)
 				return default;
 
-			if (appUser.HasExpiredCredentials())
+			var access = _principal.Access;
+			if (access.IsExpired())
 			{
-				var response = await credentialService.RefreshCredentials(config, appUser.AccessData.RefreshToken, cancellationToken).ConfigureAwait(false);
+				var response = await credentialService.RefreshCredentials(config, access.RefreshToken, cancellationToken).ConfigureAwait(false);
 				if (response.IsSuccessful)
 				{
-					appUser.AccessData = response.Content;
-					appUser.AccessData.ExpiredAfter = DateTimeOffset.UtcNow.AddSeconds(response.Content.ExpiresIn);
-					await _manager.UpdateAsync(appUser).ConfigureAwait(false);
+					var updated = response.Content;
+					updated.ExpiredAfter = DateTimeOffset.UtcNow.AddSeconds(updated.ExpiresIn);
+					await _accessStore.SaveAsync(_principal.Profile.UserId, updated, cancellationToken).ConfigureAwait(false);
+					_principal = _principal with { Access = updated };
+					access = updated;
 				}
 			}
-			return new AccessToken(appUser.AccessData.AccessToken, appUser.AccessData.ExpiredAfter);
+			return new AccessToken(access.AccessToken, access.ExpiredAfter);
 		}
 
 		public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken)
 		{
-			return new AccessToken(appUser.AccessData.AccessToken, DateTimeOffset.FromUnixTimeSeconds(appUser.AccessData.ExpiresIn), DateTimeOffset.FromUnixTimeSeconds(appUser.AccessData.ExpiresIn), appUser.AccessData.TokenType);
+			if (_principal?.Access is not { } access)
+				return default;
+			return new AccessToken(access.AccessToken, access.ExpiredAfter);
 		}
 	}
 }

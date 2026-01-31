@@ -1,39 +1,62 @@
-﻿using MediatR;
+using MediatR;
 using MissAlise.Application.Commands;
 using MissAlise.Application.Common;
 using MissAlise.Application.Interfaces;
-using MissAlise.Application.Services.Authentication;
+using MissAlise.Entities.Identity;
+using MissAlise.Interfaces;
+using MissAlise.ValueObjects;
+using MissAlise.ValueObjects.Identity;
+using TgUser = Telegram.Bot.Types.User;
+
 namespace MissAlise.Application
 {
 	public class AuthBehavior : IPipelineBehavior<SyncCommand, Result>
 	{
 		private readonly IHandleContext _ctx;
-		private readonly IAuthenticationService _authService;
+		private readonly IUserProfilesRepository _userProfiles;
 		private readonly IOneDriveService _oneDrive;
+		private readonly IAccessCredentialsStore _accessStore;
+		private readonly IOwnerResolver _ownerResolver;
 
-		public AuthBehavior(IHandleContext ctx, IAuthenticationService authService, IOneDriveService oneDrive)
+		public AuthBehavior(IHandleContext ctx, IUserProfilesRepository authService, IOneDriveService oneDrive, IAccessCredentialsStore accessStore, IOwnerResolver ownerResolver)
 		{
 			_ctx = ctx;
-			_authService = authService;
+			_userProfiles = authService;
 			_oneDrive = oneDrive;
+			_accessStore = accessStore;
+			_ownerResolver = ownerResolver;
 		}
 
 		public async Task<Result> Handle(SyncCommand request, RequestHandlerDelegate<Result> next, CancellationToken cancellationToken)
 		{
-			var claimant = _ctx.Get<Claimant>();
-			var appUser = await _authService.LoginUserAsync(claimant.Id);
-			if (appUser == null || appUser.EmailConfirmed == false)
-				return Result.Fail<UnauthorizedAccessException>("Unauthorized user");
-
-			if (appUser.HasExpiredCredentials())
+			var userId = request.user;
+			if (userId.Value == default)
 			{
-				var response = await _oneDrive.RefreshUserAccessTokenAsync(appUser, cancellationToken);
+				var sender = _ctx.Get<TgUser>();
+				if (sender is null)
+					return Result.Fail<UnauthorizedAccessException>("User context not found");
+				var identity = new ExternalIdentity("telegram", sender.Id.ToString());
+				userId = new UserId(await _ownerResolver.ResolveOwnerIdAsync(identity, cancellationToken));
 			}
 
-			_ctx.Set(appUser);
-			var result = await next();
+			var profile = await _userProfiles.FindByOwnerIdAsync(userId.Value, cancellationToken);
+			if (profile is null)
+				return Result.Fail<UnauthorizedAccessException>("User profile not found");
 
-			return result;
+			var access = await _accessStore.GetAsync(userId, cancellationToken);
+			if (access is null)
+				return Result.Fail<UnauthorizedAccessException>("OneDrive not linked. Complete OAuth first.");
+
+			if (access.IsExpired())
+			{
+				var refreshResult = await _oneDrive.RefreshUserAccessTokenAsync(userId, access, cancellationToken);
+				if (!refreshResult.Success || refreshResult.Value is null)
+					return Result.Fail<UnauthorizedAccessException>(refreshResult.Error ?? "Token refresh failed");
+				access = refreshResult.Value;
+			}
+
+			_ctx.Set(new SyncPrincipal(profile, access));
+			return await next();
 		}
 	}
 }

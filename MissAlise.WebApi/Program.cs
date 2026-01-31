@@ -2,21 +2,19 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MissAlise.Application;
-using MissAlise.Application.Background;
-using MissAlise.Application.Background.Handlers;
 using MissAlise.Application.Common;
 using MissAlise.Background;
 using MissAlise.TelegramBot;
 using MissAlise.DataBase;
-using MissAlise.Entities.OneDrive;
+using MissAlise.Interfaces;
 using MissAlise.OneDrive;
 using MissAlise.OneDrive.Auth;
 using MissAlise.Worker.Background;
+using MissAlise.Entities.Identity;
+using MissAlise.ValueObjects;
 
 namespace MissAlise.WebApi;
 
@@ -41,9 +39,9 @@ public class Program
 			.AddApplicationServices()
 			.AddMigrationsService()
 			.AddPersistanceServices(builder.Configuration)
-			.AddBackgroundServer<MissAliseBackgroundServer>()
-			.AddBackgroundJob<SyncOneDriveJob, SyncOneDriveJobHandler>(
-					builder => builder.SetDescription("Синхронизация OneDrive"))//.AddTrigger(new SyncOneDriveFolderJob(default,default), "1 min").SetDelay(Time.Minute))
+			//.AddBackgroundServer<MissAliseBackgroundServer>()
+			//.AddBackgroundJob<SyncOneDriveJob, SyncOneDriveJobHandler>(
+			//		builder => builder.SetDescription("РЎРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ OneDrive"))//.AddTrigger(new SyncOneDriveFolderJob(default,default), "1 min").SetDelay(Time.Minute))
 			.AddOneDriveService(azureSection)
 			.AddBotService(botSection)
 			.AddRouting(options =>
@@ -52,7 +50,7 @@ public class Program
 				options.LowercaseQueryStrings = true;
 			});
 
-		builder.Services.AddEndpointsApiExplorer(); //это только для minimal api
+		builder.Services.AddEndpointsApiExplorer(); // С‚РѕР»СЊРєРѕ РґР»СЏ minimal api
 		builder.Services.AddSwaggerGen(options=> {
 			var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
 			options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
@@ -72,8 +70,6 @@ public class Program
 
 		app.UseHttpsRedirection();
 		app.UseRouting();
-		app.UseAuthentication();
-		app.UseAuthorization();
 		app.UseEndpoints(endpoints => endpoints.MapControllers());
 
 		await app.RunAsync();
@@ -90,17 +86,16 @@ public class Program
 		if (!response.IsSuccessful)
 			return Results.Problem(response.Error.ToString(), null, (int)response.StatusCode);
 
-		var manager = ctx.RequestServices.GetRequiredService<UserManager<AppUser>>();
-		var appUser = await manager.Users.Include(user => user.AccessData).SingleOrDefaultAsync(user => user.Id == state);
-		appUser.AccessData = response.Content;
-		appUser.AccessData.ExpiredAfter = DateTimeOffset.UtcNow.AddSeconds(response.Content.ExpiresIn);
-		appUser.EmailConfirmed = true;
+		var ownerResolver = ctx.RequestServices.GetRequiredService<IOwnerResolver>();
+		var accessStore = ctx.RequestServices.GetRequiredService<IAccessCredentialsStore>();
+		var identity = new MissAlise.ValueObjects.Identity.ExternalIdentity("telegram", state);
+		var userId = await ownerResolver.ResolveOwnerIdAsync(identity, cancel);
 
-		var result = await manager.UpdateAsync(appUser);		
-		if (result.Succeeded)
-			return Results.Text("<html><body>Авторизация закончена успешно. Вы можете закрыть это окно</body></html>", "text/html", Encoding.UTF8, 200);
-		else
-			return Results.Text($"<html><body>Ошибка авторизации. {string.Join('\n', result.Errors.Select(sel => sel.Description))}</body></html>", "text/html", Encoding.UTF8, 401);
+		var access = response.Content;
+		access.ExpiredAfter = DateTimeOffset.UtcNow.AddSeconds(access.ExpiresIn);
+		await accessStore.SaveAsync(new UserId(userId), access, cancel);
+
+		return Results.Text("<html><body>РњРѕР¶РµС‚Рµ Р·Р°РєСЂС‹С‚СЊ СЌС‚Рѕ РѕРєРЅРѕ</body></html>", "text/html", Encoding.UTF8, 200);
 	}
 
 	static void ApplyMapping(IServiceCollection services)
@@ -108,7 +103,7 @@ public class Program
 		// use DI (http://docs.automapper.org/en/latest/Dependency-injection.html) or create the mapper yourself
 		services.AddAutoMapper(cfg =>
 		{
-			cfg.CreateMap<Telegram.Bot.Types.User, AppUser>();
+			cfg.CreateMap<Telegram.Bot.Types.User, UserProfile>();
 			//cfg.CreateMap<Bar, BarDto>();
 		});
 	}

@@ -1,13 +1,13 @@
-using MissAlise.Entities.OneDrive;
+using MissAlise.Entities.Identity;
+using MissAlise.Entities.Media;
+using MissAlise.ValueObjects.Identity;
 
 namespace MissAlise.Interfaces
 {
 	public interface IUserProfilesRepository
 	{
-		Task<IEnumerable<UserProfile>> AllAsync(CancellationToken cancel);
-		Task AddOrReplaceAsync(UserProfile user, CancellationToken cancel);
-		Task<UserProfile> FindAsync(string id, CancellationToken cancel);
-		Task AddPendingUser(User user, CancellationToken cancel);
-		Task<User?> PopPendingUser(string identifier, CancellationToken cancel);
+		Task<UserProfile?> FindByOwnerIdAsync(Guid ownerId, CancellationToken ct);
+		Task<UserProfile?> FindByExternalIdentityAsync(ExternalIdentity identity, CancellationToken ct);
+		Task SaveAsync(UserProfile profile, CancellationToken ct);
 	}
 }

@@ -37,8 +37,6 @@ namespace MissAlise.Services.Photos
 			}
 
 			app.UseHttpsRedirection();
-			app.UseAuthentication();
-			app.UseAuthorization();
 			app.MapControllers();
 
 			app.Run();

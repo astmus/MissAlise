@@ -1,13 +1,13 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using MissAlise.Application.Common;
 using MissAlise.Application.Common.RequestHandler;
 using MissAlise.Application.Interfaces;
-using MissAlise.Entities.OneDrive;
 using MissAlise.Interfaces;
+using MissAlise.ValueObjects;
 
 namespace MissAlise.Application.Commands
 {
-	public record SyncCommand() : ICommand;
+	public record SyncCommand(UserId user) : ICommand;
 
 	public class SyncCommandHandler : AsyncHandlerBase<SyncCommand>, ICommandHandler<SyncCommand>
 	{
@@ -100,7 +100,10 @@ namespace MissAlise.Application.Commands
 
 		public async Task<Result> Handle(SyncCommand request, CancellationToken cancel)
 		{
-			var repository = await usersRepository.LoadForCurrentUserAsync(cancel);
+			var principal = ctx.Get<MissAlise.Entities.Identity.SyncPrincipal>();
+			if (principal is null)
+				return Result.Fail("Sync principal not set");
+			var repository = await usersRepository.GetStorageAsync(principal.Profile.UserId, cancel);
 
 			await using var pipeline = new DriveSyncPipeline(
 				oneDrive,

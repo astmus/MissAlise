@@ -1,24 +1,19 @@
-﻿using System.Collections;
-using System.Collections.Specialized;
-using System.Linq.Expressions;
-using System.Text;
 using System.Web;
-using Azure.Core;
 using Microsoft.Extensions.Options;
 using Microsoft.Graph;
 
 //using Microsoft.Graph;
-using Microsoft.Kiota.Authentication.Azure;
-using Microsoft.Kiota.Http.HttpClientLibrary;
 using MissAlise.Application.Common;
 using MissAlise.Application.Interfaces;
-using MissAlise.Application.Services.Authentication;
-using MissAlise.Entities.OneDrive;
+using MissAlise.Entities.Identity;
+using MissAlise.Interfaces;
+using MissAlise.ValueObjects;
+using MissAlise.Entities.Media;
 using MissAlise.OneDrive.Auth;
 using MissAlise.OneDrive.Drives.Item.Items.Item.Delta;
+using MissAlise.OneDrive.Mapping;
 using MissAlise.OneDrive.Models;
-using Newtonsoft.Json.Linq;
-using User = MissAlise.Entities.OneDrive.User;
+using MissAlise.ValueObjects.Media;
 
 namespace MissAlise.OneDrive
 {
@@ -28,15 +23,15 @@ namespace MissAlise.OneDrive
 		private readonly IHandleContext _ctx;
 		private readonly ApiClient _client;
 		private readonly IOneDriveTokenService _tokenService;
-		private readonly IAuthenticationService _manager;
+		private readonly IAccessCredentialsStore _accessStore;
 
-		public OneDriveService(IOptions<AzureAd> azure, ApiClient client, IHandleContext ctx, IOneDriveTokenService tokenService, IAuthenticationService manager)
+		public OneDriveService(IOptions<AzureAd> azure, ApiClient client, IHandleContext ctx, IOneDriveTokenService tokenService, IAccessCredentialsStore accessStore)
 		{
 			_azure = azure.Value;
 			_ctx = ctx;
 			_client = client;
 			_tokenService = tokenService;
-			_manager = manager;
+			_accessStore = accessStore;
 		}
 
 		public async Task<User> GetOwnerInfo(CancellationToken cancel)
@@ -54,7 +49,7 @@ namespace MissAlise.OneDrive
 			return _client.Drives[parentId].Items[itemId].Content.GetAsync(cancellationToken: cancel);
 		}
 
-		public async Task<string> HandleDeltaDriveItemsAsync(Action<ItemInfo> handleDelegate, CancellationToken cancel)
+		public async Task<string> HandleDeltaDriveItemsAsync(Action<MediaItem> handleDelegate, CancellationToken cancel)
 		{
 			//var childrenRequest = _client.Drives["Me"].Items["Root"].Delta;
 			var childrenRequest = _client.Drives["Me"].Items["Root"].Delta;
@@ -90,7 +85,7 @@ namespace MissAlise.OneDrive
 						if (item.Folder != null)
 							return true;
 				
-						var itemInfo = CreateItemIinfo(item);
+						var itemInfo = CreateItem(item);
 						if (itemInfo != null)
 							handleDelegate(itemInfo);
 						return true;
@@ -105,7 +100,7 @@ namespace MissAlise.OneDrive
 				return null;
 		}
 
-		public async Task<string> HandleActualDriveItemsAsync(Action<ItemInfo> handleDelegate, CancellationToken cancel)
+		public async Task<string> HandleActualDriveItemsAsync(Action<MediaItem> handleDelegate, CancellationToken cancel)
 		{
 			//var childrenRequest = _client.Drives["Me"].Items["Root"].Delta;
 			var childrenRequest = _client.Drives["Me"].Items["Root"].Delta;
@@ -141,7 +136,7 @@ namespace MissAlise.OneDrive
 						if (item.Folder != null)
 							return true;
 				
-						var itemInfo = CreateItemIinfo(item);
+						var itemInfo = CreateItem(item);
 						if (itemInfo != null)
 							handleDelegate(itemInfo);
 						return true;
@@ -156,24 +151,9 @@ namespace MissAlise.OneDrive
 				return null;
 		}
 
-		ItemInfo CreateItemIinfo(DriveItem item)
+		MediaItem CreateItem(DriveItem item)
 		{
-			if (item.Deleted != null)							
-				return new ItemInfo() { Id = item.Id };
-
-			try
-			{
-				var jObj = JObject.FromObject(item);
-
-				var resObj = jObj.ToObject<ItemInfo>();
-				resObj.Parent = jObj.SelectToken("ParentReference").ToObject<ParentInfo>();
-				resObj.Sha256Hash = item.File?.Hashes?.Sha256Hash;
-				return resObj;
-			}
-			catch (Exception)
-			{
-				return null;
-			}
+			return item.ToMediaItem();
 		}
 		
 
@@ -191,18 +171,17 @@ namespace MissAlise.OneDrive
 			return builder.Uri;
 		}
 
-		public async Task<Result<AppUser>> RefreshUserAccessTokenAsync(AppUser user, CancellationToken cancel)
+		public async Task<Result<AccessInformation>> RefreshUserAccessTokenAsync(UserId userId, AccessInformation currentAccess, CancellationToken cancel)
 		{
-			var response = await _tokenService.RefreshCredentials(_azure, user.AccessData.RefreshToken, cancel).ConfigureAwait(false);
+			var response = await _tokenService.RefreshCredentials(_azure, currentAccess.RefreshToken, cancel).ConfigureAwait(false);
 			if (response.IsSuccessful)
 			{
-				user.AccessData = response.Content;
-				user.AccessData.ExpiredAfter = DateTimeOffset.UtcNow.AddSeconds(response.Content.ExpiresIn);
-				var result = await _manager.UpdateUserAsync(user).ConfigureAwait(false);
-				return user;
+				var updated = response.Content;
+				updated.ExpiredAfter = DateTimeOffset.UtcNow.AddSeconds(updated.ExpiresIn);
+				await _accessStore.SaveAsync(userId, updated, cancel).ConfigureAwait(false);
+				return Result.Ok(updated);
 			}
-			else
-				return Result.Fail<AppUser>(response.Error.Content);
+			return Result.Fail<AccessInformation>(response.Error.Content);
 		}
 	}
 }

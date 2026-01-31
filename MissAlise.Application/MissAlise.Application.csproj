@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
@@ -9,7 +9,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\MissAlise.Background\MissAlise.Background.csproj" />
 		<ProjectReference Include="..\MissAlise.ServiceDefaults\MissAlise.Shared.csproj" />
 		<ProjectReference Include="..\MissAlise\MissAlise.csproj" />
 	</ItemGroup>
@@ -19,9 +18,9 @@
 		<PackageReference Include="AutoMapper.AspNetCore.OData.EFCore" Version="7.0.0" />
 		<PackageReference Include="AutoMapper.Extensions.ExpressionMapping" Version="8.0.0" />
 		<PackageReference Include="MediatR" Version="12.4.1" />
+		<PackageReference Include="Telegram.Bot" Version="22.4.4" />
 		<!--<PackageReference Include="Microsoft.Graph" Version="5.70.0" />-->
 		<PackageReference Include="Microsoft.Kiota.Abstractions" Version="1.17.1" />
-		<PackageReference Include="System.Text.Json" Version="9.0.2" />
 	</ItemGroup>
 	<!--<ItemGroup>
 		<Compile Include="..\MissAlise.OneDrive\Models\**\*">

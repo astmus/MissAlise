@@ -1,12 +1,11 @@
-﻿using MissAlise.Application.Common;
+﻿using System.Data.Common;
+using MissAlise.Application.Common;
+using MissAlise.Entities.Identity;
 
 namespace MissAlise.Application
 {
 	public static class ApplicationExtensions
 	{
-		public static bool HasExpiredCredentials(this AppUser user)
-		{
-			return DateTimeOffset.UtcNow > user.AccessData?.ExpiredAfter;
-		}
+		
 	}
 }

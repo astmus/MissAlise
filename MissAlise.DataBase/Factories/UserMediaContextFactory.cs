@@ -5,10 +5,7 @@ using MissAlise.DataBase.Contexts;
 namespace MissAlise.DataBase.Factories;
 
 /*
- dotnet ef migrations add <migration name> \
-  --project MissAlise.DataBase \
-  --context UserMediaContext
-  --output-dir Migrations/UserMedia
+ dotnet ef migrations add <migration name> --project MissAlise.DataBase --context UserMediaContext  --output-dir Migrations/UserMedia
  */
 
 public sealed class UserMediaContextFactory : IDesignTimeDbContextFactory<UserMediaContext>

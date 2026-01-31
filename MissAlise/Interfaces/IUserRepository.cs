@@ -1,10 +1,10 @@
-using MissAlise.Entities.OneDrive;
+using MissAlise.Entities.Media;
+using MissAlise.ValueObjects;
 
 namespace MissAlise.Interfaces
 {
 	public interface IUserRepository
 	{
-		Task<IUserStorage> GetUserStorageAsync(User user, CancellationToken cancel);
-		Task<IUserStorage?> LoadForCurrentUserAsync(CancellationToken cancel);
+		Task<IUserStorage> GetStorageAsync(UserId user, CancellationToken cancel);
 	}
 }
