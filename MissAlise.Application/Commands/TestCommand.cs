@@ -17,7 +17,7 @@ namespace MissAlise.Application.Commands
 			throw new NotImplementedException();
 		}
 
-		protected override Task HandleAsync(TestCommand data, CancellationToken cancel)
+		protected override Task RunHandleAsync(TestCommand data, CancellationToken cancel)
 		{
 			throw new NotImplementedException();
 		}

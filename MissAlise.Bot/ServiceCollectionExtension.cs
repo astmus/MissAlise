@@ -1,33 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MissAlise.Application.Commands;
-using MissAlise.Application.Interfaces;
-using MissAlise.TelegramBot.Handlers;
 using Telegram.Bot.Types;
 
 namespace MissAlise.TelegramBot
 {
 	public static class ServiceCollectionExtension
 	{
-		public static IServiceCollection AddBotService(this IServiceCollection services, IConfigurationSection botConfig)
-		{
-			services
-				.AddSingleton<Bot<UpdateExt>, MissAliseBot>()
-				.AddHostedService<MissAliseBot.UpdateReceiver>()
-				.AddHostedService<MissAliseBot.UpdateHandler>()
-				.Configure<BotConfiguration>(botConfig);
-
-			services.AddMediatR(cfg =>
-			{
-				cfg.RegisterServicesFromAssemblyContaining<StartCommand>();
-				cfg.Lifetime = ServiceLifetime.Scoped;
-			});
-
-			services.AddScoped<IAsyncHandler<Message>, ChatMessageHandler>();
-			//services.AddScoped<IAsyncHandler<StartCommand>, StartCommandHandler>();
-			return services;
-		}
-
 		static internal User GetCurrentUser(this Update update)
 		{
 			var msg = update.GetCurrentMessage();

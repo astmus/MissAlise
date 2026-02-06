@@ -1,0 +1,1 @@
+# Wizard generation: each BotParameterDescription becomes a step

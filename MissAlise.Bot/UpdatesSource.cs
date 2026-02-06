@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.CommandLine.Parsing;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Text;
+﻿using System.Diagnostics;
 using System.Threading.Channels;
-using System.Threading.Tasks;
-using MissAlise.Application.Common.RequestHandler;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
-using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -118,14 +109,14 @@ namespace MissAlise.TelegramBot
 				{
 					try
 					{
-						TUpdate[] updateArray = await _receiver._botClient.SendRequest(getUpdatesRequest, cancellationToken: _token).ConfigureAwait(false);
+						var updateArray = await _receiver._botClient.SendRequest(getUpdatesRequest, cancellationToken: _token).ConfigureAwait(false);
 
 						if (updateArray.Length > 0)
 						{
 							_messageOffset = updateArray[^1].Id + 1;
 							Interlocked.Add(ref _pendingUpdates, updateArray.Length);
 														
-							foreach (TUpdate update in updateArray)
+							foreach (var update in updateArray)
 							{
 								var success = _channel.Writer.TryWrite(update);
 								Debug.Assert(success, "TryWrite should succeed as we are using an unbounded channel");

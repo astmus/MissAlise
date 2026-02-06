@@ -30,7 +30,7 @@ namespace MissAlise.Application.Commands
 			this.ctx = ctx;
 		}
 		static readonly string[] fields = ["name", "folder", "parentReference", "size", "id", "createdDateTime", "file", "@microsoft.graph.downloadUrl", "fileSystemInfo", "photo", "image", "audio", "video"];
-		protected override async Task HandleAsync(SyncCommand data, CancellationToken cancel)
+		protected override async Task RunHandleAsync(SyncCommand data, CancellationToken cancel)
 		{
 			try
 			{

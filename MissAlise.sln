@@ -39,6 +39,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.Services.Common",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.Background.Abstractions", "MissAlise.Background.Abstractions\MissAlise.Background.Abstractions.csproj", "{6BD3E236-D5BC-7404-F8DE-2E4035894A03}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MissAlise.Workflow", "MissAlise.Workflow\MissAlise.Workflow.csproj", "{FCC6BA95-9EF7-C8CE-CD58-E153B84EF1B9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -97,6 +99,10 @@ Global
 		{6BD3E236-D5BC-7404-F8DE-2E4035894A03}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6BD3E236-D5BC-7404-F8DE-2E4035894A03}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6BD3E236-D5BC-7404-F8DE-2E4035894A03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCC6BA95-9EF7-C8CE-CD58-E153B84EF1B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCC6BA95-9EF7-C8CE-CD58-E153B84EF1B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCC6BA95-9EF7-C8CE-CD58-E153B84EF1B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCC6BA95-9EF7-C8CE-CD58-E153B84EF1B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -111,6 +117,7 @@ Global
 		{9897A2D5-9ED6-4655-9A1A-C7B59C080AA5} = {D0DD832F-37DA-40F2-B287-D871251463C6}
 		{BB792BDD-B3E5-49DA-BF5C-6AC5E95BB671} = {D0DD832F-37DA-40F2-B287-D871251463C6}
 		{0ED57F02-1A15-478A-A630-42A4F6889E98} = {D0DD832F-37DA-40F2-B287-D871251463C6}
+		{FCC6BA95-9EF7-C8CE-CD58-E153B84EF1B9} = {7DF210E5-96C3-4716-AD1E-F321B6777F1D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3F6F4408-059B-4CEF-929A-8B8BF857E56D}

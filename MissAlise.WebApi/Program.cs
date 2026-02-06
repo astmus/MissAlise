@@ -5,16 +5,16 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MissAlise.Application;
-using MissAlise.Application.Common;
-using MissAlise.Background;
-using MissAlise.TelegramBot;
+using MissAlise.Application.Commands;
 using MissAlise.DataBase;
+using MissAlise.Entities.Identity;
 using MissAlise.Interfaces;
 using MissAlise.OneDrive;
 using MissAlise.OneDrive.Auth;
-using MissAlise.Worker.Background;
-using MissAlise.Entities.Identity;
+using MissAlise.TelegramBot;
 using MissAlise.ValueObjects;
+using MissAlise.Workflow.Demo.BackgroundSync;
+using StackExchange.Redis;
 
 namespace MissAlise.WebApi;
 
@@ -43,11 +43,22 @@ public class Program
 			//.AddBackgroundJob<SyncOneDriveJob, SyncOneDriveJobHandler>(
 			//		builder => builder.SetDescription("Синхронизация OneDrive"))//.AddTrigger(new SyncOneDriveFolderJob(default,default), "1 min").SetDelay(Time.Minute))
 			.AddOneDriveService(azureSection)
-			.AddBotService(botSection)
+			.AddBot(botSection, b => {
+				b.AddCommand<SyncCommand>("синхронизировать", "запустить синхронизацию full/deff")
+				 .AddCommand<BackgroundSyncCommand>("новая back sync", "добавить back снихронизацию");
+				
+			})				
 			.AddRouting(options =>
 			{
 				options.LowercaseUrls = true;
 				options.LowercaseQueryStrings = true;
+			})
+			.AddSingleton<IConnectionMultiplexer>(sp =>
+			{
+				var cs = sp.GetRequiredService<IConfiguration>().GetConnectionString("cache");
+				if (string.IsNullOrWhiteSpace(cs))
+					throw new InvalidOperationException("ConnectionStrings:cache is missing. In AppHost add .WithReference(cache) to webapi.");
+				return ConnectionMultiplexer.Connect(cs);
 			});
 
 		builder.Services.AddEndpointsApiExplorer(); // только для minimal api
@@ -58,6 +69,8 @@ public class Program
 
 		ApplyMapping(builder.Services);
 		var app = builder.Build();
+
+		app.Services.UseBotWorkflow();
 
 		app.MapGet("/signin-oidc", Signin);
 
@@ -94,6 +107,7 @@ public class Program
 		var access = response.Content;
 		access.ExpiredAfter = DateTimeOffset.UtcNow.AddSeconds(access.ExpiresIn);
 		await accessStore.SaveAsync(new UserId(userId), access, cancel);
+		var bot = ctx.RequestServices.GetRequiredService<Bot>();
 
 		return Results.Text("<html><body>Можете закрыть это окно</body></html>", "text/html", Encoding.UTF8, 200);
 	}

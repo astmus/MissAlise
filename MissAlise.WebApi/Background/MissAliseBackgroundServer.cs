@@ -1,6 +1,6 @@
 ﻿using MissAlise.Background;
 
-namespace MissAlise.Worker.Background
+namespace MissAlise.WebApi.Background
 {
 	public class MissAliseBackgroundServer : BackgroundServer
 	{

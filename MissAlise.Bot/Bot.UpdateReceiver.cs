@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MissAlise.Application.Common.RequestHandler;
@@ -24,17 +24,18 @@ namespace MissAlise.TelegramBot
 				_scopeFactory = scopeFactory;
 			}
 
-			private async Task InitializeAsync(CancellationToken ct)
+			private async Task InitializeAsync(CancellationToken cancel)
 			{
 				_scope = _scopeFactory.CreateScope();
 
 				try
 				{
 					_bot = _scope.ServiceProvider.GetRequiredService<Bot<TUpdate>>();
-					_bot.Information = await _bot.ApiClient.GetMe(ct);
-					await _bot.ApiClient.DeleteMyCommands(cancellationToken: ct);
+					_bot.Info = await _bot.ApiClient.GetMe(cancel);
+					
+					await _bot.ApiClient.DeleteMyCommands(cancellationToken: cancel);
 
-					_log.LogInformation("Connected as {Bot}", _bot.Information);
+					_log.LogInformation("Connected as {Bot}", _bot.Info);
 				}
 				catch
 				{

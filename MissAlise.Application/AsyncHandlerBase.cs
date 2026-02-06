@@ -6,7 +6,7 @@ namespace MissAlise.Application
 	{
 		protected int isWork;
 		protected CancellationTokenSource? src;
-		protected abstract Task HandleAsync(TData data, CancellationToken cancel);
+		protected abstract Task RunHandleAsync(TData data, CancellationToken cancel);
 
 		protected virtual Task OnErroAsync(Exception error)
 		{
@@ -20,7 +20,7 @@ namespace MissAlise.Application
 			{
 				using (src = CancellationTokenSource.CreateLinkedTokenSource(cancel))
 				{
-					await HandleAsync(data, src.Token).ConfigureAwait(false);
+					await RunHandleAsync(data, src.Token).ConfigureAwait(false);
 				}
 			}
 			catch (Exception error)

@@ -11,13 +11,12 @@ using MissAlise.Application.Common.RequestHandler;
 using MissAlise.Application.Interfaces;
 using MissAlise.Entities.Identity;
 using MissAlise.Interfaces;
-using MissAlise.TelegramBot;
 using MissAlise.ValueObjects.Identity;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace MissAlise.Application.Commands
+namespace MissAlise.TelegramBot
 {
 	public record StartCommand() : ICommand;
 	public class StartCommandHandler : ICommandHandler<StartCommand>
@@ -25,9 +24,9 @@ namespace MissAlise.Application.Commands
 		private readonly IHandleContext _ctx;
 		private readonly IUserProfilesRepository _userProfiles;
 		private readonly IOneDriveService _oneService;
-		private readonly MissAlise.Interfaces.IOwnerResolver _ownerResolver;
+		private readonly IOwnerResolver _ownerResolver;
 
-		public StartCommandHandler(IHandleContext ctx, IUserProfilesRepository authService, IOneDriveService oneService, MissAlise.Interfaces.IOwnerResolver ownerResolver)
+		public StartCommandHandler(IHandleContext ctx, IUserProfilesRepository authService, IOneDriveService oneService, IOwnerResolver ownerResolver)
 		{
 			_ctx = ctx;
 			_userProfiles = authService;
@@ -37,10 +36,10 @@ namespace MissAlise.Application.Commands
 
 		public async Task<Result> Handle(StartCommand request, CancellationToken cancellationToken)
 		{
-			var tgUser = _ctx.GetCurrent<Telegram.Bot.Types.User>();
+			var tgUser = _ctx.GetCurrent<User>();
 			var _update = _ctx.Get<UpdateExt>();
 			var identity = new ExternalIdentity("telegram", tgUser.Id.ToString());
-			var bot = _ctx.Get<MissAliseBot>("bot");
+			var bot = _ctx.Get<Bot>("bot");
 			var userId = await _ownerResolver.ResolveOwnerIdAsync(identity, cancellationToken);
 
 			var profile = await _userProfiles.FindByOwnerIdAsync(userId, cancellationToken);

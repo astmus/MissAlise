@@ -8,8 +8,4 @@
     <RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Refit" Version="8.0.0" />
-  </ItemGroup>
-
 </Project>

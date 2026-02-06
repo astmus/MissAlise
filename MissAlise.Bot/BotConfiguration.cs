@@ -1,6 +1,6 @@
 ﻿namespace MissAlise.TelegramBot
 {
-	internal class BotConfiguration
+	public class BotConfiguration : IBotConfiguration
 	{
 		public BotConfiguration()
 		{

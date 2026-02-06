@@ -6,7 +6,6 @@ using MissAlise.Entities.Identity;
 using MissAlise.Interfaces;
 using MissAlise.ValueObjects;
 using MissAlise.ValueObjects.Identity;
-using TgUser = Telegram.Bot.Types.User;
 
 namespace MissAlise.Application
 {
@@ -32,10 +31,11 @@ namespace MissAlise.Application
 			var userId = request.user;
 			if (userId.Value == default)
 			{
-				var sender = _ctx.Get<TgUser>();
+				var sender = _ctx.Get<UserProfile>();
 				if (sender is null)
 					return Result.Fail<UnauthorizedAccessException>("User context not found");
-				var identity = new ExternalIdentity("telegram", sender.Id.ToString());
+
+				var identity = sender.Identities.FirstOrDefault(i => i.Scheme == "telegram");
 				userId = new UserId(await _ownerResolver.ResolveOwnerIdAsync(identity, cancellationToken));
 			}
 

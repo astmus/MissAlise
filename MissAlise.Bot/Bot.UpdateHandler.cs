@@ -1,11 +1,7 @@
-﻿using System.CommandLine;
-using System.Windows.Input;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MissAlise.Application.Commands;
-using MissAlise.Application.Common;
 using MissAlise.Application.Interfaces;
 using MissAlise.Entities.Identity;
 using Telegram.Bot;
@@ -22,7 +18,11 @@ namespace MissAlise.TelegramBot
 			private readonly Bot<TUpdate> bot;
 			private readonly IMapper _mapper;
 
-			public UpdateHandler(ILogger<UpdateHandler> logger, IServiceScopeFactory factory, Bot<TUpdate> bot, IMapper mapper)
+			public UpdateHandler(
+				ILogger<UpdateHandler> logger,
+				IServiceScopeFactory factory,
+				Bot<TUpdate> bot,
+				IMapper mapper)
 			{
 				this.logger = logger;
 				this.factory = factory;
@@ -54,33 +54,17 @@ namespace MissAlise.TelegramBot
 					ctx.Set(update);
 					ctx.Set(_mapper.Map<UserProfile>(sender));
 					ctx.Set(sender);
-					ctx.Set(bot, "bot");					
+					ctx.Set(update.GetCurrentChat());
+					ctx.Set(bot, "bot");
 
 					Task basicTask = (update as UpdateExt) switch
-					{						
+					{
 						{ CallbackQuery: not null } => InvokeHandlerAsync(services, update.CallbackQuery, cancel),
 						{ InlineQuery: not null } => InvokeHandlerAsync(services, update.InlineQuery, cancel),
-						//{ ChosenInlineResult: not null } => Task.CompletedTask,						
-						//{ Message: not null } => InvokeHandlerAsync(services, update.GetCurrentMessage(), cancel),
 						_ => InvokeHandlerAsync(services, update.GetCurrentMessage(), cancel)
-						//{ EditedMessage: not null } => UpdateType.EditedMessage,
-						//{ ChannelPost: not null } => UpdateType.ChannelPost,
-						//{ EditedChannelPost: not null } => UpdateType.EditedChannelPost,
-						//{ MessageReaction: not null } => UpdateType.MessageReaction,
-						//{ MessageReactionCount: not null } => UpdateType.MessageReactionCount,
-						//{ ShippingQuery: not null } => UpdateType.ShippingQuery,
-						//{ PreCheckoutQuery: not null } => UpdateType.PreCheckoutQuery,
-						//{ Poll: not null } => UpdateType.Poll,
-						//{ PollAnswer: not null } => UpdateType.PollAnswer,
-						//{ MyChatMember: not null } => UpdateType.MyChatMember,
-						//{ ChatMember: not null } => UpdateType.ChatMember,
-						//{ ChatJoinRequest: not null } => UpdateType.ChatJoinRequest,
-						//{ ChatBoost: not null } => UpdateType.ChatBoost,
-						//{ RemovedChatBoost: not null } => UpdateType.RemovedChatBoost
 					};
 
-					//currentTask ??= InvokeHandlerAsync(services, update.GetCurrentMessage(), cancel);
-					await basicTask.ConfigureAwait(false);					
+					await basicTask.ConfigureAwait(false);
 				}
 				catch (Exception error)
 				{
@@ -88,9 +72,9 @@ namespace MissAlise.TelegramBot
 				}
 			}
 
-			private Task InvokeHandlerAsync<TUpdateItem>(IServiceProvider sp, TUpdateItem updateItem, CancellationToken cancel) where TUpdateItem : class
+			private Task InvokeHandlerAsync<THandleItem>(IServiceProvider sp, THandleItem updateItem, CancellationToken cancel) where THandleItem : class
 			{
-				var handler = sp.GetRequiredService<IAsyncHandler<TUpdateItem>>();
+				var handler = sp.GetRequiredService<IAsyncHandler<THandleItem>>();
 				return handler.InvokeAsync(updateItem, cancel);
 			}
 
