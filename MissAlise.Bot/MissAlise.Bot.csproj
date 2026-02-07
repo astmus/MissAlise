@@ -27,6 +27,5 @@
 
 	<ItemGroup>
 	  <Folder Include="Building\" />
-	  <Folder Include="Workflow\" />
 	</ItemGroup>
 </Project>

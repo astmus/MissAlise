@@ -8,6 +8,7 @@ using MissAlise.TelegramBot.Workflow;
 using MissAlise.Workflow;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.InlineQueryResults;
 
 namespace MissAlise.TelegramBot.Handlers
 {
@@ -15,10 +16,6 @@ namespace MissAlise.TelegramBot.Handlers
 	{
 		private readonly IHandleContext _ctx;
 		private readonly ILogger<InlineQueryHandler> _log;
-		private readonly IMediator _mm;
-		private readonly Bot _bot;
-		private readonly IBotCommandLineParser? _cliParser;
-		private readonly IBotCommandFactory? _cliFactory;
 		private readonly IWorkflowStateStore? _workflowStore;
 		private readonly IWorkflowCoordinator? _engine;
 		private readonly IWorkflowResultRenderer? _workflowRenderer;
@@ -26,20 +23,13 @@ namespace MissAlise.TelegramBot.Handlers
 		public InlineQueryHandler(
 			IHandleContext ctx,
 			ILogger<InlineQueryHandler> log,
-			IMediator mm,
-			Bot bot,
-			IBotCommandLineParser? cliParser = null,
-			IBotCommandFactory? cliFactory = null,
+			Bot bot,			
 			IWorkflowStateStore? workflowStore = null,
 			IWorkflowCoordinator? engine = null,
 			IWorkflowResultRenderer? workflowRenderer = null) : base(bot)
 		{
 			_log = log;
-			_mm = mm;
-			_bot = bot;
 			_ctx = ctx;
-			_cliParser = cliParser;
-			_cliFactory = cliFactory;
 			_workflowStore = workflowStore;
 			_engine = engine;
 			_workflowRenderer = workflowRenderer;
@@ -47,31 +37,32 @@ namespace MissAlise.TelegramBot.Handlers
 
 		protected override async Task HandleAsync(InlineQuery data, CancellationToken cancel)
 		{
-			var userId = data.From?.Id ?? 0L;
-			if (_workflowStore != null && _engine != null && _workflowRenderer != null && userId != 0)
+			var q = data.Query ?? string.Empty;
+			var leafs = _bot.Definition.SearchLeafCommands(q).Take(20).ToArray();
+
+			InlineQueryResult[] results = new InlineQueryResultArticle[leafs.Length];
+
+			for (var i = 0; i < leafs.Length; i++)
 			{
-				var wfContext = new WorkflowContext { ChatId = userId, UserId = userId };
-				var session = await _workflowStore.TryLoadAsync(wfContext, cancel).ConfigureAwait(false);
-				if (session != null)
+				var leaf = leafs[i];
+				var title = "/" + leaf.Name;
+				var desc = leaf.Description ?? "";
+
+				results[i] = new InlineQueryResultArticle(
+					id: $"cmd:{i}:{leaf.Name}",
+					title: title,
+					inputMessageContent: new InputTextMessageContent(title))
 				{
-					var request = WorkflowRequestFactory.FromInlineQuery(data);
-					var result = await _engine.HandleAsync(request, cancel).ConfigureAwait(false);
-					await _workflowRenderer.RenderAsync(userId, result.Presentation, cancel).ConfigureAwait(false);
-					return;
-				}
+					Description = desc
+				};
 			}
 
-			if (string.IsNullOrWhiteSpace(data.Query) || _cliParser == null || _cliFactory == null)
-				return;
-
-			var parseResult = _cliParser.ParseAsInlineQuery(data.Query);
-			if (parseResult is ReadyToInvokeResult ready)
-			{
-				var wfContext = new WorkflowContext { ChatId = data.From.Id, UserId = data.From.Id };
-				var command = _cliFactory.CreateCommand(ready.CommandPath, ready.CollectedValues, wfContext);
-				if (command is ICommand cmd)
-					await _mm.Send(cmd, cancel).ConfigureAwait(false);
-			}
+			await _bot.ApiClient.AnswerInlineQuery(
+				inlineQueryId: data.Id,
+				results: results,
+				isPersonal: true,
+				cacheTime: 0,
+				cancellationToken: cancel);
 			// Inline search: could answer with InlineQueryResultArticle list for suggestions (second-level commands, etc.)
 		}
 	}

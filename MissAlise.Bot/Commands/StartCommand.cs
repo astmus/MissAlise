@@ -16,7 +16,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace MissAlise.TelegramBot
+namespace MissAlise.TelegramBot.Commands
 {
 	public record StartCommand() : ICommand;
 	public class StartCommandHandler : ICommandHandler<StartCommand>

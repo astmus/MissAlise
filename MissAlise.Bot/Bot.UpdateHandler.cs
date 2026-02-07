@@ -32,23 +32,19 @@ namespace MissAlise.TelegramBot
 
 			protected override async Task ExecuteAsync(CancellationToken cancel)
 			{
-				while (!cancel.IsCancellationRequested)
-				{					
-					await foreach (var update in bot.Updates.Reader.ReadAllAsync(cancel))
-					{
-						logger.LogInformation("Got update {Id}", update.Id);
-						_ = HandleUpdateAsync(bot.ApiClient, update, cancel);
-					}					
+				await foreach (var update in bot.Updates.Reader.ReadAllAsync(cancel))
+				{
+					logger.LogInformation("Got update {Id}", update.Id);
+					_ = HandleUpdateAsync(update, cancel);
 				}
 			}
 
-			public async Task HandleUpdateAsync(ITelegramBotClient botClient, TUpdate update, CancellationToken cancel)
+			public async Task HandleUpdateAsync(TUpdate update, CancellationToken cancel)
 			{
 				try
 				{
 					using var handleScope = factory.CreateScope();
 					var services = handleScope.ServiceProvider;
-
 					var sender = update.GetCurrentUser();
 					var ctx = services.GetRequiredService<IHandleContext>();
 					ctx.Set(update);

@@ -30,6 +30,20 @@ public sealed class BotDefinition
 	public bool TryGetLeafByPath(string path, out BotCommandDescription leaf)
 			=> _leafByPath.TryGetValue(NormalizePath(path), out leaf!);
 
+	public IEnumerable<BotCommandDescription> SearchLeafCommands(string query)
+	{
+		query ??= string.Empty;
+		var q = query.Trim();
+		if (q.Length == 0)
+			return _leafByPath.Values.OrderBy(x => x.Name);
+
+		return _leafByPath
+			.Where(kv => kv.Key.Contains(q, StringComparison.OrdinalIgnoreCase) || kv.Value.Name.Contains(q, StringComparison.OrdinalIgnoreCase))
+			.Select(kv => kv.Value)
+			.Distinct()
+			.OrderBy(x => x.Name);
+	}
+
 	public sealed class LeafRuntime
 	{
 		public required BotCommandDescription Description { get; init; }

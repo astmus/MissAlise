@@ -45,8 +45,7 @@ public class Program
 			.AddOneDriveService(azureSection)
 			.AddBot(botSection, b => {
 				b.AddCommand<SyncCommand>("start_sync", "запустить синхронизацию full/deff")
-				 .AddCommand<BackgroundSyncCommand>("sync", "добавить back снихронизацию");
-				
+				 .AddCommand<BackgroundSyncCommand>("sync", "добавить back снихронизацию");				
 			})				
 			.AddRouting(options =>
 			{
@@ -59,6 +58,10 @@ public class Program
 				if (string.IsNullOrWhiteSpace(cs))
 					throw new InvalidOperationException("ConnectionStrings:cache is missing. In AppHost add .WithReference(cache) to webapi.");
 				return ConnectionMultiplexer.Connect(cs);
+			})
+			.AddAutoMapper(cfg =>
+			{
+				cfg.CreateMap<Telegram.Bot.Types.User, UserProfile>();
 			});
 
 		builder.Services.AddEndpointsApiExplorer(); // только для minimal api
@@ -67,7 +70,6 @@ public class Program
 			options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 		});
 
-		ApplyMapping(builder.Services);
 		var app = builder.Build();
 
 		app.Services.UseBotWorkflow();
@@ -110,15 +112,5 @@ public class Program
 		var bot = ctx.RequestServices.GetRequiredService<Bot>();
 
 		return Results.Text("<html><body>Можете закрыть это окно</body></html>", "text/html", Encoding.UTF8, 200);
-	}
-
-	static void ApplyMapping(IServiceCollection services)
-	{
-		// use DI (http://docs.automapper.org/en/latest/Dependency-injection.html) or create the mapper yourself
-		services.AddAutoMapper(cfg =>
-		{
-			cfg.CreateMap<Telegram.Bot.Types.User, UserProfile>();
-			//cfg.CreateMap<Bar, BarDto>();
-		});
 	}
 }

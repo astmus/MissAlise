@@ -31,7 +31,9 @@ public sealed class BotBuilder
 	{
 		var leafMap = new Dictionary<Command, BotDefinition.LeafRuntime>();
 		var leafByPath = new Dictionary<string, BotCommandDescription>(StringComparer.OrdinalIgnoreCase);
-		var rootCmd = new RootCommand();
+		var rootCmd = new RootCommand("MissAlise");
+
+		EnsureHelpCommand();
 
 		foreach (var c in _root.SubCommands)
 			rootCmd.AddCommand(BuildCommand(c, leafMap, leafByPath, null));
@@ -71,6 +73,15 @@ public sealed class BotBuilder
 			cmd.AddCommand(BuildCommand(s, leafMap, leafByPath, parentPath));
 
 		return cmd;
+	}
+
+	private void EnsureHelpCommand()
+	{
+		if (_root.SubCommands.Any(c => c.Name.Equals("help", StringComparison.OrdinalIgnoreCase)))
+			return;
+
+		var helpCommand = CreateCommand(typeof(HelpCommand), "help", "Показать справку по командам");
+		_root.SubCommands.Add(helpCommand);
 	}
 
 	private BotCommandDescription CreateCommand(Type type, string name, string? description)

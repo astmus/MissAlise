@@ -12,11 +12,52 @@ using MissAlise.Workflow.Extensions;
 using MissAlise.Workflow.Registry;
 using MissAlise.Workflow.State;
 using MissAlise.TelegramBot.Building;
+using MissAlise.TelegramBot.Commands;
 
 namespace MissAlise.TelegramBot
 {
 	public static class ServiceCollectionExtension
 	{
+		public static IServiceCollection AddBot(this IServiceCollection services, IConfigurationSection botConfig, Action<BotBuilder> configurate)
+		{
+			var b = new BotBuilder();
+			configurate(b);
+			services.AddSingleton<BotDefinition>(sp => b.Build());
+
+			services.AddWorkflowCore();
+			services.AddSingleton<IWorkflowStateStore>(_ => new InMemoryWorkflowStateStore(TelegramCliWorkflow.Id, TelegramCliWorkflow.CliStep));
+			services.AddSingleton<IWorkflowPresenter, TelegramCliPresenter>();
+			services.AddScoped<TelegramCliStep>();
+			services.AddScoped<IWorkflowCommandSink, MediatRWorkflowCommandSink>();			
+			services.AddSingleton<TelegramWorkflowRenderer>();
+			services.Configure<WorkflowRegistryOptions>(opt => opt.Register = TelegramCliWorkflow.Register);			
+
+			services
+				.AddSingleton<Bot>(sp => sp.GetRequiredService<Bot<UpdateExt>>())
+				.AddSingleton<Bot<UpdateExt>>()
+				.AddHostedService<Bot<UpdateExt>.UpdateReceiver>()
+				.AddHostedService<Bot<UpdateExt>.UpdateHandler>()
+				.Configure<BotConfiguration>(botConfig);
+
+			services.AddMediatR(cfg =>
+			{
+				cfg.RegisterServicesFromAssemblyContaining<StartCommand>();
+				cfg.Lifetime = ServiceLifetime.Scoped;
+			});
+
+			services.AddScoped<IAsyncHandler<Message>, ChatMessageHandler>();
+			services.AddScoped<IAsyncHandler<InlineQuery>, InlineQueryHandler>();
+			services.AddScoped<IAsyncHandler<CallbackQuery>, CallbackQueryHandler>();
+
+			return services;
+		}
+
+		/// <summary>Применяет Workflow registry (дескрипторы workflow). Вызвать после app.Build().</summary>
+		public static IServiceProvider UseBotWorkflow(this IServiceProvider serviceProvider)
+		{
+			return serviceProvider.UseWorkflowRegistry();
+		}
+
 		public static IServiceCollection AddBotService(this IServiceCollection services, IConfigurationSection botConfig, Action<BotBuilder> configurate)
 		{			
 			// Workflow core + Telegram CLI workflow
@@ -27,8 +68,7 @@ namespace MissAlise.TelegramBot
 			services.AddScoped<IWorkflowCommandSink, MediatRWorkflowCommandSink>();
 			services.AddSingleton<TelegramWorkflowRenderer>();
 			services.Configure<WorkflowRegistryOptions>(opt => opt.Register = TelegramCliWorkflow.Register);
-			services.AddHostedService<WorkflowRegistryBootstrapper>().AddScoped<TelegramCliWorkflow>();
-
+			services.AddScoped<TelegramCliWorkflow>();
 
 			var b = new BotBuilder();
 			configurate(b);

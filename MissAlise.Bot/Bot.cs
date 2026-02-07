@@ -18,9 +18,8 @@ namespace MissAlise.TelegramBot
 			this.Definition = definition;
 		}
 
-		public HttpClient HttpConnection { get; }
 		public ITelegramBotClient ApiClient { get; init; }
-		public BotCommand BotCommandRoot => botCommandRoot.Value;
+		//public BotCommand BotCommandRoot => Definition.;
 		public User Info { get; protected set; }
 
 		protected IBotConfiguration botOptions { get; set; }
@@ -28,34 +27,19 @@ namespace MissAlise.TelegramBot
 		protected virtual IEnumerable<BotCommand> BotCommands { get; set; }
 		public BotDefinition Definition { get; }
 
-		protected Lazy<BotCommand> botCommandRoot;
 		protected readonly ILogger<Bot> _log;
+		protected HttpClient HttpConnection { get; }
 
 		public virtual Task HandleErrorAsync(Exception exception, CancellationToken cancellationToken)
 		{
 			_log.LogError(exception, exception.Message, default);
 			return Task.CompletedTask;
 		}
-
-		public ICommand ParseCommand(string message)
-		{
-			ICommand resultCommand = null;
-
-			//var result = null;//= BotCommandRoot.Parse(message);
-
-			//if (result.Errors.Any())
-			//	_ = HandleErrorAsync(new AggregateException(result.Errors.Select(error => new Exception(error.Message))), default);
-			//else
-				//resultCommand = (result.CommandResult.Command as RelayCommand).Command;
-
-			return resultCommand;
-		}
 	}
 
 	internal partial class Bot<TUpdate> : Bot where TUpdate : Update
 	{
 		private UpdatesSource<TUpdate> _updatesSource;
-		//private readonly BotDefinition _definition;
 		private readonly Channel<TUpdate> Updates = Channel.CreateUnbounded<TUpdate>(
 			new()
 			{
@@ -67,23 +51,6 @@ namespace MissAlise.TelegramBot
 		public Bot(IOptions<BotConfiguration> options, ILogger<Bot<TUpdate>> log, BotDefinition definition) : base(log, definition)
 		{
 			botOptions = options.Value;
-			//_definition = definition;
-
-			//botCommandRoot = new Lazy<RootCommand>(() =>
-			//  {
-			//	  var root = new RootCommand();
-			//	  foreach (var cmd in BotCommands)
-			//		  root.AddCommand(cmd);
-
-			//	  var commands = definition.Commands
-			//			  .Where(c => c.IsPublic)
-			//			  .Select(c => new RelayCommand(c.Command, c.Description ?? "", rCommand => null));
-
-			//	  foreach (var c in commands)
-			//		  root.AddCommand(c);
-
-			//	  return root;
-			//  }, LazyThreadSafetyMode.ExecutionAndPublication);
 
 			ApiClient = new TelegramBotClient(botOptions.ApiKey, HttpConnection);
 
