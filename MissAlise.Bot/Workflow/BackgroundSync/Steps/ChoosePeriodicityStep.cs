@@ -1,3 +1,4 @@
+using MissAlise.Workflow.PropertyEditing;
 using MissAlise.Workflow.Steps;
 
 namespace MissAlise.Workflow.Demo.BackgroundSync.Steps;
@@ -10,6 +11,28 @@ public sealed class ChoosePeriodicityStep : IWorkflowStep
         WorkflowInput input,
         CancellationToken cancellationToken)
     {
+        var definition = new PropertyEditDefinition
+        {
+            Title = "Background Sync: периодичность",
+            ValueLabel = "Period (sec)",
+            StateKey = BackgroundSyncState.PeriodSeconds,
+            Mode = PropertyEditMode.Increment,
+            Step = 60,
+            Min = 60,
+            Max = 86400,
+            ShowAccept = true,
+            AcceptText = "Accept"
+        };
+
+        var editResult = PropertyEditHandler.TryHandle(input, session, definition, "prop");
+        if (editResult.Handled)
+        {
+            if (editResult.Accepted)
+                return Task.FromResult(WorkflowStepResult.Next<ChooseReportingStep>());
+
+            return Task.FromResult(WorkflowStepResult.Stay());
+        }
+
         if (input.Kind == WorkflowInputKind.Callback && input.Payload is not null &&
             input.Payload.StartsWith("bs:period:", StringComparison.OrdinalIgnoreCase))
         {

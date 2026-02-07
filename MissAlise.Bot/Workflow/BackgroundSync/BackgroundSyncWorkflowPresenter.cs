@@ -1,5 +1,6 @@
 using MissAlise.Workflow;
 using MissAlise.Workflow.Presentation;
+using MissAlise.Workflow.PropertyEditing;
 
 namespace MissAlise.Workflow.Demo.BackgroundSync;
 
@@ -62,19 +63,36 @@ public sealed class BackgroundSyncWorkflowPresenter : IWorkflowPresenter
 
     private static WorkflowPresentation Periodicity(WorkflowSession s)
     {
-        var sec = s.Get(BackgroundSyncState.PeriodSeconds) ?? "<не задано>";
+        var definition = new PropertyEditDefinition
+        {
+            Title = "Background Sync: периодичность",
+            ValueLabel = "Period (sec)",
+            StateKey = BackgroundSyncState.PeriodSeconds,
+            Mode = PropertyEditMode.Increment,
+            Step = 60,
+            Min = 60,
+            Max = 86400,
+            ShowAccept = true,
+            AcceptText = "Accept",
+            FormatValue = value => string.IsNullOrWhiteSpace(value) ? "<не задано>" : value
+        };
+
+        var presenter = new PropertyEditPresenter();
+        var presentation = presenter.Present(s, definition, "prop");
+        var text = presentation.Text + "\n\nВыбери пресет или используй +/- и Accept.";
+
+        var buttons = presentation.Buttons.ToList();
+        buttons.AddRange(new[]
+        {
+            new WorkflowButton { Text = "5 min", Payload = "bs:period:300" },
+            new WorkflowButton { Text = "15 min", Payload = "bs:period:900" },
+            new WorkflowButton { Text = "1 hour", Payload = "bs:period:3600" },
+        });
+
         return new WorkflowPresentation
         {
-            Text =
-                "Background Sync: периодичность\n\n" +
-                $"Period (sec): {sec}\n\n" +
-                "Выбери вариант кнопкой или пришли число секунд сообщением.",
-            Buttons = new[]
-            {
-                new WorkflowButton { Text = "5 min", Payload = "bs:period:300" },
-                new WorkflowButton { Text = "15 min", Payload = "bs:period:900" },
-                new WorkflowButton { Text = "1 hour", Payload = "bs:period:3600" },
-            }
+            Text = text,
+            Buttons = buttons
         };
     }
 
