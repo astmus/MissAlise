@@ -4,7 +4,7 @@ using System.CommandLine.Parsing;
 using System.Linq;
 using System.Reflection;
 
-namespace BotDsl;
+namespace MissAlise.TelegramBot.Building;
 
 public static class Binder
 {

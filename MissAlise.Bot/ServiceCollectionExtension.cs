@@ -1,11 +1,59 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MissAlise.Application.Interfaces;
+using MissAlise.TelegramBot.CommandLine;
+using MissAlise.TelegramBot.Handlers;
+using MissAlise.TelegramBot.Wizard;
 using Telegram.Bot.Types;
+using MissAlise.TelegramBot.Workflow;
+using MissAlise.TelegramBot.Workflow.Cli;
+using MissAlise.Workflow;
+using MissAlise.Workflow.Extensions;
+using MissAlise.Workflow.Registry;
+using MissAlise.Workflow.State;
+using MissAlise.TelegramBot.Building;
 
 namespace MissAlise.TelegramBot
 {
 	public static class ServiceCollectionExtension
 	{
+		public static IServiceCollection AddBotService(this IServiceCollection services, IConfigurationSection botConfig, Action<BotBuilder> configurate)
+		{			
+			// Workflow core + Telegram CLI workflow
+			services.AddWorkflowCore();
+			services.AddSingleton<IWorkflowStateStore>(_ => new InMemoryWorkflowStateStore(TelegramCliWorkflow.Id, TelegramCliWorkflow.CliStep));
+			services.AddSingleton<IWorkflowPresenter, TelegramCliPresenter>();
+			services.AddScoped<TelegramCliStep>();
+			services.AddScoped<IWorkflowCommandSink, MediatRWorkflowCommandSink>();
+			services.AddSingleton<TelegramWorkflowRenderer>();
+			services.Configure<WorkflowRegistryOptions>(opt => opt.Register = TelegramCliWorkflow.Register);
+			services.AddHostedService<WorkflowRegistryBootstrapper>().AddScoped<TelegramCliWorkflow>();
+
+
+			var b = new BotBuilder();
+			configurate(b);
+			services.AddSingleton<BotDefinition>(sp => b.Build());
+
+			services
+				//.AddSingleton(sp => bot.Build())
+				.AddSingleton<Bot>(sp => sp.GetRequiredService<Bot<UpdateExt>>())
+				.AddSingleton<Bot<UpdateExt>>()
+				.AddHostedService<Bot<UpdateExt>.UpdateReceiver>()
+				.AddHostedService<Bot<UpdateExt>.UpdateHandler>()
+				.Configure<BotConfiguration>(botConfig);
+
+			services.AddMediatR(cfg =>
+			{
+				cfg.RegisterServicesFromAssemblyContaining<StartCommand>();
+				cfg.Lifetime = ServiceLifetime.Scoped;
+			});
+
+			services.AddScoped<IAsyncHandler<Message>, ChatMessageHandler>();
+			services.AddScoped<IAsyncHandler<InlineQuery>, InlineQueryHandler>();
+			return services.AddScoped<IAsyncHandler<CallbackQuery>, CallbackQueryHandler>();
+		}
+
+
 		static internal User GetCurrentUser(this Update update)
 		{
 			var msg = update.GetCurrentMessage();

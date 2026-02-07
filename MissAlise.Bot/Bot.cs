@@ -2,6 +2,7 @@ using System.Threading.Channels;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MissAlise.Application.Common.RequestHandler;
+using MissAlise.TelegramBot.Building;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -11,9 +12,10 @@ namespace MissAlise.TelegramBot
 {
 	public abstract partial class Bot
 	{
-		public Bot(ILogger<Bot> log)
+		public Bot(ILogger<Bot> log, BotDefinition definition)
 		{
 			_log = log;
+			this.Definition = definition;
 		}
 
 		public HttpClient HttpConnection { get; }
@@ -24,6 +26,8 @@ namespace MissAlise.TelegramBot
 		protected IBotConfiguration botOptions { get; set; }
 		protected ReceiverOptions receiveOptions { get; set; }
 		protected virtual IEnumerable<BotCommand> BotCommands { get; set; }
+		public BotDefinition Definition { get; }
+
 		protected Lazy<BotCommand> botCommandRoot;
 		protected readonly ILogger<Bot> _log;
 
@@ -60,7 +64,7 @@ namespace MissAlise.TelegramBot
 			}
 		);
 
-		public Bot(IOptions<BotConfiguration> options, ILogger<Bot<TUpdate>> log) : base(log)
+		public Bot(IOptions<BotConfiguration> options, ILogger<Bot<TUpdate>> log, BotDefinition definition) : base(log, definition)
 		{
 			botOptions = options.Value;
 			//_definition = definition;
@@ -83,7 +87,6 @@ namespace MissAlise.TelegramBot
 
 			ApiClient = new TelegramBotClient(botOptions.ApiKey, HttpConnection);
 
-			// ïåðåíåñòè â áèëäåð
 			receiveOptions = new ReceiverOptions() { Limit = 100, AllowedUpdates = [UpdateType.Message, UpdateType.InlineQuery, UpdateType.CallbackQuery, UpdateType.ChosenInlineResult] };
 		}
 		

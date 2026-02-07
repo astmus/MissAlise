@@ -44,8 +44,8 @@ public class Program
 			//		builder => builder.SetDescription("Синхронизация OneDrive"))//.AddTrigger(new SyncOneDriveFolderJob(default,default), "1 min").SetDelay(Time.Minute))
 			.AddOneDriveService(azureSection)
 			.AddBot(botSection, b => {
-				b.AddCommand<SyncCommand>("синхронизировать", "запустить синхронизацию full/deff")
-				 .AddCommand<BackgroundSyncCommand>("новая back sync", "добавить back снихронизацию");
+				b.AddCommand<SyncCommand>("start_sync", "запустить синхронизацию full/deff")
+				 .AddCommand<BackgroundSyncCommand>("sync", "добавить back снихронизацию");
 				
 			})				
 			.AddRouting(options =>

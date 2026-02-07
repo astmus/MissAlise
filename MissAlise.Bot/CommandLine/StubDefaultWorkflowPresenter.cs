@@ -7,5 +7,5 @@ namespace MissAlise.TelegramBot.CommandLine;
 public sealed class StubDefaultWorkflowPresenter : IDefaultWorkflowPresenter
 {
 	public WorkflowPresentation Present(WorkflowSession session, WorkflowContext context)
-		=> new WorkflowPresentation { Text = "Команда выполнена.", Buttons = Array.Empty<WorkflowButton>() };
+		=> new WorkflowPresentation { Text = "Команда для обработки не найдена", Buttons = Array.Empty<WorkflowButton>() };
 }

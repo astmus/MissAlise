@@ -1,12 +1,15 @@
-using BotDsl;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MissAlise.Application.Interfaces;
+using MissAlise.TelegramBot.Building;
 using MissAlise.TelegramBot.CommandLine;
 using MissAlise.TelegramBot.Handlers;
+using MissAlise.TelegramBot.Workflow;
+using MissAlise.TelegramBot.Workflow.Cli;
 using MissAlise.Workflow;
 using MissAlise.Workflow.Descriptors;
 using MissAlise.Workflow.Extensions;
+using MissAlise.Workflow.Registry;
 using MissAlise.Workflow.State;
 using Telegram.Bot.Types;
 
@@ -21,10 +24,13 @@ public static class BotBuilderExtensions
 		services.AddSingleton<BotDefinition>(sp => b.Build());
 
 		services.AddWorkflowCore();
-		services.AddSingleton<IWorkflowStateStore>(_ => new InMemoryWorkflowStateStore(
-			CliParameterCollectionWorkflowDescriptor.Id,
-			WorkflowStepId.From<CollectParameterStep>()));
-		services.AddBotCommandLineWorkflow();
+		services.AddSingleton<IWorkflowStateStore>(_ => new InMemoryWorkflowStateStore(TelegramCliWorkflow.Id, TelegramCliWorkflow.CliStep));
+		services.AddSingleton<IWorkflowPresenter, TelegramCliPresenter>();
+		services.AddScoped<TelegramCliStep>();
+		services.AddScoped<IWorkflowCommandSink, MediatRWorkflowCommandSink>();
+		services.AddSingleton<TelegramWorkflowRenderer>();
+		services.Configure<WorkflowRegistryOptions>(opt => opt.Register = TelegramCliWorkflow.Register);
+		services.AddHostedService<WorkflowRegistryBootstrapper>();
 
 		services
 			.AddSingleton<Bot>(sp => sp.GetRequiredService<Bot<UpdateExt>>())

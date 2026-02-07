@@ -1,9 +1,11 @@
-
 using System;
 using System.Collections.Generic;
 
-namespace MissAlise.TelegramBot.Building;
+namespace MissAlise.TelegramBot.CommandLine;
 
+/// <summary>
+/// Описание параметра команды, используемое и для CLI-парсинга, и для wizard/inline UI.
+/// </summary>
 public sealed record BotParameterDescription(
     string Name,
     string CliName,

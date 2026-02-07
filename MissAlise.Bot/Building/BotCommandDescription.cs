@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace BotDsl;
+namespace MissAlise.TelegramBot.Building;
 
 public sealed class BotCommandDescription
 {

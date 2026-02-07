@@ -8,9 +8,9 @@ internal sealed class TelegramWorkflowRenderer : IWorkflowResultRenderer
 {
     private readonly ITelegramBotClient _client;
 
-    public TelegramWorkflowRenderer(ITelegramBotClient client)
+    public TelegramWorkflowRenderer(Bot bot)
     {
-        _client = client;
+        _client = bot.ApiClient;
     }
 
     public Task RenderAsync(long chatId, WorkflowPresentation presentation, CancellationToken cancel)
