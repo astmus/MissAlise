@@ -63,7 +63,7 @@ namespace MissAlise.TelegramBot.Handlers
 				{
 					var request = WorkflowRequestFactory.FromCallback(data, chatId, userId);
 					var result = await _engine.HandleAsync(request, cancel).ConfigureAwait(false);
-					await _workflowRenderer.RenderAsync(chatId, result.Presentation, cancel).ConfigureAwait(false);
+					await _workflowRenderer.RenderAsync(result, cancel).ConfigureAwait(false);
 					await SafeAnswerCallbackAsync(data.Id, cancel);
 					return;
 				}
@@ -98,7 +98,7 @@ namespace MissAlise.TelegramBot.Handlers
 					await _workflowStore.CreateAsync(session, cancel).ConfigureAwait(false);
 					var request = WorkflowRequestFactory.Start(chatId, userId);
 					var result = await _engine.HandleAsync(request, cancel).ConfigureAwait(false);
-					await _workflowRenderer.RenderAsync(chatId, result.Presentation, cancel).ConfigureAwait(false);
+					await _workflowRenderer.RenderAsync(result, cancel).ConfigureAwait(false);
 					await SafeAnswerCallbackAsync(data.Id, cancel);
 					return;
 				}

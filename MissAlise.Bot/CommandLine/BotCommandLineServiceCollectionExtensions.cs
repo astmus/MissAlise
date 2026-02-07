@@ -21,7 +21,8 @@ public static class BotCommandLineServiceCollectionExtensions
 		services.AddScoped<CliParameterCollectionPresenter>();
 		services.AddScoped<StubDefaultWorkflowPresenter>();
 
-		services.AddSingleton<IWorkflowResultRenderer, TelegramWorkflowRenderer>();
+		services.AddScoped<IWorkflowUpdateResultVisitor, TelegramWorkflowUpdateResultVisitor>();
+		services.AddScoped<IWorkflowResultRenderer, TelegramWorkflowRenderer>();
 
 		services.PostConfigure<WorkflowRegistryOptions>(opt =>
 			opt.Register += r => r.Register(CliParameterCollectionWorkflowDescriptor.Create()));
