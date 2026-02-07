@@ -45,7 +45,7 @@ namespace MissAlise.TelegramBot.Handlers
 
 			var request = WorkflowRequestFactory.FromCallback(data, chatId.Value, data.From.Id);
 			var result = await _engine.HandleAsync(request, cancel).ConfigureAwait(false);
-			await _workflowRenderer.RenderAsync(chatId.Value, result.Presentation, cancel).ConfigureAwait(false);
+			await _workflowRenderer.RenderAsync(result, cancel).ConfigureAwait(false);
 
 			try { await _bot.ApiClient.AnswerCallbackQueryAsync(data.Id, cancellationToken: cancel).ConfigureAwait(false); } catch { /* ignore */ }
 		}

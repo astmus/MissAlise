@@ -29,7 +29,8 @@ namespace MissAlise.TelegramBot
 			services.AddSingleton<IWorkflowPresenter, TelegramCliPresenter>();
 			services.AddScoped<TelegramCliStep>();
 			services.AddScoped<IWorkflowCommandSink, MediatRWorkflowCommandSink>();			
-			services.AddSingleton<TelegramWorkflowRenderer>();
+			services.AddScoped<IWorkflowResultRenderer, TelegramWorkflowRenderer>();
+			services.AddScoped<IWorkflowResultVisitor, TelegramWorkflowResultVisitor>();
 			services.Configure<WorkflowRegistryOptions>(opt => opt.Register = TelegramCliWorkflow.Register);			
 
 			services

@@ -1,36 +1,32 @@
-using MissAlise.Workflow.Presentation;
-using Telegram.Bot;
-using Telegram.Bot.Types.ReplyMarkups;
+using MissAlise.Application.Interfaces;
+using MissAlise.Workflow;
+using Telegram.Bot.Types;
 
 namespace MissAlise.TelegramBot.Workflow;
 
 internal sealed class TelegramWorkflowRenderer : IWorkflowResultRenderer
 {
-    private readonly ITelegramBotClient _client;
+    private readonly Bot _bot;
+    private readonly IHandleContext _context;
+    private readonly IWorkflowResultVisitor? _visitor;
 
-    public TelegramWorkflowRenderer(Bot bot)
+    public TelegramWorkflowRenderer(Bot bot, IHandleContext context, IWorkflowResultVisitor? visitor = null)
     {
-        _client = bot.ApiClient;
+        _bot = bot;
+        _context = context;
+        _visitor = visitor;
     }
 
-    public Task RenderAsync(long chatId, WorkflowPresentation presentation, CancellationToken cancel)
+    public Task RenderAsync(WorkflowHandleResult result, CancellationToken cancel)
     {
-        ReplyMarkup? markup = null;
-
-        if (presentation.Buttons.Count > 0)
+        if (_visitor != null)
         {
-            // One button per row (simple & readable). Can be upgraded later.
-            var rows = presentation.Buttons
-                .Select(b => new[] { InlineKeyboardButton.WithCallbackData(b.Text, b.Payload) })
-                .ToArray();
-
-            markup = new InlineKeyboardMarkup(rows);
+            return _visitor.VisitAsync(result, cancel);
         }
 
-        return _client.SendTextMessageAsync(
-            chatId: chatId,
-            text: presentation.Text,
-            replyMarkup: markup,
-            cancellationToken: cancel);
+        var update = _context.Get<UpdateExt>() ?? _context.Get<Update>();
+        var chat = update?.GetCurrentChat() ?? _context.Get<Chat>();
+        
+        return WorkflowPresentationSender.SendAsync(_bot.ApiClient, chat, result.Presentation, cancel);
     }
 }
