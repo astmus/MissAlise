@@ -8,7 +8,7 @@ namespace MissAlise.TelegramBot.Handlers;
 
 /// <summary>
 /// Thin wrapper: Message -> WorkflowCoordinator -> TelegramWorkflowRenderer.
-/// Вся логика команд/сессий находится в workflow (TelegramCliStep).
+/// ��� ������ ������/������ ��������� � workflow (TelegramCliStep).
 /// </summary>
 internal sealed class ChatMessageHandler : BotAsyncHandlerBase<Message>
 {
