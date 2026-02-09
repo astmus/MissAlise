@@ -12,6 +12,8 @@ using MissAlise.Interfaces;
 using MissAlise.OneDrive;
 using MissAlise.OneDrive.Auth;
 using MissAlise.TelegramBot;
+using MissAlise.TelegramBot.Building;
+using MissAlise.TelegramBot.Commands;
 using MissAlise.ValueObjects;
 using MissAlise.Workflow.Demo.BackgroundSync;
 using StackExchange.Redis;
@@ -44,8 +46,22 @@ public class Program
 			//		builder => builder.SetDescription("Синхронизация OneDrive"))//.AddTrigger(new SyncOneDriveFolderJob(default,default), "1 min").SetDelay(Time.Minute))
 			.AddOneDriveService(azureSection)
 			.AddBot(botSection, b => {
-				b.AddCommand<SyncCommand>("start_sync", "запустить синхронизацию full/deff")
-				 .AddCommand<BackgroundSyncCommand>("sync", "добавить back снихронизацию");				
+				b
+				.AddCommand<StartCommand>("start", "restart")
+				.AddCommand<SyncCommand>("sync", "run sync full/deff")
+				.AddCommand<BackgroundSyncCommand>("back_sync", "add back sync")
+				.BeginScope<OneDriveRoot>("onedrive", "one drive commands")
+					.AddCommand<OneDriveStatus>("status", "status of client")
+					.AddCommand<OneDriveAuth>("authorization", "run one drive reauthorization")
+						.BeginSection<OneDriveSync>("sync", "sync  scope")
+							.AddCommand<OneDriveSyncDiff>("diff", "List")
+							.AddCommand<OneDriveSyncFull>("full", "List")
+						.EndSection()
+				.EndScope<OneDriveRoot>()
+				.BeginScope<MediaRoot>("media", "actions with all media items")
+					.AddCommand<SettingsSearch>("settings", "search")
+				.EndScope<MediaRoot>();
+				
 			})				
 			.AddRouting(options =>
 			{

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MissAlise.TelegramBot.CommandLine;
+using MissAlise.TelegramBot.Building;
 using MissAlise.Workflow;
 using MissAlise.Workflow.Presentation;
 
@@ -38,20 +38,54 @@ internal sealed class TelegramCliPresenter : IWorkflowPresenter
         if (!string.IsNullOrWhiteSpace(hint))
             lines.Add(hint);
 
-        // Root menu or submenu. For simplicity: show root top-level.
         var buttons = new List<WorkflowButton>();
-        foreach (var top in _bot.Definition.DescriptionTree.SubCommands)
+        IEnumerable<BotCommandDescription> commands;
+        string title;
+        string? parentPath = null;
+
+        if (!string.IsNullOrWhiteSpace(path) && _bot.Definition.TryGetCommandByPath(path, out var parent))
         {
-            // If it's leaf, callback points to leaf path; else menu path.
-            var targetPath = top.Name;
-            buttons.Add(new WorkflowButton
-            {
-                Text = "/" + top.Name,
-                Payload = "cmd:" + targetPath
-            });
+            commands = parent!.GetAllSubCommands();
+            title = $"/{path}";
+            var pathParts = path!.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            parentPath = pathParts.Length > 1 ? string.Join(' ', pathParts.Take(pathParts.Length - 1)) : string.Empty;
+        }
+        else
+        {
+            commands = _bot.Definition.Description.GetAllSubCommands();
+            title = "Выбери команду:";
         }
 
-        lines.Add("Выбери команду:");
+        lines.Add(title);
+
+        var hasSections = commands.Any(c => !string.IsNullOrEmpty(c.Name));
+        if (hasSections)
+        {
+            string? lastSection = null;
+            foreach (var cmd in commands)
+            {
+                if (!string.IsNullOrEmpty(cmd.Name) && cmd.Name != lastSection)
+                {
+                    lastSection = cmd.Name;
+                    lines.Add($"— {cmd.Name} —");
+                }
+                if (string.IsNullOrEmpty(cmd.Name))
+                    lastSection = null;
+                var targetPath = string.IsNullOrEmpty(path) ? cmd.Name : path!.TrimEnd() + " " + cmd.Name;
+                buttons.Add(new WorkflowButton { Text = cmd.Name, Payload = "cmd:" + targetPath });
+            }
+        }
+        else
+        {
+            foreach (var top in commands)
+            {
+                var targetPath = string.IsNullOrEmpty(path) ? top.Name : path!.TrimEnd() + " " + top.Name;
+                buttons.Add(new WorkflowButton { Text = top.Name, Payload = "cmd:" + targetPath });
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(path))
+            buttons.Add(new WorkflowButton { Text = "← Назад", Payload = string.IsNullOrEmpty(parentPath) ? "cmd:" : "cmd:" + parentPath });
         return new WorkflowPresentation
         {
             Text = string.Join("\n", lines),
@@ -66,7 +100,7 @@ internal sealed class TelegramCliPresenter : IWorkflowPresenter
             return new WorkflowPresentation
             {
                 Text = "Сессия ввода параметров устарела. Выбери команду заново.",
-                Buttons = _bot.Definition.DescriptionTree.SubCommands
+                Buttons = _bot.Definition.Description.SubCommands
                     .Select(c => new WorkflowButton { Text = "/" + c.Name, Payload = "cmd:" + c.Name })
                     .ToArray()
             };

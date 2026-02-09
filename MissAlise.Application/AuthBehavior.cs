@@ -1,6 +1,7 @@
 using MediatR;
 using MissAlise.Application.Commands;
 using MissAlise.Application.Common;
+using MissAlise.Application.Dto;
 using MissAlise.Application.Interfaces;
 using MissAlise.Entities.Identity;
 using MissAlise.Interfaces;
@@ -28,8 +29,8 @@ namespace MissAlise.Application
 
 		public async Task<Result> Handle(SyncCommand request, RequestHandlerDelegate<Result> next, CancellationToken cancellationToken)
 		{
-			var userId = request.user;
-			if (userId.Value == default)
+			UserId userId = default;
+			if (request.Value == default)
 			{
 				var sender = _ctx.Get<UserProfile>();
 				if (sender is null)

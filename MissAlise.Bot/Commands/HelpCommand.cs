@@ -33,7 +33,7 @@ public sealed class HelpCommandHandler : ICommandHandler<HelpCommand>
 		if (chatId == 0)
 			return Result.Fail("Chat not found");
 
-		await _bot.ApiClient.SendTextMessageAsync(chatId, helpText, cancellationToken: cancellationToken);
+		await _bot.ApiClient.SendMessage(chatId, helpText, cancellationToken: cancellationToken);
 		return Result.Successful;
 	}
 
@@ -41,7 +41,7 @@ public sealed class HelpCommandHandler : ICommandHandler<HelpCommand>
 	{
 		var sb = new StringBuilder();
 		using var writer = new StringWriter(sb);
-		var helpBuilder = new HelpBuilder(LocalizationResources.Instance, maxWidth: 100);
+		var helpBuilder = new HelpBuilder(LocalizationResources.Instance, maxWidth: 240);
 		var helpContext = new HelpContext(helpBuilder, command, writer);
 		helpBuilder.Write(helpContext);
 		return sb.ToString();

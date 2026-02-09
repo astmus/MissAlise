@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
@@ -23,9 +23,5 @@
 		<ProjectReference Include="..\MissAlise.DataBase\MissAlise.DataBase.csproj" />
 		<ProjectReference Include="..\MissAlise.Workflow\MissAlise.Workflow.csproj" />
 		<!--<ProjectReference Include="..\MissAlise.ServiceDefaults\MissAlise.Shared.csproj" />-->
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Building\" />
 	</ItemGroup>
 </Project>

@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 
@@ -12,4 +11,6 @@ public sealed class BotCommandDescription
 
     public List<BotCommandDescription> SubCommands { get; } = new();
     public List<BotParameterDescription> Parameters { get; } = new();
+
+    public IEnumerable<BotCommandDescription> GetAllSubCommands() => SubCommands;
 }

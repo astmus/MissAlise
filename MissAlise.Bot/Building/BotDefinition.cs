@@ -11,7 +11,7 @@ namespace MissAlise.TelegramBot.Building;
 public sealed class BotDefinition
 {
 	public RootCommand RootCommand { get; }
-	public BotCommandDescription DescriptionTree { get; }
+	public BotCommandDescription Description { get; }
 
 	private readonly Dictionary<Command, LeafRuntime> _leafByCommand;
 	private readonly Dictionary<string, BotCommandDescription> _leafByPath;
@@ -19,7 +19,7 @@ public sealed class BotDefinition
 	internal BotDefinition(RootCommand root, BotCommandDescription tree, Dictionary<Command, LeafRuntime> leafByCommand, Dictionary<string, BotCommandDescription> leafByPath)
 	{
 		RootCommand = root;
-		DescriptionTree = tree;
+		Description = tree;
 		_leafByCommand = leafByCommand;
 		_leafByPath = leafByPath;
 	}
@@ -28,7 +28,29 @@ public sealed class BotDefinition
 		=> _leafByCommand.TryGetValue(parseResult.CommandResult.Command, out leaf!);
 
 	public bool TryGetLeafByPath(string path, out BotCommandDescription leaf)
-			=> _leafByPath.TryGetValue(NormalizePath(path), out leaf!);
+		=> _leafByPath.TryGetValue(NormalizePath(path), out leaf!);
+
+	public bool TryGetCommandByPath(string path, out BotCommandDescription? command)
+	{
+		command = null;
+		var normalized = NormalizePath(path);
+		if (string.IsNullOrEmpty(normalized)) return false;
+
+		var parts = normalized.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+		BotCommandDescription? current = Description;
+
+		foreach (var part in parts)
+		{
+			var next = current?.GetAllSubCommands()
+				.FirstOrDefault(c => c.Name.Equals(part, StringComparison.OrdinalIgnoreCase));
+			if (next is null)
+				return false;
+			current = next;
+		}
+
+		command = current;
+		return command is not null;
+	}
 
 	public IEnumerable<BotCommandDescription> SearchLeafCommands(string query)
 	{

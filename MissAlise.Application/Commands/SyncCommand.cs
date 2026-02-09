@@ -7,7 +7,7 @@ using MissAlise.ValueObjects;
 
 namespace MissAlise.Application.Commands
 {
-	public record SyncCommand(UserId user) : ICommand;
+	public record SyncCommand(long Value) : ICommand;
 
 	public class SyncCommandHandler : AsyncHandlerBase<SyncCommand>, ICommandHandler<SyncCommand>
 	{

@@ -2,48 +2,78 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
 using System.Linq;
 using System.Reflection;
+using static System.Collections.Specialized.BitVector32;
 
 namespace MissAlise.TelegramBot.Building;
 
-public sealed class BotBuilder
+public sealed partial class BotBuilder : IBotBuilder
 {
-	private readonly BotCommandDescription _root = new() { Name = "root" };
+	private readonly BotCommandDescription _root;
+	private readonly Stack<BotCommandDescription> _commands = new();
+	private BotCommandDescription _current => _commands.Peek();
 
-	public BotBuilder AddCommand<T>(string name, string? description = null)
+	public BotBuilder()
+	{
+		_root = new() { Name = "" };
+		_commands.Push(_root);
+	}
+
+	public IBotBuilder AddCommand<T>(string name, string? description = null)
 		where T : class
 	{
 		var cmd = CreateCommand(typeof(T), name, description);
-		_root.SubCommands.Add(cmd);
+		_current.SubCommands.Add(cmd);
 		return this;
 	}
 
-	public BotBuilder AddSubCommand<T>(BotCommandDescription parent, string name, string? description = null)
-		where T : class
+	public IBotSectionBuilder<T> BeginScope<T>(string name, string description)
 	{
-		var cmd = CreateCommand(typeof(T), name, description);
-		parent.SubCommands.Add(cmd);
+		var scope = new BotCommandDescription { Name = name, Description = description };
+		_current.SubCommands.Add(scope);
+		_commands.Push(scope);
+		return new BotSectionBuilder<T>(default, this);
+	}
+
+	public IBotBuilder EndSection()
+	{
+		if (_commands.Count == 0)
+			throw new InvalidOperationException("EndSection() called but there is no open section. Check BeginSection/EndSection");
+
+		_commands.Pop();
 		return this;
 	}
 
 	public BotDefinition Build()
 	{
+		// на момент Build все открытые секции должны быть закрыты
+		//полка  закоменчено потом поправим
+		//if (_commands.Count != 1)
+		//	throw new InvalidOperationException("EndSection() called but there is no open section. Check BeginSection/EndSection");
+
 		var leafMap = new Dictionary<Command, BotDefinition.LeafRuntime>();
 		var leafByPath = new Dictionary<string, BotCommandDescription>(StringComparer.OrdinalIgnoreCase);
 		var rootCmd = new RootCommand("MissAlise");
 
 		EnsureHelpCommand();
 
-		foreach (var c in _root.SubCommands)
-			rootCmd.AddCommand(BuildCommand(c, leafMap, leafByPath, null));
+		//foreach (var c in _root.SubCommands)
+		//	rootCmd.AddCommand(BuildCommand(c, leafMap, leafByPath, null));
+
+		BuildCommandRecursive(rootCmd, _root, leafMap, leafByPath, null);
 
 		return new BotDefinition(rootCmd, _root, leafMap, leafByPath);
 	}
-
-	private Command BuildCommand(BotCommandDescription d, Dictionary<Command, BotDefinition.LeafRuntime> leafMap, Dictionary<string, BotCommandDescription> leafByPath, string? parentPath)
+	private Command BuildCommandRecursive(
+					RootCommand root,
+					BotCommandDescription d,
+					Dictionary<Command, BotDefinition.LeafRuntime> leafMap,
+					Dictionary<string, BotCommandDescription> leafByPath,
+					string? parentPath)
 	{
-		var cmd = new Command(d.Name, d.Description);
+		Command cmd = root ?? new Command(d.Name, d.Description);
 		cmd.AddAlias("/" + d.Name);
 
 		var optMap = new Dictionary<string, Option>(StringComparer.OrdinalIgnoreCase);
@@ -69,8 +99,8 @@ public sealed class BotBuilder
 			leafByPath[BotDefinition.NormalizePath(path)] = d;
 		}
 
-		foreach (var s in d.SubCommands)
-			cmd.AddCommand(BuildCommand(s, leafMap, leafByPath, parentPath));
+		foreach (var s in d.GetAllSubCommands())
+			cmd.AddCommand(BuildCommandRecursive(null, s, leafMap, leafByPath, path));
 
 		return cmd;
 	}
@@ -99,7 +129,7 @@ public sealed class BotBuilder
 
 			var isNullable = Nullable.GetUnderlyingType(p.PropertyType) != null;
 
-			desc.Parameters.Add(new BotParameterDescription(
+			var parameter = new BotParameterDescription(
 				p.Name,
 				"--" + ToKebab(p.Name),
 				p.PropertyType,
@@ -108,7 +138,9 @@ public sealed class BotBuilder
 				null,
 				p.PropertyType.IsEnum ? Enum.GetNames(p.PropertyType) : null,
 				null
-			));
+			);
+
+			desc.Parameters.Add(parameter);
 		}
 
 		return desc;
