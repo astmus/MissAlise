@@ -4,6 +4,7 @@ using System.Linq;
 using MissAlise.TelegramBot.Building;
 using MissAlise.Workflow;
 using MissAlise.Workflow.Presentation;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace MissAlise.TelegramBot.Workflow.Cli;
 
@@ -13,124 +14,178 @@ namespace MissAlise.TelegramBot.Workflow.Cli;
 /// </summary>
 internal sealed class TelegramCliPresenter : IWorkflowPresenter
 {
-    private readonly Bot _bot;
+	private readonly Bot _bot;
 
-    public TelegramCliPresenter(Bot bot)
-    {
-        _bot = bot;
-    }
+	public TelegramCliPresenter(Bot bot)
+	{
+		_bot = bot;
+	}
 
-    public WorkflowPresentation Present(WorkflowSession session, WorkflowContext context)
-    {
-        var mode = session.Get("cli:mode") ?? "menu";
-        var path = session.Get("cli:path");
-        var error = session.Get("cli:error");
+	public WorkflowPresentation Present(WorkflowSession session, WorkflowContext context)
+	{
+		var mode = session.Get("cli:mode") ?? "menu";
+		var path = session.Get("cli:path");
+		var error = session.Get("cli:error");
 
-        if (mode == "wizard")
-            return PresentWizard(session, path);
+		if (mode == "wizard")
+			return PresentWizard(session, path, error);
 
-        return PresentMenu(path, error);
-    }
+		return PresentMenu(path, error);
+	}
 
-    private WorkflowPresentation PresentMenu(string? path, string? hint)
-    {
-        var lines = new List<string>();
-        if (!string.IsNullOrWhiteSpace(hint))
-            lines.Add(hint);
+	private WorkflowPresentation PresentMenu(string? path, string? hint)
+	{
+		var lines = new List<string>();
+		if (!string.IsNullOrWhiteSpace(hint))
+			lines.Add(hint);
 
-        var buttons = new List<WorkflowButton>();
-        IEnumerable<BotCommandDescription> commands;
-        string title;
-        string? parentPath = null;
+		var buttons = new List<WorkflowButton>();
+		IEnumerable<BotCommandDescription> commands;
+		string title;
+		string? parentPath = null;
 
-        if (!string.IsNullOrWhiteSpace(path) && _bot.Definition.TryGetCommandByPath(path, out var parent))
-        {
-            commands = parent!.GetAllSubCommands();
-            title = $"/{path}";
-            var pathParts = path!.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            parentPath = pathParts.Length > 1 ? string.Join(' ', pathParts.Take(pathParts.Length - 1)) : string.Empty;
-        }
-        else
-        {
-            commands = _bot.Definition.Description.GetAllSubCommands();
-            title = "Выбери команду:";
-        }
+		if (!string.IsNullOrWhiteSpace(path) && _bot.Definition.TryGetCommandByPath(path, out var parent))
+		{
+			commands = parent!.GetAllSubCommands();
+			title = $"/{path}";
+			var pathParts = path!.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+			parentPath = pathParts.Length > 1 ? string.Join(' ', pathParts.Take(pathParts.Length - 1)) : string.Empty;
+		}
+		else
+		{
+			commands = _bot.Definition.Description.GetAllSubCommands();
+			title = "Выбери команду:";
+		}
 
-        lines.Add(title);
+		lines.Add(title);
 
-        var hasSections = commands.Any(c => !string.IsNullOrEmpty(c.Name));
-        if (hasSections)
-        {
-            string? lastSection = null;
-            foreach (var cmd in commands)
-            {
-                if (!string.IsNullOrEmpty(cmd.Name) && cmd.Name != lastSection)
-                {
-                    lastSection = cmd.Name;
-                    lines.Add($"— {cmd.Name} —");
-                }
-                if (string.IsNullOrEmpty(cmd.Name))
-                    lastSection = null;
-                var targetPath = string.IsNullOrEmpty(path) ? cmd.Name : path!.TrimEnd() + " " + cmd.Name;
-                buttons.Add(new WorkflowButton { Text = cmd.Name, Payload = "cmd:" + targetPath });
-            }
-        }
-        else
-        {
-            foreach (var top in commands)
-            {
-                var targetPath = string.IsNullOrEmpty(path) ? top.Name : path!.TrimEnd() + " " + top.Name;
-                buttons.Add(new WorkflowButton { Text = top.Name, Payload = "cmd:" + targetPath });
-            }
-        }
+		var hasSections = commands.Any(c => !string.IsNullOrEmpty(c.Name));
+		if (hasSections)
+		{
+			string? lastSection = null;
+			foreach (var cmd in commands)
+			{
+				if (!string.IsNullOrEmpty(cmd.Name) && cmd.Name != lastSection)
+				{
+					lastSection = cmd.Name;
+					lines.Add($"— {cmd.Name} —");
+				}
+				if (string.IsNullOrEmpty(cmd.Name))
+					lastSection = null;
+				var targetPath = string.IsNullOrEmpty(path) ? cmd.Name : path!.TrimEnd() + " " + cmd.Name;
+				buttons.Add(new WorkflowButton { Text = cmd.Name, Payload = "cmd:" + targetPath });
+			}
+		}
+		else
+		{
+			foreach (var top in commands)
+			{
+				var targetPath = string.IsNullOrEmpty(path) ? top.Name : path!.TrimEnd() + " " + top.Name;
+				buttons.Add(new WorkflowButton { Text = top.Name, Payload = "cmd:" + targetPath });
+			}
+		}
 
-        if (!string.IsNullOrWhiteSpace(path))
-            buttons.Add(new WorkflowButton { Text = "← Назад", Payload = string.IsNullOrEmpty(parentPath) ? "cmd:" : "cmd:" + parentPath });
-        return new WorkflowPresentation
-        {
-            Text = string.Join("\n", lines),
-            Buttons = buttons
-        };
-    }
+		if (!string.IsNullOrWhiteSpace(path))
+			buttons.Add(new WorkflowButton { Text = "← Назад", Payload = string.IsNullOrEmpty(parentPath) ? "cmd:" : "cmd:" + parentPath });
+		return new WorkflowPresentation
+		{
+			Text = string.Join("\n", lines),
+			Buttons = buttons
+		};
+	}
 
-    private WorkflowPresentation PresentWizard(WorkflowSession session, string? path)
-    {
-        if (string.IsNullOrWhiteSpace(path) || !_bot.Definition. TryGetLeafByPath(path, out var leaf))
-        {
-            return new WorkflowPresentation
-            {
-                Text = "Сессия ввода параметров устарела. Выбери команду заново.",
-                Buttons = _bot.Definition.Description.SubCommands
-                    .Select(c => new WorkflowButton { Text = "/" + c.Name, Payload = "cmd:" + c.Name })
-                    .ToArray()
-            };
-        }
+	private WorkflowPresentation PresentWizard(WorkflowSession session, string? path, string? error)
+	{
+		if (string.IsNullOrWhiteSpace(path) || !_bot.Definition.TryGetLeafByPath(path, out var leaf))
+		{
+			return new WorkflowPresentation
+			{
+				Text = "Сессия ввода параметров устарела. Выбери команду заново.",
+				Buttons = _bot.Definition.Description.SubCommands
+					.Select(c => new WorkflowButton { Text = "/" + c.Name, Payload = "cmd:" + c.Name })
+					.ToArray()
+			};
+		}
 
-        var idx = session.GetInt("cli:paramIndex", 0);
-        idx = Math.Clamp(idx, 0, Math.Max(0, leaf.Parameters.Count - 1));
-        var p = leaf.Parameters[idx];
+		var idx = session.GetInt("cli:paramIndex", 0);
+		idx = Math.Clamp(idx, 0, Math.Max(0, leaf.Parameters.Count - 1));
+		var p = leaf.Parameters[idx];
+		var currentValue = session.Get("arg:" + p.Name);
+		var currentValueText = string.IsNullOrWhiteSpace(currentValue) ? "не задано" : currentValue;
 
-        var text = $"Команда: /{leaf.Name}\n" +
-                   $"Параметр {idx + 1}/{leaf.Parameters.Count}: {p.Name}\n" +
-                   $"Введи значение" + (p.IsRequired ? " (обязательно)" : "") + ":";
+		var lines = new List<string>();
+		if (!string.IsNullOrWhiteSpace(error))
+			lines.Add($"Ошибка: {error}");
 
-        var buttons = new List<WorkflowButton>();
+		lines.Add($"Команда: /{leaf.Name}");
+		lines.Add($"Параметр {idx + 1}/{leaf.Parameters.Count}: {p.Name}");
+		lines.Add($"Введи значение" + (p.IsRequired ? " (обязательно)" : "") + ":");
+		lines.Add($"Текущее значение: {currentValueText}\n");
+		lines.Add("Можно ввести значение вручную текстом.");
 
-        // Allowed values -> buttons
-        if (p.AllowedValues is { Count: > 0 })
-        {
-            foreach (var v in p.AllowedValues.Take(10))
-            {
-                buttons.Add(new WorkflowButton
-                {
-                    Text = v,
-                    Payload = $"set:{p.Name}:{v}"
-                });
-            }
-        }
+		var buttons = new List<WorkflowButton>();
 
-        buttons.Add(new WorkflowButton { Text = "Отмена", Payload = "nav:cancel" });
+		// Allowed values -> buttons
+		if (p.AllowedValues is { Count: > 0 })
+		{
+			foreach (var v in p.AllowedValues.Take(10))
+			{
+				buttons.Add(new WorkflowButton
+				{
+					Text = v,
+					Payload = $"set:{p.Name}:{v}"
+				});
+			}
+		}
+		else if (IsNumeric(p.ValueType))
+		{
+			buttons.Add(new WorkflowButton
+			{
+				Text = "−1",
+				Payload = $"adj:{p.Name}:-1"
+			});
+			buttons.Add(new WorkflowButton
+			{
+				Text = "+1",
+				Payload = $"adj:{p.Name}:1"
+			});
 
-        return new WorkflowPresentation { Text = text, Buttons = buttons };
-    }
+			buttons.Add(new WorkflowButton { Text = "Принять", Payload = "nav:accept" });
+		}
+		else if (IsBool(p.ValueType))
+		{
+			buttons.Add(new WorkflowButton
+			{
+				Text = "yes",
+				Payload = $"set:{p.Name}:1"
+			});
+			buttons.Add(new WorkflowButton
+			{
+				Text = "no",
+				Payload = $"set:{p.Name}:0"
+			});
+		}
+
+
+		buttons.Add(new WorkflowButton { Text = "Отмена", Payload = "nav:cancel" });
+
+		return new WorkflowPresentation { Text = string.Join('\n', lines), Buttons = buttons };
+	}
+
+	private static bool IsNumeric(Type type)
+	{
+		var underlying = Nullable.GetUnderlyingType(type);
+		type = underlying ?? type;
+		return type == typeof(int)
+			   || type == typeof(long)
+			   || type == typeof(double)
+			   || type == typeof(decimal);
+	}
+
+	private static bool IsBool(Type type)
+	{
+		var underlying = Nullable.GetUnderlyingType(type);
+		type = underlying ?? type;
+		return type == typeof(bool);
+	}
 }

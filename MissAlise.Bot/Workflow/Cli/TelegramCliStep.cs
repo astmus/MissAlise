@@ -7,9 +7,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using MissAlise.TelegramBot.Building;
-using MissAlise.TelegramBot.CommandLine;
 using MissAlise.Workflow;
 using MissAlise.Workflow.Steps;
+using static System.Net.Mime.MediaTypeNames;
 using BotCommandDescription = MissAlise.TelegramBot.Building.BotCommandDescription;
 
 namespace MissAlise.TelegramBot.Workflow.Cli;
@@ -47,7 +47,7 @@ internal sealed class TelegramCliStep : IWorkflowStep
 
 		// Global cancel
 		if (IsCancel(input))
-			return Task.FromResult(ResetToMenu(session));
+			return Task.FromResult(ResetWizard(session));
 
 		// Wizard has priority
 		if (mode == "wizard")
@@ -72,7 +72,7 @@ internal sealed class TelegramCliStep : IWorkflowStep
 		if (input.Kind == WorkflowInputKind.Callback && input.Payload is not null)
 		{
 			if (TryParseCmdPayload(input.Payload, out var path))
-				return StartCommandOrMenu(session, path);
+				return StartCommandOrWizard(session, path);
 		}
 
 		// Command line text
@@ -80,15 +80,15 @@ internal sealed class TelegramCliStep : IWorkflowStep
 		{
 			var text = input.Text?.Trim();
 			if (string.IsNullOrWhiteSpace(text))
-				return ShowRootMenu(session);
+				return DisplayMenu(session);
 
 			// allow pasted callback payload
-			if (LooksLikeCallbackText(text) && TryParseCmdPayload(text, out var cbPath))
-				return StartCommandOrMenu(session, cbPath);
+			if (TryParseCmdPayload(text, out var cbPath))
+				return StartCommandOrWizard(session, cbPath);
 
 			// not a command -> fallback menu
 			if (!text.StartsWith('/'))
-				return ShowRootMenu(session, hint: "Я работаю командами. Выбери команду ниже или введи /start");
+				return DisplayMenu(session, hint: "Я работаю командами. Выбери команду ниже или введи /start");
 
 			// Parse via System.CommandLine			
 			var parse = _bot.RootCommand.Parse(text);
@@ -96,7 +96,7 @@ internal sealed class TelegramCliStep : IWorkflowStep
 			{
 				// Not a leaf: show nearest menu based on tokens (e.g. /onedrive)
 				var path = string.Join(' ', parse.CommandResult.Command.Options.Where(a => !a.Name.StartsWith('-')).Select(a => a.Name.TrimStart('/')));
-				return ShowMenuForPath(session, path);
+				return DisplayMenu(session, path);
 			}
 
 			var missing = _bot.GetMissing(parse, leaf);
@@ -135,10 +135,10 @@ internal sealed class TelegramCliStep : IWorkflowStep
 			return WorkflowStepResult.Produce(model);
 		}
 
-		return ShowRootMenu(session);
+		return DisplayMenu(session);
 	}
 
-	private WorkflowStepResult StartCommandOrMenu(WorkflowSession session, string path)
+	private WorkflowStepResult StartCommandOrWizard(WorkflowSession session, string path)
 	{
 		// If it's a leaf path -> start wizard immediately (no args) or execute if no params
 		if (_bot.TryGetLeafByPath(path, out var leafDesc))
@@ -149,9 +149,6 @@ internal sealed class TelegramCliStep : IWorkflowStep
 				return WorkflowStepResult.Produce(cmd);
 			}
 
-			session.Set(S_Mode, "wizard");
-			session.Set(S_Path, BotDefinition.NormalizePath(path));
-			session.Set(S_ParamIndex, "0");
 			return WorkflowStepResult.Stay(new Dictionary<string, string>
 			{
 				[S_Mode] = "wizard",
@@ -160,99 +157,149 @@ internal sealed class TelegramCliStep : IWorkflowStep
 			});
 		}
 
-		// otherwise show menu at this path
-		return ShowMenuForPath(session, path);
+		return DisplayMenu(session, path);
 	}
 
 	private WorkflowStepResult HandleWizard(WorkflowSession session, WorkflowInput input)
 	{
 		var path = session.Get(S_Path);
 		if (string.IsNullOrWhiteSpace(path) || !_bot.TryGetLeafByPath(path, out var leaf))
-			return ResetToMenu(session);
+			return DisplayMenu(session);
 
 		var idx = session.GetInt(S_ParamIndex, 0);
 		if (idx < 0) idx = 0;
 		if (idx >= leaf.Parameters.Count)
 			idx = leaf.Parameters.Count - 1;
 
-		// Apply callback set:param:value
-		if (input.Kind == WorkflowInputKind.Callback && input.Payload is not null)
+		var inputData = input.Payload;
+
+		if (input.Kind is WorkflowInputKind.Text)
 		{
-			if (TryParseSetPayload(input.Payload, out var pKey, out var pValue))
+			inputData = $"set:{leaf.Parameters[idx].Name}:{input.Text?.Trim()}";
+		}
+
+		if (GetCallbackType(inputData) is not string cbType)
+			return WorkflowStepResult.Stay();
+
+		if (TryParseSetPayload(inputData, out var pKey, out var pValue))
+		{
+			if (!TryApplyValue(leaf, session, pKey, pValue, out var error))
 			{
-				session.Set(ArgKey(pKey), pValue);
-				idx = NextIndex(leaf, session, idx);
-				session.Set(S_ParamIndex, idx.ToString());
 				return WorkflowStepResult.Stay(new Dictionary<string, string>
 				{
 					[S_Mode] = "wizard",
 					[S_Path] = path,
-					[S_ParamIndex] = idx.ToString()
+					[S_ParamIndex] = idx.ToString(),
+					[S_Error] = error
 				});
 			}
+
+			if (AllRequiredCollected(leaf, session))
+			{
+				var cmd = CreateCommandFromSession(leaf, session);
+				ResetWizard(session);
+				return WorkflowStepResult.Complete(cmd);
+			}
+
+			idx = NextIndex(leaf, session);
 		}
 
-		// Apply plain text as current param value
-		if (input.Kind is WorkflowInputKind.Text or WorkflowInputKind.Command)
+		if (TryParseAdjustPayload(inputData, out var adjKey, out var deltaValue))
 		{
-			var text = input.Text?.Trim();
-			if (!string.IsNullOrWhiteSpace(text))
+			var param = leaf.Parameters.FirstOrDefault(x => x.Name.Equals(adjKey, StringComparison.OrdinalIgnoreCase));
+			param ??= leaf.Parameters[idx];
+			if (TryAdjustNumeric(session, param, deltaValue, out var adjusted))
 			{
-				// allow pasted callback set:
-				if (LooksLikeCallbackText(text) && TryParseSetPayload(text, out var pk2, out var pv2))
-				{
-					session.Set(ArgKey(pk2), pv2);
-				}
-				else
-				{
-					var curParam = leaf.Parameters[idx];
-					session.Set(ArgKey(curParam.Name), text);
-				}
+				session.Set(ArgKey(param.Name), adjusted);
+			}			
+		}
 
-				idx = NextIndex(leaf, session, idx);
+		if (inputData.Equals("nav:accept", StringComparison.OrdinalIgnoreCase))
+		{
+			var curParam = leaf.Parameters[idx];
+			var currentValue = session.Get(ArgKey(curParam.Name));
+			if (!string.IsNullOrWhiteSpace(currentValue))
+			{
+				idx = NextIndex(leaf, session);
 				session.Set(S_ParamIndex, idx.ToString());
 
-				// All required collected?
 				if (AllRequiredCollected(leaf, session))
 				{
 					var cmd = CreateCommandFromSession(leaf, session);
-					// reset wizard state
-					var reset = ResetToMenu(session);
-					return WorkflowStepResult.Produce(cmd, next: null, updates: reset.StateUpdates);
+					var reset = ResetWizard(session);
+					return WorkflowStepResult.Produce(cmd, updates: reset.StateUpdates);
 				}
-
-				return WorkflowStepResult.Stay(new Dictionary<string, string>
-				{
-					[S_Mode] = "wizard",
-					[S_Path] = path,
-					[S_ParamIndex] = idx.ToString()
-				});
 			}
+
 		}
 
-		return WorkflowStepResult.Stay(null);
+		return WorkflowStepResult.Stay(new Dictionary<string, string>
+		{
+			[S_Mode] = "wizard",
+			[S_Path] = path,
+			[S_ParamIndex] = idx.ToString()
+		});
+	}
+
+	private static string GetCallbackType(string text) => text switch
+	{
+		var t when t.StartsWith("cmd:", StringComparison.OrdinalIgnoreCase) => "cmd",
+		var t when t.StartsWith("set:", StringComparison.OrdinalIgnoreCase) => "set",
+		var t when t.StartsWith("adj:", StringComparison.OrdinalIgnoreCase) => "adj",
+		var t when t.StartsWith("nav:", StringComparison.OrdinalIgnoreCase) => "nav",
+
+		_ => null
+	};
+
+	private static bool TryApplyValue(BotCommandDescription leaf, WorkflowSession session, string paramName, string raw, out string? error)
+	{
+		error = null;
+		var param = leaf.Parameters.FirstOrDefault(x => x.Name.Equals(paramName, StringComparison.OrdinalIgnoreCase));
+		if (param is null)
+		{
+			error = $"Неизвестный параметр '{paramName}'.";
+			session.Set(S_Error, error);
+			return false;
+		}
+
+		if (!TryValidateValue(param, raw, out error))
+		{
+			session.Set(S_Error, error ?? "Некорректное значение.");
+			return false;
+		}
+
+		session.Set(ArgKey(param.Name), raw);
+		return true;
+	}
+
+	private static bool TryValidateValue(BotParameterDescription param, string raw, out string? error)
+	{
+		error = null;
+		try
+		{
+			_ = ConvertFromString(raw, param.ValueType);
+			return true;
+		}
+		catch (Exception ex) when (ex is FormatException or NotSupportedException or ArgumentException)
+		{
+			error = ex.Message;
+			return false;
+		}
 	}
 
 	private static bool AllRequiredCollected(BotCommandDescription leaf, WorkflowSession session)
 		=> leaf.Parameters.Where(p => p.IsRequired).All(p => !string.IsNullOrWhiteSpace(session.Get(ArgKey(p.Name))));
 
-	private static int NextIndex(BotCommandDescription leaf, WorkflowSession session, int currentIdx)
+	private static int NextIndex(BotCommandDescription leaf, WorkflowSession session)
 	{
-		// move to next missing required
-		for (var i = currentIdx + 1; i < leaf.Parameters.Count; i++)
-		{
-			var p = leaf.Parameters[i];
-			if (p.IsRequired && string.IsNullOrWhiteSpace(session.Get(ArgKey(p.Name))))
-				return i;
-		}
-		// or first missing required
 		for (var i = 0; i < leaf.Parameters.Count; i++)
 		{
 			var p = leaf.Parameters[i];
 			if (p.IsRequired && string.IsNullOrWhiteSpace(session.Get(ArgKey(p.Name))))
 				return i;
 		}
-		return Math.Clamp(currentIdx, 0, Math.Max(0, leaf.Parameters.Count - 1));
+
+		return -1;
 	}
 
 	private static readonly ConcurrentDictionary<Type, ParameterInfo[]> _ctorParamsCache = new();
@@ -347,54 +394,75 @@ internal sealed class TelegramCliStep : IWorkflowStep
 		throw new NotSupportedException($"Cannot convert string to '{targetType.FullName}'.");
 	}
 
-	private WorkflowStepResult ShowRootMenu(WorkflowSession session, string? hint = null)
+	private WorkflowStepResult DisplayMenu(WorkflowSession session, string path = null, string hint = null)
 	{
-		session.Set(S_Mode, "menu");
-		session.State.Remove(S_Path);
-		session.State.Remove(S_ParamIndex);
-		if (hint is not null)
-			session.Set(S_Error, hint);
-
-		return WorkflowStepResult.Stay(new Dictionary<string, string>
-		{
-			[S_Mode] = "menu",
-			[S_Error] = hint ?? string.Empty
-		});
-	}
-
-	private WorkflowStepResult ShowMenuForPath(WorkflowSession session, string path)
-	{
-		path = BotDefinition.NormalizePath(path);
-		session.Set(S_Mode, "menu");
 		session.Set(S_Path, path);
+		session.Set(S_Error, hint);
+		session.State.Remove(S_ParamIndex);
 
 		return WorkflowStepResult.Stay(new Dictionary<string, string>
 		{
 			[S_Mode] = "menu",
-			[S_Path] = path
 		});
 	}
 
-	private static WorkflowStepResult ResetToMenu(WorkflowSession session)
+	private static WorkflowStepResult ResetWizard(WorkflowSession session)
 	{
 		// Remove all arg:* keys
 		var keys = session.State.Keys.Where(k => k.StartsWith("arg:", StringComparison.OrdinalIgnoreCase)).ToArray();
 		foreach (var k in keys) session.State.Remove(k);
 
+		session.State.Remove(S_Mode);
 		session.State.Remove(S_Path);
 		session.State.Remove(S_ParamIndex);
 		session.State.Remove(S_Error);
 
-		return WorkflowStepResult.Stay(new Dictionary<string, string>
-		{
-			[S_Mode] = "menu"
-		});
+		return WorkflowStepResult.Stay();
 	}
 
-	private static bool LooksLikeCallbackText(string text)
-		=> text.StartsWith("cmd:", StringComparison.OrdinalIgnoreCase)
-		   || text.StartsWith("set:", StringComparison.OrdinalIgnoreCase)
-		   || text.StartsWith("nav:", StringComparison.OrdinalIgnoreCase);
+	private static bool TryAdjustNumeric(WorkflowSession session, BotParameterDescription param, string deltaValue, out string adjusted)
+	{
+		adjusted = string.Empty;
+		var targetType = param.ValueType;
+		var underlying = Nullable.GetUnderlyingType(targetType);
+		if (underlying is not null)
+			targetType = underlying;
+
+		var currentRaw = session.Get(ArgKey(param.Name));
+		if (targetType == typeof(int))
+		{
+			var current = string.IsNullOrWhiteSpace(currentRaw) ? 0 : int.Parse(currentRaw, CultureInfo.InvariantCulture);
+			var delta = int.Parse(deltaValue, CultureInfo.InvariantCulture);
+			adjusted = (current + delta).ToString(CultureInfo.InvariantCulture);
+			return true;
+		}
+
+		if (targetType == typeof(long))
+		{
+			var current = string.IsNullOrWhiteSpace(currentRaw) ? 0L : long.Parse(currentRaw, CultureInfo.InvariantCulture);
+			var delta = long.Parse(deltaValue, CultureInfo.InvariantCulture);
+			adjusted = (current + delta).ToString(CultureInfo.InvariantCulture);
+			return true;
+		}
+
+		if (targetType == typeof(double))
+		{
+			var current = string.IsNullOrWhiteSpace(currentRaw) ? 0.0 : double.Parse(currentRaw, CultureInfo.InvariantCulture);
+			var delta = double.Parse(deltaValue, CultureInfo.InvariantCulture);
+			adjusted = (current + delta).ToString(CultureInfo.InvariantCulture);
+			return true;
+		}
+
+		if (targetType == typeof(decimal))
+		{
+			var current = string.IsNullOrWhiteSpace(currentRaw) ? 0m : decimal.Parse(currentRaw, CultureInfo.InvariantCulture);
+			var delta = decimal.Parse(deltaValue, CultureInfo.InvariantCulture);
+			adjusted = (current + delta).ToString(CultureInfo.InvariantCulture);
+			return true;
+		}
+
+		return false;
+	}
 
 	private static bool TryParseCmdPayload(string payload, out string path)
 	{
@@ -416,6 +484,20 @@ internal sealed class TelegramCliStep : IWorkflowStep
 		if (i <= 0) return false;
 		paramKey = rest[..i];
 		value = rest[(i + 1)..];
+		return paramKey.Length > 0;
+	}
+
+	private static bool TryParseAdjustPayload(string payload, out string paramKey, out string delta)
+	{
+		paramKey = string.Empty;
+		delta = string.Empty;
+		if (!payload.StartsWith("adj:", StringComparison.OrdinalIgnoreCase)) return false;
+
+		var rest = payload.Substring(4);
+		var i = rest.IndexOf(':');
+		if (i <= 0) return false;
+		paramKey = rest[..i];
+		delta = rest[(i + 1)..];
 		return paramKey.Length > 0;
 	}
 }
