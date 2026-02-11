@@ -48,9 +48,10 @@ public class Program
 			.AddBot(botSection, b => {
 				b
 				.AddCommand<StartCommand>("start", "restart")
-				.AddCommand<SyncCommand>("sync", "run sync full/deff")
-				.AddCommand<BackgroundSyncCommand>("back_sync", "add back sync")
-				.BeginScope<OneDriveRoot>("onedrive", "one drive commands")
+				.AddCommand<SyncCommand>("sync", "run sync full/deff", "Синхронизация")
+				.AddCommand<MyCommand>("my", "Тестовая команда", "Teстировать")
+				.AddCommand<BackgroundSyncCommand>("back_sync", "back sync", "Фоновое выполнение")
+				.BeginScope<OneDriveRoot>("onedrive", "one drive commands", "Onedrive облако")
 					.AddCommand<OneDriveStatus>("status", "status of client")
 					.AddCommand<OneDriveAuth>("authorization", "run one drive reauthorization")
 						.BeginSection<OneDriveSync>("sync", "sync  scope")

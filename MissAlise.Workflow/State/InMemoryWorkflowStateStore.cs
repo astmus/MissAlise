@@ -1,78 +1,95 @@
-using MissAlise.Workflow;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using MissAlise.Workflow.Descriptors;
 
 namespace MissAlise.Workflow.State;
 
 public sealed class InMemoryWorkflowStateStore : IWorkflowStateStore
 {
-    private readonly object _lock = new();
-    private readonly Dictionary<(long chatId, long userId), WorkflowSession> _sessions = new();
+	private readonly object _lock = new();
+	// Session storage by instance id.
+	private readonly Dictionary<string, WorkflowSession> _sessionsById = new(StringComparer.OrdinalIgnoreCase);
 
-    private readonly WorkflowId _defaultWorkflowId;
-    private readonly WorkflowStepId _defaultStartStep;
+	// "Active session" pointer per context (chat/user). This is an index, not the session itself.
+	private readonly Dictionary<(long chatId, long userId), string> _activeByContext = new();
 
-    public InMemoryWorkflowStateStore(WorkflowId defaultWorkflowId, WorkflowStepId defaultStartStep)
-    {
-        _defaultWorkflowId = defaultWorkflowId;
-        _defaultStartStep = defaultStartStep;
-    }
+	private readonly WorkflowId _defaultWorkflowId;
+	private readonly WorkflowStepId _defaultStartStep;
 
-    public Task<WorkflowSession?> TryLoadAsync(WorkflowContext context, CancellationToken cancellationToken)
-    {
-        var key = (context.ChatId, context.UserId);
-        lock (_lock)
-        {
-            return _sessions.TryGetValue(key, out var session)
-                ? Task.FromResult<WorkflowSession?>(session)
-                : Task.FromResult<WorkflowSession?>(null);
-        }
-    }
+	public InMemoryWorkflowStateStore(WorkflowId defaultWorkflowId, WorkflowStepId defaultStartStep)
+	{
+		_defaultWorkflowId = defaultWorkflowId;
+		_defaultStartStep = defaultStartStep;
+	}
 
-    public Task<WorkflowSession> LoadOrCreateAsync(WorkflowContext context, CancellationToken cancellationToken)
-    {
-        var key = (context.ChatId, context.UserId);
+	public Task<WorkflowSession> LoadOrCreateAsync(WorkflowContext context, CancellationToken cancellationToken)
+	{
+		var key = (context.ChatId, context.UserId);
 
-        lock (_lock)
-        {
-            if (_sessions.TryGetValue(key, out var session))
-                return Task.FromResult(session);
+		lock (_lock)
+		{
+			if (_activeByContext.TryGetValue(key, out var sid)
+				&& _sessionsById.TryGetValue(sid, out var existing))
+			{
+				return Task.FromResult(existing);
+			}
 
-            session = new WorkflowSession
-            {
-                ChatId = context.ChatId,
-                UserId = context.UserId,
-                WorkflowId = _defaultWorkflowId,
-                CurrentStep = _defaultStartStep,
-            };
+			var session = new WorkflowSession
+			{
+				SessionId = Guid.NewGuid().ToString("N"),
+				ChatId = context.ChatId,
+				UserId = context.UserId,
+				WorkflowId = _defaultWorkflowId,
+				CurrentStep = _defaultStartStep,
+			};
 
-            _sessions[key] = session;
-            return Task.FromResult(session);
-        }
-    }
+			_sessionsById[session.SessionId] = session;
+			_activeByContext[key] = session.SessionId;
+			return Task.FromResult(session);
+		}
+	}
 
-    public Task CreateAsync(WorkflowSession session, CancellationToken cancellationToken)
-    {
-        var key = (session.ChatId, session.UserId);
-        lock (_lock)
-        {
-            if (_sessions.ContainsKey(key))
-                throw new InvalidOperationException($"Session for chat {session.ChatId}, user {session.UserId} already exists.");
-            _sessions[key] = session;
-        }
-        return Task.CompletedTask;
-    }
+	public Task SaveAsync(WorkflowSession session, CancellationToken cancellationToken)
+	{
+		var key = (session.ChatId, session.UserId);
+		lock (_lock)
+		{
+			_sessionsById[session.SessionId] = session;
 
-    public Task SaveAsync(WorkflowSession session, CancellationToken cancellationToken)
-    {
-        var key = (session.ChatId, session.UserId);
-        lock (_lock) { _sessions[key] = session; }
-        return Task.CompletedTask;
-    }
+			// Update the active pointer only for non-completed sessions.
+			if (!session.IsCompleted)
+				_activeByContext[key] = session.SessionId;
+			else
+				_activeByContext.Remove(key);
+		}
+		return Task.CompletedTask;
+	}
 
-    public Task DeleteAsync(WorkflowContext context, CancellationToken cancellationToken)
-    {
-        var key = (context.ChatId, context.UserId);
-        lock (_lock) { _sessions.Remove(key); }
-        return Task.CompletedTask;
-    }
+	public Task DeleteBySessionIdAsync(string sessionId, CancellationToken cancellationToken)
+	{
+		lock (_lock)
+		{
+			_sessionsById.Remove(sessionId);
+
+			// Clean up any active pointers referencing this session.
+			var toRemove = _activeByContext
+				.Where(kvp => string.Equals(kvp.Value, sessionId, StringComparison.OrdinalIgnoreCase))
+				.Select(kvp => kvp.Key)
+				.ToArray();
+			foreach (var k in toRemove)
+				_activeByContext.Remove(k);
+		}
+
+		return Task.CompletedTask;
+	}
+
+	public Task ClearActiveAsync(WorkflowContext context, CancellationToken cancellationToken)
+	{
+		var key = (context.ChatId, context.UserId);
+		lock (_lock) { _activeByContext.Remove(key); }
+		return Task.CompletedTask;
+	}
+
+	public Task<bool> WasExpiredAsync(WorkflowContext context, CancellationToken ct) => throw new NotImplementedException();
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
 using MissAlise.TelegramBot.Building;
@@ -9,8 +10,9 @@ using static System.Net.Mime.MediaTypeNames;
 namespace MissAlise.TelegramBot.Workflow.Cli;
 
 /// <summary>
-/// Формирует UI (текст + инлайн кнопки) для текущего состояния CLI/wizard.
-/// Вся логика парсинга/изменения состояния — в <see cref="TelegramCliStep"/>.
+/// Формирует UI (текст + инлайн кнопки) для Telegram CLI workflow.
+/// Логика переходов живёт в шагах:
+/// <see cref="TelegramCliMenuStep"/>, <see cref="TelegramCliWizardStep"/>, <see cref="TelegramCliCommandStep"/>.
 /// </summary>
 internal sealed class TelegramCliPresenter : IWorkflowPresenter
 {
@@ -23,14 +25,26 @@ internal sealed class TelegramCliPresenter : IWorkflowPresenter
 
 	public WorkflowPresentation Present(WorkflowSession session, WorkflowContext context)
 	{
-		var mode = session.Get("cli:mode") ?? "menu";
-		var path = session.Get("cli:path");
-		var error = session.Get("cli:error");
+		var path = session.Get(TelegramCliSession.S_Path);
+		var error = session.Get(TelegramCliSession.S_Error);
 
-		if (mode == "wizard")
-			return PresentWizard(session, path, error);
+		if (session.IsCompleted)
+			return ResetMenu(session);
 
-		return PresentMenu(path, error);
+		return session.CurrentStep switch
+		{
+			var s when s == TelegramCliWorkflow.WizardStep
+				=> PresentWizard(session, path, error),
+			var s when s == TelegramCliWorkflow.CommandStep
+				=> PresentCommand(session, path, error),
+			_ => PresentMenu(path, error)
+		};
+	}
+
+	private static WorkflowPresentation ResetMenu(WorkflowSession session)
+	{
+		session.State.Clear();
+		return WorkflowPresentation.Empty;
 	}
 
 	private WorkflowPresentation PresentMenu(string? path, string? hint)
@@ -46,20 +60,20 @@ internal sealed class TelegramCliPresenter : IWorkflowPresenter
 
 		if (!string.IsNullOrWhiteSpace(path) && _bot.Definition.TryGetCommandByPath(path, out var parent))
 		{
-			commands = parent!.GetAllSubCommands();
+			commands = parent!.SubCommands;
 			title = $"/{path}";
 			var pathParts = path!.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
 			parentPath = pathParts.Length > 1 ? string.Join(' ', pathParts.Take(pathParts.Length - 1)) : string.Empty;
 		}
 		else
 		{
-			commands = _bot.Definition.Description.GetAllSubCommands();
+			commands = _bot.Definition.Description.SubCommands;
 			title = "Выбери команду:";
 		}
 
 		lines.Add(title);
 
-		var hasSections = commands.Any(c => !string.IsNullOrEmpty(c.Name));
+		var hasSections = commands.Any(c => c.SubCommands.Any());
 		if (hasSections)
 		{
 			string? lastSection = null;
@@ -73,7 +87,7 @@ internal sealed class TelegramCliPresenter : IWorkflowPresenter
 				if (string.IsNullOrEmpty(cmd.Name))
 					lastSection = null;
 				var targetPath = string.IsNullOrEmpty(path) ? cmd.Name : path!.TrimEnd() + " " + cmd.Name;
-				buttons.Add(new WorkflowButton { Text = cmd.Name, Payload = "cmd:" + targetPath });
+				buttons.Add(new WorkflowButton { Text = cmd.Command.Title ?? cmd.Name, Payload = "cmd:" + targetPath });
 			}
 		}
 		else
@@ -81,12 +95,13 @@ internal sealed class TelegramCliPresenter : IWorkflowPresenter
 			foreach (var top in commands)
 			{
 				var targetPath = string.IsNullOrEmpty(path) ? top.Name : path!.TrimEnd() + " " + top.Name;
-				buttons.Add(new WorkflowButton { Text = top.Name, Payload = "cmd:" + targetPath });
+				buttons.Add(new WorkflowButton { Text = top.Command.Title ?? top.Name, Payload = "cmd:" + targetPath });
 			}
 		}
 
 		if (!string.IsNullOrWhiteSpace(path))
 			buttons.Add(new WorkflowButton { Text = "← Назад", Payload = string.IsNullOrEmpty(parentPath) ? "cmd:" : "cmd:" + parentPath });
+
 		return new WorkflowPresentation
 		{
 			Text = string.Join("\n", lines),
@@ -107,21 +122,25 @@ internal sealed class TelegramCliPresenter : IWorkflowPresenter
 			};
 		}
 
-		var idx = session.GetInt("cli:paramIndex", 0);
+		var idx = session.GetInt(TelegramCliSession.S_ParamIndex, 0);
 		idx = Math.Clamp(idx, 0, Math.Max(0, leaf.Parameters.Count - 1));
 		var p = leaf.Parameters[idx];
-		var currentValue = session.Get("arg:" + p.Name);
+		var currentValue = session.Get(TelegramCliSession.ArgKey(p.Name));
 		var currentValueText = string.IsNullOrWhiteSpace(currentValue) ? "не задано" : currentValue;
 
 		var lines = new List<string>();
 		if (!string.IsNullOrWhiteSpace(error))
 			lines.Add($"Ошибка: {error}");
 
-		lines.Add($"Команда: /{leaf.Name}");
+		lines.Add($"Команда: /{path}");
 		lines.Add($"Параметр {idx + 1}/{leaf.Parameters.Count}: {p.Name}");
-		lines.Add($"Введи значение" + (p.IsRequired ? " (обязательно)" : "") + ":");
+		if (p.DefaultValue is not null)
+			lines.Add($"По умолчанию: {p.DefaultValue}");
+		lines.Add($"Значение" + (p.IsRequired ? " (обязательно)" : "") + ":");
 		lines.Add($"Текущее значение: {currentValueText}\n");
-		lines.Add("Можно ввести значение вручную текстом.");
+		
+		if (!string.IsNullOrWhiteSpace(p.Description))
+			lines.Add(p.Description);
 
 		var buttons = new List<WorkflowButton>();
 
@@ -132,60 +151,62 @@ internal sealed class TelegramCliPresenter : IWorkflowPresenter
 			{
 				buttons.Add(new WorkflowButton
 				{
-					Text = v,
+					Text = v.ToString(),
 					Payload = $"set:{p.Name}:{v}"
 				});
 			}
 		}
-		else if (IsNumeric(p.ValueType))
-		{
-			buttons.Add(new WorkflowButton
-			{
-				Text = "−1",
-				Payload = $"adj:{p.Name}:-1"
-			});
-			buttons.Add(new WorkflowButton
-			{
-				Text = "+1",
-				Payload = $"adj:{p.Name}:1"
-			});
-
-			buttons.Add(new WorkflowButton { Text = "Принять", Payload = "nav:accept" });
-		}
-		else if (IsBool(p.ValueType))
-		{
-			buttons.Add(new WorkflowButton
-			{
-				Text = "yes",
-				Payload = $"set:{p.Name}:1"
-			});
-			buttons.Add(new WorkflowButton
-			{
-				Text = "no",
-				Payload = $"set:{p.Name}:0"
-			});
-		}
-
 
 		buttons.Add(new WorkflowButton { Text = "Отмена", Payload = "nav:cancel" });
+		buttons.Add(new WorkflowButton { Text = "← В меню", Payload = "nav:back" });
 
 		return new WorkflowPresentation { Text = string.Join('\n', lines), Buttons = buttons };
 	}
 
-	private static bool IsNumeric(Type type)
+	private WorkflowPresentation PresentCommand(WorkflowSession session, string? path, string? hint)
 	{
-		var underlying = Nullable.GetUnderlyingType(type);
-		type = underlying ?? type;
-		return type == typeof(int)
-			   || type == typeof(long)
-			   || type == typeof(double)
-			   || type == typeof(decimal);
-	}
+		if (string.IsNullOrWhiteSpace(path) || !_bot.Definition.TryGetLeafByPath(path, out var leaf))
+		{
+			return new WorkflowPresentation
+			{
+				Text = "Команда устарела. Выбери её заново.",
+				Buttons = _bot.Definition.Description.SubCommands
+					.Select(c => new WorkflowButton { Text = "/" + c.Name, Payload = "cmd:" + c.Name })
+					.ToArray()
+			};
+		}
 
-	private static bool IsBool(Type type)
-	{
-		var underlying = Nullable.GetUnderlyingType(type);
-		type = underlying ?? type;
-		return type == typeof(bool);
+		var lines = new List<string>();
+		if (!string.IsNullOrWhiteSpace(hint))
+			lines.Add(hint);
+		lines.Add($"Команда: /{path}");
+		lines.Add("Параметры:");
+		foreach (var p in leaf.Parameters)
+		{
+			var raw = session.Get(TelegramCliSession.ArgKey(p.Name));
+			var v = string.IsNullOrWhiteSpace(raw) ? (p.DefaultValue?.ToString() ?? "не задано") : raw;
+			var req = p.IsRequired ? " *" : "";
+			lines.Add($"- {p.Name}{req}: {v}");
+		}
+
+		var buttons = new List<WorkflowButton>();
+		// edit buttons per param
+		foreach (var p in leaf.Parameters.Take(12))
+		{
+			buttons.Add(new WorkflowButton
+			{
+				Text = $"✏ {p.Name}",
+				Payload = "nav:edit:" + p.Name
+			});
+		}
+		buttons.Add(new WorkflowButton { Text = "▶ Выполнить", Payload = "nav:run" });
+		buttons.Add(new WorkflowButton { Text = "← В меню", Payload = "nav:back" });
+		buttons.Add(new WorkflowButton { Text = "Отмена", Payload = "nav:cancel" });
+
+		return new WorkflowPresentation
+		{
+			Text = string.Join("\n", lines),
+			Buttons = buttons
+		};
 	}
 }

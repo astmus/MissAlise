@@ -43,10 +43,6 @@ public sealed record OneDriveAuth;
 [BotCommand("onedrive search")]
 public sealed record OneDriveSearch(string query, Guid? libraryId, int limit);
 
-// ============================================================================
-// Media
-// ============================================================================
-
 public enum MediaKind
 {
 	Photo,
@@ -96,26 +92,6 @@ public sealed record JobsRetry(string id);
 
 [BotCommand("jobs search")]
 public sealed record JobsSearch(string query, string? status, int limit);
-
-// ============================================================================
-// Reports
-// ============================================================================
-
-public enum ReportKind
-{
-	Executors,
-	Overtime,
-	Summary
-}
-
-[BotCommand("reports")]
-public sealed record ReportsRoot;
-
-[BotCommand("reports run")]
-public sealed record ReportsRun(ReportKind kind, string? from, string? to);
-
-[BotCommand("reports last")]
-public sealed record ReportsLast(ReportKind kind);
 
 // ============================================================================
 // Settings

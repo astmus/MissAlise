@@ -2,37 +2,40 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
+using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using static System.Collections.Specialized.BitVector32;
+using System.Runtime.InteropServices;
+using MissAlise.TelegramBot.Building.Attributes;
+using MissAlise.Workflow.Demo.BackgroundSync;
+using static LinqToDB.Reflection.Methods.LinqToDB.Insert;
 
 namespace MissAlise.TelegramBot.Building;
 
 public sealed partial class BotBuilder : IBotBuilder
 {
-	private readonly BotCommandDescription _root;
-	private readonly Stack<BotCommandDescription> _commands = new();
-	private BotCommandDescription _current => _commands.Peek();
+	//private readonly BotCommandDescription _root;
+	private readonly Stack<Command> _commands = new();
+	private Command _current => _commands.Peek();
 
 	public BotBuilder()
 	{
-		_root = new() { Name = "" };
-		_commands.Push(_root);
+		_commands.Push(new RootCommand("MissAlise"));
 	}
 
-	public IBotBuilder AddCommand<T>(string name, string? description = null)
+	public IBotBuilder AddCommand<T>(string name, string description, string? title = null)
 		where T : class
 	{
-		var cmd = CreateCommand(typeof(T), name, description);
-		_current.SubCommands.Add(cmd);
+		var cmd = new BotCommand<T>(name, description, title);
+		_current.AddCommand(cmd);
 		return this;
 	}
 
-	public IBotSectionBuilder<T> BeginScope<T>(string name, string description)
+	public IBotSectionBuilder<T> BeginScope<T>(string name, string description, string? title = null)
 	{
-		var scope = new BotCommandDescription { Name = name, Description = description };
-		_current.SubCommands.Add(scope);
+		var scope = new BotCommand<T>(name, description, title);
+		_current.AddCommand(scope);
 		_commands.Push(scope);
 		return new BotSectionBuilder<T>(default, this);
 	}
@@ -48,116 +51,127 @@ public sealed partial class BotBuilder : IBotBuilder
 
 	public BotDefinition Build()
 	{
-		// на момент Build все открытые секции должны быть закрыты
-		//полка  закоменчено потом поправим
+		// РЅР° РјРѕРјРµРЅС‚ Build РІСЃРµ РѕС‚РєСЂС‹С‚С‹Рµ СЃРµРєС†РёРё РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ Р·Р°РєСЂС‹С‚С‹
+		//РїРѕР»РєР°  Р·Р°РєРѕРјРµРЅС‡РµРЅРѕ РїРѕС‚РѕРј РїРѕРїСЂР°РІРёРј
 		//if (_commands.Count != 1)
 		//	throw new InvalidOperationException("EndSection() called but there is no open section. Check BeginSection/EndSection");
 
-		var leafMap = new Dictionary<Command, BotDefinition.LeafRuntime>();
+		var leafMap = new Dictionary<Command, BotCommandDescription>();
 		var leafByPath = new Dictionary<string, BotCommandDescription>(StringComparer.OrdinalIgnoreCase);
-		var rootCmd = new RootCommand("MissAlise");
 
 		EnsureHelpCommand();
 
 		//foreach (var c in _root.SubCommands)
 		//	rootCmd.AddCommand(BuildCommand(c, leafMap, leafByPath, null));
 
-		BuildCommandRecursive(rootCmd, _root, leafMap, leafByPath, null);
+		var rootCmd = _commands.Pop() as RootCommand;
 
-		return new BotDefinition(rootCmd, _root, leafMap, leafByPath);
+		var descRoot = BuildCommandRecursive(rootCmd, leafMap, leafByPath, null);
+
+		return new BotDefinition(rootCmd, descRoot, leafMap, leafByPath);
 	}
-	private Command BuildCommandRecursive(
-					RootCommand root,
-					BotCommandDescription d,
-					Dictionary<Command, BotDefinition.LeafRuntime> leafMap,
+	private BotCommandDescription BuildCommandRecursive(
+					Command current,
+					Dictionary<Command, BotCommandDescription> leafMap,
 					Dictionary<string, BotCommandDescription> leafByPath,
 					string? parentPath)
 	{
-		Command cmd = root ?? new Command(d.Name, d.Description);
-		cmd.AddAlias("/" + d.Name);
+		ArgumentNullException.ThrowIfNull(current, nameof(current));
 
-		var optMap = new Dictionary<string, Option>(StringComparer.OrdinalIgnoreCase);
-		foreach (var p in d.Parameters)
-		{
-			var opt = CreateOption(p);
-			cmd.AddOption(opt);
-			optMap[p.Name] = opt;
-		}
+		current.AddAlias("/" + current.Name);
 
-		var path = parentPath is null ? d.Name : parentPath + " " + d.Name;
+		var path = parentPath is null ? current.Name : parentPath + " " + current.Name;
+		var commandType = (current as BotCommandAlias)?.CommandType;
 
-		if (d.CommandType is not null)
-		{
-			leafMap[cmd] = new BotDefinition.LeafRuntime
-			{
-				Description = d,
-				Command = cmd,
-				Path = path,
-				OptionsByParamKey = optMap
-			};
+		var description = CreateCommandDescription(commandType, current, path, out var subCommands);
 
-			leafByPath[BotDefinition.NormalizePath(path)] = d;
-		}
+		leafMap[current] = description;
+		leafByPath[BotDefinition.NormalizePath(path)] = description;
 
-		foreach (var s in d.GetAllSubCommands())
-			cmd.AddCommand(BuildCommandRecursive(null, s, leafMap, leafByPath, path));
+		foreach (var sub in current.Subcommands)
+			subCommands.Add(BuildCommandRecursive(sub, leafMap, leafByPath, path));
 
-		return cmd;
+		return description;
 	}
 
 	private void EnsureHelpCommand()
 	{
-		if (_root.SubCommands.Any(c => c.Name.Equals("help", StringComparison.OrdinalIgnoreCase)))
+		if (_current.Subcommands.Any(c => c.Name.Equals("help", StringComparison.OrdinalIgnoreCase)))
 			return;
 
-		var helpCommand = CreateCommand(typeof(HelpCommand), "help", "Показать справку по командам");
-		_root.SubCommands.Add(helpCommand);
+		AddCommand<HelpCommand>("help", "РџРѕРєР°Р·Р°С‚СЊ СЃРїСЂР°РІРєСѓ РїРѕ РєРѕРјР°РЅРґР°Рј");
 	}
 
-	private BotCommandDescription CreateCommand(Type type, string name, string? description)
+	private static BotCommandDescription CreateCommandDescription(Type commandType, Command aliaseCmd, string path, out List<BotCommandDescription> subCommands)
 	{
-		var desc = new BotCommandDescription
+		List<BotParameterDescription> parameters = null;
+		Dictionary<string, Option> options = null;
+		subCommands = new List<BotCommandDescription>();
+
+		//var properties = commandType?.GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(p => p.CanRead);
+		var ctor = commandType?.GetConstructors(BindingFlags.Public | BindingFlags.Instance).FirstOrDefault();
+		var ctorArgs = ctor?.GetParameters();
+
+		if (ctorArgs?.Any() == true)
 		{
-			Name = name,
-			Description = description,
-			CommandType = type
-		};
+			parameters = new List<BotParameterDescription>();
+			options = new Dictionary<string, Option>(StringComparer.OrdinalIgnoreCase);
 
-		foreach (var p in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
-		{
-			if (!p.CanRead) continue;
+			foreach (var arg in ctorArgs)
+			{
 
-			var isNullable = Nullable.GetUnderlyingType(p.PropertyType) != null;
+				var isNullable = Nullable.GetUnderlyingType(arg.ParameterType) != null;
+				var valueType = arg.ParameterType;
+				var descriptionAttribute = arg.GetCustomAttribute<BotDescriptionAttribute>();
 
-			var parameter = new BotParameterDescription(
-				p.Name,
-				"--" + ToKebab(p.Name),
-				p.PropertyType,
-				!isNullable && p.PropertyType != typeof(bool),
-				true,
-				null,
-				p.PropertyType.IsEnum ? Enum.GetNames(p.PropertyType) : null,
-				null
-			);
+				var allowedValues = arg.GetCustomAttribute<BotValueChooseAttribute>()?.Values;				
+				var provider = arg.GetCustomAttribute<BotValueSpinTimeAttribute>()?.ValueProvider;
 
-			desc.Parameters.Add(parameter);
+				var parameter = new BotParameterDescription(
+					arg.Name,
+					"--" + ToKebab(arg.Name),
+					valueType,
+					!isNullable,
+					true,
+					descriptionAttribute?.Description,
+					allowedValues ?? (valueType.IsEnum ? Enum.GetNames(valueType) : null),
+					null,
+					provider
+				);
+
+				var opt = CreateOption(parameter);
+				aliaseCmd.AddOption(opt);
+
+				options[arg.Name] = opt;
+				parameters.Add(parameter);
+			}
 		}
 
-		return desc;
+		return new BotCommandDescription
+		{
+			Name = aliaseCmd.Name,
+			Description = aliaseCmd.Description,
+			Command = aliaseCmd as BotCommandAlias,
+			CommandType = commandType,
+			Path = path,
+			SubCommands = subCommands,
+			Parameters = parameters?.AsReadOnly() ?? Array.Empty<BotParameterDescription>().AsReadOnly(),
+			OptionsByParamKey = options?.AsReadOnly(),
+		};
 	}
 
-	private static Option CreateOption(BotParameterDescription p)
+	private static Option CreateOption(BotParameterDescription arg)
 	{
-		var coreType = Nullable.GetUnderlyingType(p.ValueType) ?? p.ValueType;
+		var coreType = Nullable.GetUnderlyingType(arg.ValueType) ?? arg.ValueType;
 
 		if (coreType == typeof(bool))
-			return new Option<bool>(p.CliName, p.Description) { IsRequired = p.IsRequired };
+			return new Option<bool>(arg.CliName, arg.Description) { IsRequired = arg.IsRequired };
 
 		var opt = (Option)Activator.CreateInstance(
 			typeof(Option<>).MakeGenericType(coreType),
-			new object?[] { p.CliName, p.Description })!;
+			new object?[] { arg.CliName, arg.Description })!;
 
-		opt.IsRequired = p.IsRequired;
+		opt.IsRequired = arg.IsRequired;
 		return opt;
 	}
 

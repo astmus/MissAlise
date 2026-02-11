@@ -8,15 +8,36 @@ using System.Reflection;
 
 namespace MissAlise.TelegramBot.Building;
 
+public class BotCommandAlias : Command
+{
+	public BotCommandAlias(Type commandType, string name, string? description = null, string? title = null) : base(name, description)
+	{
+		CommandType = commandType;
+		Title = title;
+	}
+
+	public string? Title { get; }
+	public Type CommandType { get; }
+}
+
+public class BotCommand<T> : BotCommandAlias
+{
+	public BotCommand(string name, string? description = null, string? title = null) : base(typeof(T), name, description, title)
+	{
+	}
+
+}
+
+
 public sealed class BotDefinition
 {
 	public RootCommand RootCommand { get; }
 	public BotCommandDescription Description { get; }
 
-	private readonly Dictionary<Command, LeafRuntime> _leafByCommand;
+	private readonly Dictionary<Command, BotCommandDescription> _leafByCommand;
 	private readonly Dictionary<string, BotCommandDescription> _leafByPath;
 
-	internal BotDefinition(RootCommand root, BotCommandDescription tree, Dictionary<Command, LeafRuntime> leafByCommand, Dictionary<string, BotCommandDescription> leafByPath)
+	internal BotDefinition(RootCommand root, BotCommandDescription tree, Dictionary<Command, BotCommandDescription> leafByCommand, Dictionary<string, BotCommandDescription> leafByPath)
 	{
 		RootCommand = root;
 		Description = tree;
@@ -24,11 +45,11 @@ public sealed class BotDefinition
 		_leafByPath = leafByPath;
 	}
 
-	public bool TryResolveLeaf(ParseResult parseResult, out LeafRuntime leaf)
+	public bool TryResolveLeaf(ParseResult parseResult, out BotCommandDescription leaf)
 		=> _leafByCommand.TryGetValue(parseResult.CommandResult.Command, out leaf!);
 
 	public bool TryGetLeafByPath(string path, out BotCommandDescription leaf)
-		=> _leafByPath.TryGetValue(NormalizePath(path), out leaf!);
+		=> _leafByPath.TryGetValue(NormalizePath(RootCommand.Aliases.First() + " " + path), out leaf!);
 
 	public bool TryGetCommandByPath(string path, out BotCommandDescription? command)
 	{
@@ -41,10 +62,12 @@ public sealed class BotDefinition
 
 		foreach (var part in parts)
 		{
-			var next = current?.GetAllSubCommands()
+			var next = current?.SubCommands
 				.FirstOrDefault(c => c.Name.Equals(part, StringComparison.OrdinalIgnoreCase));
+
 			if (next is null)
 				return false;
+
 			current = next;
 		}
 
@@ -66,21 +89,13 @@ public sealed class BotDefinition
 			.OrderBy(x => x.Name);
 	}
 
-	public sealed class LeafRuntime
-	{
-		public required BotCommandDescription Description { get; init; }
-		public required Command Command { get; init; }
-		public required string Path { get; init; }
-		public required IReadOnlyDictionary<string, Option> OptionsByParamKey { get; init; }
-	}
-
 	public sealed record MissingParam(BotParameterDescription Param, string Reason);
 
-	public IReadOnlyList<MissingParam> GetMissing(ParseResult parseResult, LeafRuntime leaf)
+	public IReadOnlyList<MissingParam> GetMissing(ParseResult parseResult, BotCommandDescription leaf)
 	{
 		var missing = new List<MissingParam>();
 
-		foreach (var p in leaf.Description.Parameters.Where(x => x.IsRequired))
+		foreach (var p in leaf.Parameters.Where(x => x.IsRequired))
 		{
 			if (!leaf.OptionsByParamKey.TryGetValue(p.Name, out var opt))
 				continue;
@@ -93,29 +108,26 @@ public sealed class BotDefinition
 		return missing;
 	}
 
-	public object BindModel(ParseResult parseResult, LeafRuntime leaf)
+	public object BindModel(ParseResult parseResult, BotCommandDescription leaf)
 	{
-		var t = leaf.Description.CommandType
+		var t = leaf.CommandType
 			?? throw new InvalidOperationException("Leaf has no CommandType");
 
-		var obj = Activator.CreateInstance(t)
-			?? throw new InvalidOperationException($"Cannot create instance of {t.FullName}");
-
-		foreach (var p in leaf.Description.Parameters)
+		var args = leaf.Parameters.Select(p =>
 		{
 			if (!leaf.OptionsByParamKey.TryGetValue(p.Name, out var opt))
-				continue;
+				return default;
 
 			var optRes = parseResult.CommandResult.FindResultFor(opt);
 			if (optRes is null)
-				continue;
+				return default;
 
 			var value = GetValueForOptionUntyped(parseResult, opt);
-			var prop = t.GetProperty(p.Name, BindingFlags.Public | BindingFlags.Instance);
+			return value;
+		}).ToArray();
 
-			if (prop?.CanWrite == true)
-				prop.SetValue(obj, value);
-		}
+		var obj = Activator.CreateInstance(t, args)
+			?? throw new InvalidOperationException($"Cannot create instance of {t.FullName}");
 
 		return obj;
 	}

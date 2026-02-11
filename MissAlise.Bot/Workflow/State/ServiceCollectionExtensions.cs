@@ -14,12 +14,15 @@ public static class ServiceCollectionExtensions
 	/// Сессия продлевается при каждом Save (ExpiresAt = UtcNow + DefaultSessionTtl).
 	/// </summary>
 	public static IServiceCollection AddRedisWorkflowStateStore(
-		this IServiceCollection services,		
+		this IServiceCollection services,
+		WorkflowId defaultWorkflowId,
+		WorkflowStepId defaultStartStep,
 		Action<RedisWorkflowStateStoreOptions>? configure = null)
 	{
 		services.Configure<RedisWorkflowStateStoreOptions>(opt =>
 		{
-			configure?.Invoke(opt);
+			opt.DefaultWorkflowId = defaultWorkflowId;
+			opt.DefaultStartStep = defaultStartStep;
 		});
 		if (configure != null)
 			services.Configure(configure);

@@ -4,12 +4,12 @@ namespace MissAlise.TelegramBot.Building;
 
 public interface IBotBuilder : IBotCommandContainer
 {
-	IBotBuilder AddCommand<T>(string name, string description = null) where T : class;
+	IBotBuilder AddCommand<T>(string name, string description, string? title = null) where T : class;
 }
 
 public interface IBotCommandContainer
 {
-	IBotSectionBuilder<TParent> BeginScope<TParent>(string name, string description);
+	IBotSectionBuilder<TParent> BeginScope<TParent>(string name, string description, string? title = null);
 }
 
 public interface IBotSectionBuilder<out TParent> : IBotCommandContainer
@@ -18,7 +18,7 @@ public interface IBotSectionBuilder<out TParent> : IBotCommandContainer
 
 	IBotBuilder EndScope<TSection>();
 
-	IBotSectionBuilder<IBotSectionBuilder<TParent>> BeginSection<TSection>(string name, string description) where TSection : class;
+	IBotSectionBuilder<IBotSectionBuilder<TParent>> BeginSection<TSection>(string name, string description, string? title = null) where TSection : class;
 
 	IBotSectionBuilder<TParent> AddCommand<T>(string name, string description) where T : class;
 }

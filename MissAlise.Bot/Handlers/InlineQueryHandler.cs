@@ -1,9 +1,5 @@
-using MediatR;
 using Microsoft.Extensions.Logging;
-using MissAlise.Application.Common;
-using MissAlise.Application.Common.RequestHandler;
 using MissAlise.Application.Interfaces;
-using MissAlise.TelegramBot.CommandLine;
 using MissAlise.TelegramBot.Workflow;
 using MissAlise.Workflow;
 using Telegram.Bot;
@@ -14,7 +10,6 @@ namespace MissAlise.TelegramBot.Handlers
 {
 	internal class InlineQueryHandler : BotAsyncHandlerBase<InlineQuery>
 	{
-		private readonly IHandleContext _ctx;
 		private readonly ILogger<InlineQueryHandler> _log;
 		private readonly IWorkflowStateStore? _workflowStore;
 		private readonly IWorkflowCoordinator? _engine;
@@ -26,10 +21,9 @@ namespace MissAlise.TelegramBot.Handlers
 			Bot bot,			
 			IWorkflowStateStore? workflowStore = null,
 			IWorkflowCoordinator? engine = null,
-			IWorkflowResultRenderer? workflowRenderer = null) : base(bot)
+			IWorkflowResultRenderer? workflowRenderer = null) : base(bot, ctx)
 		{
 			_log = log;
-			_ctx = ctx;
 			_workflowStore = workflowStore;
 			_engine = engine;
 			_workflowRenderer = workflowRenderer;

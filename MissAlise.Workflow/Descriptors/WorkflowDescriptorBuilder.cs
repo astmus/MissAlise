@@ -5,10 +5,8 @@ public sealed class WorkflowDescriptorBuilder
     private readonly Dictionary<WorkflowStepId, Type> _steps = new();
     private WorkflowId? _id;
     private WorkflowStepId? _start;
-    private WorkflowScope _scope = WorkflowScope.Private;
 
     public WorkflowDescriptorBuilder WithId(WorkflowId id) { _id = id; return this; }
-    public WorkflowDescriptorBuilder WithScope(WorkflowScope scope) { _scope = scope; return this; }
 
     public WorkflowDescriptorBuilder StartWith<TStep>() where TStep : IWorkflowStep
     {
@@ -33,7 +31,6 @@ public sealed class WorkflowDescriptorBuilder
             Id = _id.Value,
             StartStep = _start.Value,
             Steps = new Dictionary<WorkflowStepId, Type>(_steps),
-            Scope = _scope
         };
     }
 }

@@ -10,10 +10,10 @@ namespace MissAlise.Application
 		public static IServiceCollection AddApplicationServices(this IServiceCollection services)
 		{
 			services.TryAddScoped<IHandleContext, HandleContext>();
-			services.TryAddScoped<IContextItems, ContextItems>();
+			services.TryAddTransient<IExecutionContext, ExecuteContext>();
 			services.AddMediatR(cfg =>
 			{
-				cfg.RegisterServicesFromAssemblyContaining<ContextItems>();				
+				cfg.RegisterServicesFromAssemblyContaining<ExecuteContext>();				
 				cfg.AddBehavior<AuthBehavior>(ServiceLifetime.Scoped);
 				cfg.Lifetime = ServiceLifetime.Scoped;
 			});

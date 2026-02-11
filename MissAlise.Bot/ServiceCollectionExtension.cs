@@ -1,18 +1,17 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MissAlise.Application.Interfaces;
-using MissAlise.TelegramBot.CommandLine;
+using MissAlise.TelegramBot.Building;
+using MissAlise.TelegramBot.Commands;
 using MissAlise.TelegramBot.Handlers;
-using MissAlise.TelegramBot.Wizard;
-using Telegram.Bot.Types;
 using MissAlise.TelegramBot.Workflow;
 using MissAlise.TelegramBot.Workflow.Cli;
+using MissAlise.TelegramBot.Workflow.State;
 using MissAlise.Workflow;
 using MissAlise.Workflow.Extensions;
 using MissAlise.Workflow.Registry;
 using MissAlise.Workflow.State;
-using MissAlise.TelegramBot.Building;
-using MissAlise.TelegramBot.Commands;
+using Telegram.Bot.Types;
 
 namespace MissAlise.TelegramBot
 {
@@ -25,9 +24,11 @@ namespace MissAlise.TelegramBot
 			services.AddSingleton<BotDefinition>(sp => b.Build());
 
 			services.AddWorkflowCore();
-			services.AddSingleton<IWorkflowStateStore>(_ => new InMemoryWorkflowStateStore(TelegramCliWorkflow.Id, TelegramCliWorkflow.CliStep));
+			//services.AddSingleton<IWorkflowStateStore>(_ => new InMemoryWorkflowStateStore(TelegramCliWorkflow.Id, TelegramCliWorkflow.MenuStep));
 			services.AddSingleton<IWorkflowPresenter, TelegramCliPresenter>();
-			services.AddScoped<TelegramCliStep>();
+			services.AddScoped<TelegramCliMenuStep>();
+			services.AddScoped<TelegramCliWizardStep>();
+			services.AddScoped<TelegramCliCommandStep>();
 			services.AddScoped<IWorkflowCommandSink, MediatRWorkflowCommandSink>();			
 			services.AddScoped<IWorkflowResultRenderer, TelegramWorkflowRenderer>();
 			services.AddScoped<IWorkflowResultVisitor, TelegramWorkflowResultVisitor>();
@@ -39,7 +40,7 @@ namespace MissAlise.TelegramBot
 				.AddHostedService<Bot<UpdateExt>.UpdateReceiver>()
 				.AddHostedService<Bot<UpdateExt>.UpdateHandler>()
 				.Configure<BotConfiguration>(botConfig);
-
+			services.AddRedisWorkflowStateStore(TelegramCliWorkflow.Id, TelegramCliWorkflow.MenuStep, conf => { conf.DefaultSessionTtl = TimeSpan.FromMinutes(5); });
 			services.AddMediatR(cfg =>
 			{
 				cfg.RegisterServicesFromAssemblyContaining<StartCommand>();
@@ -63,9 +64,11 @@ namespace MissAlise.TelegramBot
 		{			
 			// Workflow core + Telegram CLI workflow
 			services.AddWorkflowCore();
-			services.AddSingleton<IWorkflowStateStore>(_ => new InMemoryWorkflowStateStore(TelegramCliWorkflow.Id, TelegramCliWorkflow.CliStep));
+			services.AddSingleton<IWorkflowStateStore>(_ => new InMemoryWorkflowStateStore(TelegramCliWorkflow.Id, TelegramCliWorkflow.MenuStep));
 			services.AddSingleton<IWorkflowPresenter, TelegramCliPresenter>();
-			services.AddScoped<TelegramCliStep>();
+			services.AddScoped<TelegramCliMenuStep>();
+			services.AddScoped<TelegramCliWizardStep>();
+			services.AddScoped<TelegramCliCommandStep>();
 			services.AddScoped<IWorkflowCommandSink, MediatRWorkflowCommandSink>();
 			services.AddSingleton<TelegramWorkflowRenderer>();
 			services.Configure<WorkflowRegistryOptions>(opt => opt.Register = TelegramCliWorkflow.Register);
@@ -112,5 +115,22 @@ namespace MissAlise.TelegramBot
 
 		static internal Message GetCurrentMessage(this Update update)
 			=> update.Message ?? update.CallbackQuery?.Message ?? update.EditedMessage ?? update.ChannelPost ?? update.EditedChannelPost ?? update.Message?.PinnedMessage;
+
+	}
+
+	public static class ReadOnlyListExtensions
+	{
+		public static int FindIndex<T>(
+			this IReadOnlyList<T> list,
+			Predicate<T> match)
+		{
+			for (int i = 0; i < list.Count; i++)
+			{
+				if (match(list[i]))
+					return i;
+			}
+
+			return -1;
+		}
 	}
 }

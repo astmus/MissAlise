@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 
@@ -11,6 +10,7 @@ public sealed record BotParameterDescription(
     bool IsRequired,
     bool IsOption,
     string? Description,
-    IReadOnlyList<string>? AllowedValues,
-    string? InlineProviderKey
+    IReadOnlyList<object>? AllowedValues,
+    string? InlineProviderKey,
+    object? DefaultValue = null
 );

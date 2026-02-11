@@ -10,16 +10,18 @@ namespace MissAlise.TelegramBot.Workflow;
 /// </summary>
 public sealed class MediatRWorkflowCommandSink : IWorkflowCommandSink
 {
-    private readonly IMediator _mediator;
+	private readonly IMediator _mediator;
 
-    public MediatRWorkflowCommandSink(IMediator mediator)
-    {
-        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-    }
+	public MediatRWorkflowCommandSink(IMediator mediator)
+	{
+		_mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+	}
 
-    public async Task PublishAsync(object command, WorkflowContext context, CancellationToken cancellationToken)
-    {
-        if (command is IRequest<Result> request)
-            await _mediator.Send(request, cancellationToken).ConfigureAwait(false);
-    }
+	public async Task<Result> PublishAsync(object command, WorkflowContext context, CancellationToken cancellationToken)
+	{
+		if (command is IRequest<Result> request)
+			return await _mediator.Send(request, cancellationToken).ConfigureAwait(false);
+
+		return Result.Fail("Commnd is not IRequest");
+	}
 }

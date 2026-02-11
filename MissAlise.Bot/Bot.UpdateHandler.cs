@@ -50,6 +50,8 @@ namespace MissAlise.TelegramBot
 					ctx.Set(update);
 					ctx.Set(_mapper.Map<UserProfile>(sender));
 					ctx.Set(sender);
+					ctx.Set(update.GetCurrentMessage());
+					ctx.Set(update.GetCurrentUser());
 					ctx.Set(update.GetCurrentChat());
 					ctx.Set(bot, "bot");
 

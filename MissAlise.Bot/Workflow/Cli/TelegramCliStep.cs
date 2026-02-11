@@ -21,11 +21,11 @@ namespace MissAlise.TelegramBot.Workflow.Cli;
 /// </summary>
 internal sealed class TelegramCliStep : IWorkflowStep
 {
-	private readonly BotDefinition _bot;
+	private readonly BotDefinition _botDescription;
 
 	public TelegramCliStep(BotDefinition bot)
 	{
-		_bot = bot;
+		_botDescription = bot;
 	}
 
 	private const string S_Mode = "cli:mode"; // menu|wizard
@@ -91,15 +91,15 @@ internal sealed class TelegramCliStep : IWorkflowStep
 				return DisplayMenu(session, hint: "Я работаю командами. Выбери команду ниже или введи /start");
 
 			// Parse via System.CommandLine			
-			var parse = _bot.RootCommand.Parse(text);
-			if (!_bot.TryResolveLeaf(parse, out var leaf))
+			var parse = _botDescription.RootCommand.Parse(text);
+			if (!_botDescription.TryResolveLeaf(parse, out var leaf))
 			{
 				// Not a leaf: show nearest menu based on tokens (e.g. /onedrive)
 				var path = string.Join(' ', parse.CommandResult.Command.Options.Where(a => !a.Name.StartsWith('-')).Select(a => a.Name.TrimStart('/')));
 				return DisplayMenu(session, path);
 			}
 
-			var missing = _bot.GetMissing(parse, leaf);
+			var missing = _botDescription.GetMissing(parse, leaf);
 			if (missing.Count > 0)
 			{
 				// start wizard: store path + prefilled values
@@ -108,7 +108,7 @@ internal sealed class TelegramCliStep : IWorkflowStep
 				session.Set(S_ParamIndex, "0");
 
 				// save provided options into session state (as strings)
-				foreach (var p in leaf.Description.Parameters)
+				foreach (var p in leaf.Parameters)
 				{
 					var opt = leaf.OptionsByParamKey[p.Name];
 					var optRes = parse.CommandResult.FindResultFor(opt);
@@ -120,7 +120,7 @@ internal sealed class TelegramCliStep : IWorkflowStep
 
 				// jump to first missing required param
 				var firstMissing = missing[0].Param;
-				var idx = leaf.Description.Parameters.FindIndex(x => x.Name.Equals(firstMissing.Name, StringComparison.OrdinalIgnoreCase));
+				var idx = leaf.Parameters.FindIndex(x => x.Name.Equals(firstMissing.Name, StringComparison.OrdinalIgnoreCase));
 				session.Set(S_ParamIndex, Math.Max(idx, 0).ToString());
 
 				return WorkflowStepResult.Stay(new Dictionary<string, string>
@@ -131,7 +131,7 @@ internal sealed class TelegramCliStep : IWorkflowStep
 				});
 			}
 
-			var model = _bot.BindModel(parse, leaf);
+			var model = _botDescription.BindModel(parse, leaf);
 			return WorkflowStepResult.Produce(model);
 		}
 
@@ -141,12 +141,12 @@ internal sealed class TelegramCliStep : IWorkflowStep
 	private WorkflowStepResult StartCommandOrWizard(WorkflowSession session, string path)
 	{
 		// If it's a leaf path -> start wizard immediately (no args) or execute if no params
-		if (_bot.TryGetLeafByPath(path, out var leafDesc))
+		if (_botDescription.TryGetLeafByPath(path, out var leafDesc) && leafDesc.SubCommands.Count == 0)
 		{
 			if (leafDesc.Parameters.Count == 0)
 			{
 				var cmd = Activator.CreateInstance(leafDesc.CommandType!)!;
-				return WorkflowStepResult.Produce(cmd);
+				return WorkflowStepResult.Complete(cmd);
 			}
 
 			return WorkflowStepResult.Stay(new Dictionary<string, string>
@@ -163,7 +163,7 @@ internal sealed class TelegramCliStep : IWorkflowStep
 	private WorkflowStepResult HandleWizard(WorkflowSession session, WorkflowInput input)
 	{
 		var path = session.Get(S_Path);
-		if (string.IsNullOrWhiteSpace(path) || !_bot.TryGetLeafByPath(path, out var leaf))
+		if (!_botDescription.TryGetLeafByPath(path, out var leaf))
 			return DisplayMenu(session);
 
 		var idx = session.GetInt(S_ParamIndex, 0);
@@ -237,7 +237,8 @@ internal sealed class TelegramCliStep : IWorkflowStep
 		{
 			[S_Mode] = "wizard",
 			[S_Path] = path,
-			[S_ParamIndex] = idx.ToString()
+			[S_ParamIndex] = idx.ToString()//,
+			//[S_CTX_MESSAGE] = context,
 		});
 	}
 
@@ -277,7 +278,11 @@ internal sealed class TelegramCliStep : IWorkflowStep
 		error = null;
 		try
 		{
-			_ = ConvertFromString(raw, param.ValueType);
+			var value = ConvertFromString(raw, param.ValueType);
+			//if (value is null && param.RangeMin is null && param.RangeMax is null)
+			//	return true;
+			//if (value is not null && !IsInRange(value, param.RangeMin, param.RangeMax, out error))
+			//	return false;
 			return true;
 		}
 		catch (Exception ex) when (ex is FormatException or NotSupportedException or ArgumentException)
@@ -318,8 +323,8 @@ internal sealed class TelegramCliStep : IWorkflowStep
 		for (int i = 0; i < ctorParams.Length; i++)
 		{
 			var p = ctorParams[i];
-
-			var raw = session.Get(ArgKey(p.Name!)); // string?
+			var paramDesc = leaf.Parameters.FirstOrDefault(x => x.Name.Equals(p.Name, StringComparison.OrdinalIgnoreCase));
+			var raw = session.Get(ArgKey(p.Name!)) ?? DefaultValueToRaw(paramDesc?.DefaultValue, p.ParameterType);
 			if (raw is null)
 				throw new InvalidOperationException($"Missing session value for '{p.Name}'");
 
@@ -394,6 +399,22 @@ internal sealed class TelegramCliStep : IWorkflowStep
 		throw new NotSupportedException($"Cannot convert string to '{targetType.FullName}'.");
 	}
 
+	private static string? DefaultValueToRaw(object? defaultValue, Type targetType)
+	{
+		if (defaultValue is null) return null;
+		if (defaultValue is string s) return s;
+		if (defaultValue is int or long or double or decimal)
+			return Convert.ToString(defaultValue, CultureInfo.InvariantCulture);
+		if (defaultValue is DateTime dt)
+			return dt.ToString("o", CultureInfo.InvariantCulture);
+		if (defaultValue is TimeSpan ts)
+			return ts.ToString("c", CultureInfo.InvariantCulture);
+		if (defaultValue is bool b) return b ? "true" : "false";
+		if (defaultValue.GetType().IsEnum)
+			return defaultValue.ToString();
+		return defaultValue.ToString();
+	}
+
 	private WorkflowStepResult DisplayMenu(WorkflowSession session, string path = null, string hint = null)
 	{
 		session.Set(S_Path, path);
@@ -458,6 +479,23 @@ internal sealed class TelegramCliStep : IWorkflowStep
 			var current = string.IsNullOrWhiteSpace(currentRaw) ? 0m : decimal.Parse(currentRaw, CultureInfo.InvariantCulture);
 			var delta = decimal.Parse(deltaValue, CultureInfo.InvariantCulture);
 			adjusted = (current + delta).ToString(CultureInfo.InvariantCulture);
+			return true;
+		}
+
+		if (targetType == typeof(TimeSpan))
+		{
+			var current = string.IsNullOrWhiteSpace(currentRaw) ? TimeSpan.Zero : TimeSpan.Parse(currentRaw, CultureInfo.InvariantCulture);
+			var delta = TimeSpan.Parse(deltaValue, CultureInfo.InvariantCulture);
+			adjusted = (current + delta).ToString("c", CultureInfo.InvariantCulture);
+			return true;
+		}
+
+		if (targetType == typeof(DateTime))
+		{
+			var current = string.IsNullOrWhiteSpace(currentRaw) ? DateTime.MinValue : DateTime.Parse(currentRaw, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+			var deltaDt = DateTime.Parse(deltaValue, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+			var delta = deltaDt - DateTime.MinValue;
+			adjusted = (current + delta).ToString("o", CultureInfo.InvariantCulture);
 			return true;
 		}
 

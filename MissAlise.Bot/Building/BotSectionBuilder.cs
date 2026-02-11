@@ -13,7 +13,7 @@ public sealed partial class BotBuilder
 			_builder = builder;
 		}
 
-		public IBotSectionBuilder<T> BeginScope<T>(string name, string description)
+		public IBotSectionBuilder<T> BeginScope<T>(string name, string description, string? title = null)
 		{			
 			return _builder.BeginScope<T>(name, description);
 		}
@@ -29,9 +29,9 @@ public sealed partial class BotBuilder
 			return _builder.EndSection();
 		}
 
-		public IBotSectionBuilder<IBotSectionBuilder<TParent>> BeginSection<T>(string name, string description) where T : class
+		public IBotSectionBuilder<IBotSectionBuilder<TParent>> BeginSection<T>(string name, string description, string? title = null) where T : class
 		{
-			_builder.BeginScope<T>(name, description);
+			_builder.BeginScope<T>(name, description, title);
 
 			IBotSectionBuilder<TParent> thisTyped = this;
 			return new BotSectionBuilder<IBotSectionBuilder<TParent>>(thisTyped, _builder);
@@ -39,7 +39,7 @@ public sealed partial class BotBuilder
 		
 		public IBotSectionBuilder<TParent> AddCommand<T>(string name, string description) where T : class
 		{
-			_builder.AddCommand<T>(name, description);			
+			_builder.AddCommand<T>(name, description);
 			return this;
 		}
 	}
