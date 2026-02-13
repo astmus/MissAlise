@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using MissAlise.TelegramBot.Building;
 using MissAlise.Workflow;
 using MissAlise.Workflow.Steps;
@@ -13,91 +13,63 @@ namespace MissAlise.TelegramBot.Workflow.Cli;
 /// - позволяет перейти в wizard для редактирования конкретного параметра
 /// - выполняет команду при nav:run
 /// </summary>
-internal sealed class TelegramCliCommandStep : IWorkflowStep
+internal sealed class TelegramCliCommandStep : TelegramCliStep
 {
-    private readonly BotDefinition _bot;
+	public TelegramCliCommandStep(BotDefinition bot) : base(bot) { }
 
-    public TelegramCliCommandStep(BotDefinition bot)
-    {
-        _bot = bot;
-    }
+	protected override Task<WorkflowStepResult> ExecuteCoreAsync(
+		WorkflowContext context,
+		TelegramCliSession cli,
+		WorkflowInput input,
+		CancellationToken cancellationToken)
+	{
+		var path = cli.Path;
+		if (string.IsNullOrWhiteSpace(path) || !botDefinition.TryGetLeafByPath(path, out var leaf))
+		{
+			cli.ResetAll();
+			return Task.FromResult(WorkflowStepResult.Next(TelegramCliWorkflow.MenuStep, cli.BuildStateUpdate(error: "Команда устарела. Выбери её заново из меню.")));
+		}
 
-    public Task<WorkflowStepResult> ExecuteAsync(
-        WorkflowContext context,
-        WorkflowSession session,
-        WorkflowInput input,
-        CancellationToken cancellationToken)
-    {
-        session.State.Remove(TelegramCliSession.S_Error);
+		if (input.Kind == WorkflowInputKind.Callback && input.Payload is not null)
+		{
+			var p = input.Payload;
 
-        if (IsCancel(input))
-        {
-            TelegramCliSession.ResetAll(session);
-            return Task.FromResult(WorkflowStepResult.Next(TelegramCliWorkflow.MenuStep));
-        }
+			if (string.Equals(p, "nav:back", StringComparison.OrdinalIgnoreCase))
+				return Task.FromResult(WorkflowStepResult.Next(TelegramCliWorkflow.MenuStep));
 
-        var path = session.Get(TelegramCliSession.S_Path);
-        if (string.IsNullOrWhiteSpace(path) || !_bot.TryGetLeafByPath(path, out var leaf))
-        {
-            TelegramCliSession.ResetAll(session);
-            return Task.FromResult(WorkflowStepResult.Next(TelegramCliWorkflow.MenuStep, new Dictionary<string, string>
-            {
-                [TelegramCliSession.S_Error] = "Команда устарела. Выбери её заново из меню."
-            }));
-        }
+			if (string.Equals(p, "nav:run", StringComparison.OrdinalIgnoreCase))
+			{
+				if (!cli.AllRequiredCollected(leaf))
+				{
+					var idx = cli.NextMissingRequiredIndex(leaf);
+					if (idx < 0) idx = 0;
+					cli.ParamIndex = idx;
+					cli.Error = "Не заполнены обязательные параметры.";
+					return Task.FromResult(WorkflowStepResult.Next(TelegramCliWorkflow.WizardStep));
+				}
 
-        if (input.Kind == WorkflowInputKind.Callback && input.Payload is not null)
-        {
-            var p = input.Payload;
+				var cmd = cli.CreateCommandFromSession(leaf);
+				cli.ResetAll();
+				return Task.FromResult(WorkflowStepResult.Complete(cmd));
+			}
 
-            if (string.Equals(p, "nav:back", StringComparison.OrdinalIgnoreCase))
-                return Task.FromResult(WorkflowStepResult.Next(TelegramCliWorkflow.MenuStep));
+			if (p.StartsWith("nav:edit:", StringComparison.OrdinalIgnoreCase))
+			{
+				var name = p.Substring("nav:edit:".Length);
+				var idx = leaf.Parameters.FindIndex(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+				if (idx < 0) idx = 0;
+				cli.ParamIndex = idx;
+				return Task.FromResult(WorkflowStepResult.Next(TelegramCliWorkflow.WizardStep));
+			}
+		}
 
-            if (string.Equals(p, "nav:run", StringComparison.OrdinalIgnoreCase))
-            {
-                if (!TelegramCliSession.AllRequiredCollected(leaf, session))
-                {
-                    // send user to first missing required param
-                    var idx = TelegramCliSession.NextMissingRequiredIndex(leaf, session);
-                    if (idx < 0) idx = 0;
-                    session.Set(TelegramCliSession.S_ParamIndex, idx.ToString());
-                    session.Set(TelegramCliSession.S_Error, "Не заполнены обязательные параметры.");
-                    return Task.FromResult(WorkflowStepResult.Next(TelegramCliWorkflow.WizardStep));
-                }
+		if (input.Kind is WorkflowInputKind.Text or WorkflowInputKind.Command)
+		{
+			var text = input.Text?.Trim();
+			if (string.Equals(text, "/run", StringComparison.OrdinalIgnoreCase))
+				return Task.FromResult(WorkflowStepResult.Stay(cli.BuildStateUpdate(error: "Нажми ▶ Выполнить.")));
+		}
 
-                var cmd = TelegramCliSession.CreateCommandFromSession(leaf, session);
-                TelegramCliSession.ResetAll(session);
-                return Task.FromResult(WorkflowStepResult.Complete(cmd));
-            }
-
-            // edit specific param: nav:edit:<name>
-            if (p.StartsWith("nav:edit:", StringComparison.OrdinalIgnoreCase))
-            {
-                var name = p.Substring("nav:edit:".Length);
-                var idx = leaf.Parameters.FindIndex(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-                if (idx < 0) idx = 0;
-                session.Set(TelegramCliSession.S_ParamIndex, idx.ToString());
-                return Task.FromResult(WorkflowStepResult.Next(TelegramCliWorkflow.WizardStep));
-            }
-        }
-
-        // also allow typing /run
-        if (input.Kind is WorkflowInputKind.Text or WorkflowInputKind.Command)
-        {
-            var text = input.Text?.Trim();
-            if (string.Equals(text, "/run", StringComparison.OrdinalIgnoreCase))
-                return Task.FromResult(WorkflowStepResult.Stay(new Dictionary<string, string> { [TelegramCliSession.S_Error] = "Нажми ▶ Выполнить." }));
-        }
-
-        return Task.FromResult(WorkflowStepResult.Stay());
-    }
-
-    private static bool IsCancel(WorkflowInput input)
-    {
-        if (input.Kind == WorkflowInputKind.Callback && (input.Payload?.Equals("nav:cancel", StringComparison.OrdinalIgnoreCase) == true))
-            return true;
-        if (input.Kind is WorkflowInputKind.Text or WorkflowInputKind.Command)
-            return string.Equals(input.Text?.Trim(), "/cancel", StringComparison.OrdinalIgnoreCase);
-        return false;
-    }
+		return Task.FromResult(WorkflowStepResult.Stay());
+	}
 }

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using MissAlise.Application.Interfaces;
 using MissAlise.TelegramBot.Building;
 using MissAlise.TelegramBot.Commands;
@@ -11,6 +12,7 @@ using MissAlise.Workflow;
 using MissAlise.Workflow.Extensions;
 using MissAlise.Workflow.Registry;
 using MissAlise.Workflow.State;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace MissAlise.TelegramBot
@@ -22,6 +24,25 @@ namespace MissAlise.TelegramBot
 			var b = new BotBuilder();
 			configurate(b);
 			services.AddSingleton<BotDefinition>(sp => b.Build());
+			services.AddSingleton<ITelegramBotClient>(sp =>
+			{
+				var token = sp.GetRequiredService<IOptions<BotConfiguration>>().Value.ApiKey;
+
+				var handler = new SocketsHttpHandler
+				{
+					PooledConnectionLifetime = TimeSpan.FromMinutes(10),
+					KeepAlivePingDelay = TimeSpan.FromSeconds(30),
+					KeepAlivePingTimeout = TimeSpan.FromSeconds(10),
+					EnableMultipleHttp2Connections = true,
+				};
+
+				var httpClient = new HttpClient(handler)
+				{
+					Timeout = Timeout.InfiniteTimeSpan, 
+				};
+
+				return new TelegramBotClient(token, httpClient);
+			});
 
 			services.AddWorkflowCore();
 			//services.AddSingleton<IWorkflowStateStore>(_ => new InMemoryWorkflowStateStore(TelegramCliWorkflow.Id, TelegramCliWorkflow.MenuStep));

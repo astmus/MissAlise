@@ -22,8 +22,8 @@ namespace MissAlise.TelegramBot
 			_pollingErrorHandler = pollingErrorHandler;
 		}
 
-		public IAsyncEnumerator<TUpdate> GetAsyncEnumerator(CancellationToken cancellationToken) 
-		 {
+		public IAsyncEnumerator<TUpdate> GetAsyncEnumerator(CancellationToken cancellationToken)
+		{
 			if (Interlocked.CompareExchange(ref _inProcess, 1, 0) is 1)
 				throw new InvalidOperationException(nameof(GetAsyncEnumerator) + " may only be called once");
 
@@ -56,9 +56,7 @@ namespace MissAlise.TelegramBot
 
 				_channel = Channel.CreateUnbounded<TUpdate>(new() { SingleReader = true, SingleWriter = true });
 
-#pragma warning disable CA2016
-				_ = Task.Run(ReceiveUpdatesAsync, cancellationToken);
-#pragma warning restore CA2016
+				_ = ReceiveUpdatesAsync(cancellationToken);
 			}
 
 			public ValueTask<bool> MoveNextAsync()
@@ -81,8 +79,9 @@ namespace MissAlise.TelegramBot
 				return true;
 			}
 
-			private async Task ReceiveUpdatesAsync()
+			private async Task ReceiveUpdatesAsync(CancellationToken cancellationToken)
 			{
+				var backoffMs = 200;
 				if (_receiver._receiverOptions?.DropPendingUpdates is true)
 				{
 					try
@@ -96,12 +95,12 @@ namespace MissAlise.TelegramBot
 					}
 				}
 
-						//int? id = 307409070;
+				//int? id = 307409070;
 				var getUpdatesRequest = new GetUpdatesRequest<TUpdate>
 				{
 					Offset = _messageOffset,
 					Limit = _limit,
-					Timeout = (int)_receiver._botClient.Timeout.TotalSeconds,
+					Timeout = 120,
 					AllowedUpdates = _allowedUpdates,
 				};
 
@@ -115,7 +114,7 @@ namespace MissAlise.TelegramBot
 						{
 							_messageOffset = updateArray[^1].Id + 1;
 							Interlocked.Add(ref _pendingUpdates, updateArray.Length);
-														
+
 							foreach (var update in updateArray)
 							{
 								var success = _channel.Writer.TryWrite(update);
@@ -128,47 +127,67 @@ namespace MissAlise.TelegramBot
 					{
 						return;
 					}
-#pragma warning disable CA1031
-					catch (Exception ex)
-#pragma warning restore CA1031
+					catch (Telegram.Bot.Exceptions.RequestException ex) when (ex.InnerException is TaskCanceledException or TimeoutException)
 					{
-						Debug.Assert(_uncaughtException is null);
+						// long polling может таймаутиться — это не "fail"
+						await Task.Delay(backoffMs, _token).ConfigureAwait(false);
+						backoffMs = Math.Min(backoffMs * 2, 5000);
+						continue;
+					}
+					catch (Exception ex)
+					{
+						await HandlePollingError(ex).ConfigureAwait(false);
 
-						// If there is no errorHandler or the errorHandler throws, stop receiving
-						if (_receiver._pollingErrorHandler is null)
-						{
-							_uncaughtException = ex;
-							_cts.Cancel();
-						}
-						else
-						{
-							try
-							{
-								await _receiver._pollingErrorHandler(ex, _token).ConfigureAwait(false);
-							}
-#pragma warning disable CA1031
-							catch (Exception errorHandlerException)
-#pragma warning restore CA1031
-							{
-								_uncaughtException = new AggregateException("Exception was not caught by the errorHandler.", ex, errorHandlerException);
-								_cts.Cancel();
-							}
-						}
+						await Task.Delay(backoffMs, _token).ConfigureAwait(false);
+						backoffMs = Math.Min(backoffMs * 2, 10000);
+					}
+					//					catch (OperationCanceledException)
+					//					{
+					//						return;
+					//					}
+					//#pragma warning disable CA1031
+					//					catch (Exception ex)
+					//#pragma warning restore CA1031
+					//					{
+					//						Debug.Assert(_uncaughtException is null);
 
-						if (_uncaughtException is not null)
-						{
+					//						// If there is no errorHandler or the errorHandler throws, stop receiving
+					//						if (_receiver._pollingErrorHandler is null)
+					//						{
+					//							_uncaughtException = ex;
+					//							_cts.Cancel();
+					//						}
+					//						else
+					//						{
+					//							try
+					//							{
+					//								await _receiver._pollingErrorHandler(ex, _token).ConfigureAwait(false);
+					//							}
+					//#pragma warning disable CA1031
+					//							catch (Exception errorHandlerException)
+					//#pragma warning restore CA1031
+					//							{
+					//								_uncaughtException = new AggregateException("Exception was not caught by the errorHandler.", ex, errorHandlerException);
+					//								_cts.Cancel();
+					//							}
+					//						}
+
+					if (_uncaughtException is not null)
+					{
 #pragma warning disable CA2201
-							_uncaughtException = new("Exception was not caught by the errorHandler.", _uncaughtException);
+						_uncaughtException = new("Exception was not caught by the errorHandler.", _uncaughtException);
 #pragma warning restore CA2201
-						}
 					}
 				}
 			}
 
+			private async Task HandlePollingError(Exception ex)
+				=> await _receiver._pollingErrorHandler(ex, _cts.Token).ConfigureAwait(false);
+
 			public TUpdate Current => _current!; // _current being null indicates MoveNextAsync was never called
 
 			public ValueTask DisposeAsync()
-			{			
+			{
 				_cts.Cancel();
 				_cts.Dispose();
 				return ValueTask.CompletedTask;

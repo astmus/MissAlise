@@ -34,26 +34,30 @@ namespace MissAlise.TelegramBot
 			{
 				await foreach (var update in bot.Updates.Reader.ReadAllAsync(cancel))
 				{
-					logger.LogInformation("Got update {Id}", update.Id);
 					_ = HandleUpdateAsync(update, cancel);
 				}
 			}
 
 			public async Task HandleUpdateAsync(TUpdate update, CancellationToken cancel)
 			{
+				logger.LogInformation("Start handle update {Id} {now}", update.Id, DateTime.UtcNow.ToLongTimeString());
+
 				try
 				{
 					using var handleScope = factory.CreateScope();
 					var services = handleScope.ServiceProvider;
-					var sender = update.GetCurrentUser();
+					
 					var ctx = services.GetRequiredService<IHandleContext>();
+					var sender = update.GetCurrentUser();
+					var message = update.GetCurrentMessage();
+					var chat = update.GetCurrentChat();
+
+					ctx.Set(bot, "bot");
 					ctx.Set(update);
 					ctx.Set(_mapper.Map<UserProfile>(sender));
 					ctx.Set(sender);
-					ctx.Set(update.GetCurrentMessage());
-					ctx.Set(update.GetCurrentUser());
-					ctx.Set(update.GetCurrentChat());
-					ctx.Set(bot, "bot");
+					ctx.Set(chat);
+					ctx.Set(message);					
 
 					Task basicTask = (update as UpdateExt) switch
 					{
@@ -68,6 +72,8 @@ namespace MissAlise.TelegramBot
 				{
 					logger.LogError(error, error.Message);
 				}
+
+				logger.LogInformation("End handle update {Id}  {now}", update.Id, DateTime.UtcNow.ToLongTimeString());
 			}
 
 			private Task InvokeHandlerAsync<THandleItem>(IServiceProvider sp, THandleItem updateItem, CancellationToken cancel) where THandleItem : class
@@ -75,9 +81,6 @@ namespace MissAlise.TelegramBot
 				var handler = sp.GetRequiredService<IAsyncHandler<THandleItem>>();
 				return handler.InvokeAsync(updateItem, cancel);
 			}
-
-			private Task HandleSearchAsync(Update update, InlineQuery inlineQuery, object stoppingToken) => throw new NotImplementedException();
-			private Task HandleCallbackAsync(Update update, CallbackQuery callbackQuery, object stoppingToken) => throw new NotImplementedException();
 		}
 	}
 }

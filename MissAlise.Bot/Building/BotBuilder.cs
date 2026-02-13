@@ -8,8 +8,8 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using MissAlise.TelegramBot.Building.Attributes;
+using MissAlise.TelegramBot.Building.Values;
 using MissAlise.Workflow.Demo.BackgroundSync;
-using static LinqToDB.Reflection.Methods.LinqToDB.Insert;
 
 namespace MissAlise.TelegramBot.Building;
 
@@ -124,19 +124,25 @@ public sealed partial class BotBuilder : IBotBuilder
 				var valueType = arg.ParameterType;
 				var descriptionAttribute = arg.GetCustomAttribute<BotDescriptionAttribute>();
 
-				var allowedValues = arg.GetCustomAttribute<BotValueChooseAttribute>()?.Values;				
-				var provider = arg.GetCustomAttribute<BotValueSpinTimeAttribute>()?.ValueProvider;
+				var chooseAttr = arg.GetCustomAttribute<BotValueChooseAttribute>();
+				var rangeAttr = arg.GetCustomAttribute<BotRangeAttribute>();
+				var stepAttr = arg.GetCustomAttribute<BotStepAttribute>();
+				var boolGroupAttr = arg.GetCustomAttribute<BotBoolStateGroupAttribute>();
+				var spinTimeAttr = arg.GetCustomAttribute<BotValueSpinTimeAttribute>();
+
+				// Собираем все настройки параметра в один объект Value<T>/NumericValue<T>/StepValue<T>.
+				// Этот объект кладём в BotParameterDescription.DefaultValue.
+				var valueMeta = BuildValueMeta(arg.ParameterType, chooseAttr, rangeAttr, stepAttr, boolGroupAttr, spinTimeAttr);
 
 				var parameter = new BotParameterDescription(
-					arg.Name,
-					"--" + ToKebab(arg.Name),
+					arg.Name!,
+					"--" + ToKebab(arg.Name!),
 					valueType,
 					!isNullable,
 					true,
 					descriptionAttribute?.Description,
-					allowedValues ?? (valueType.IsEnum ? Enum.GetNames(valueType) : null),
 					null,
-					provider
+					valueMeta
 				);
 
 				var opt = CreateOption(parameter);
@@ -158,6 +164,134 @@ public sealed partial class BotBuilder : IBotBuilder
 			Parameters = parameters?.AsReadOnly() ?? Array.Empty<BotParameterDescription>().AsReadOnly(),
 			OptionsByParamKey = options?.AsReadOnly(),
 		};
+	}
+
+	private static ValueBase? BuildValueMeta(
+		Type valueType,
+		BotValueChooseAttribute? chooseAttr,
+		BotRangeAttribute? rangeAttr,
+		BotStepAttribute? stepAttr,
+		BotBoolStateGroupAttribute? boolGroupAttr,
+		BotValueSpinTimeAttribute? spinTimeAttr)
+	{
+		var coreType = Nullable.GetUnderlyingType(valueType) ?? valueType;
+
+		// 0) Bool -> BoolValue + visual group
+		if (coreType == typeof(bool))
+		{
+			return new BoolValue(chooseAttr?.DefaultValue is bool db ? db : default(bool?))
+			{
+				VisualGroupKey = boolGroupAttr?.GroupKey,
+				AllowedValues = chooseAttr?.Values?.OfType<bool>().ToArray(),
+			};
+		}
+
+		// 1) Специальный кейс: TimeSpan spin (у тебя уже есть такая модель в BackgroundSyncCommand)
+		if (coreType == typeof(TimeSpan) && spinTimeAttr is not null)
+		{
+			// TimeSpan НЕ реализует generic-math IAdditionOperators/ISubtractionOperators,
+			// поэтому используем StepValue<TimeSpan> с делегатами.
+			return ValueFactory.TimeSpanSpinner(
+				@default: spinTimeAttr.Value,
+				min: spinTimeAttr.Min,
+				max: spinTimeAttr.Max,
+				step: spinTimeAttr.Diff,
+				multipliers: new[] { 1 },
+				formatter: static ts => ts.ToString());
+		}
+
+		// 2) Enum -> AllowedValues = Enum names
+		if (coreType.IsEnum)
+		{
+			var names = Enum.GetNames(coreType);
+			return new Value<string>(default) { AllowedValues = names };
+		}
+
+		// 3) Общий кейс: NumericValue<T> для числовых типов (int/long/double/decimal)
+		// Мы создаём NumericValue<T> только для типов, которые поддерживают INumber<T>.
+		// В противном случае — просто Value<T>.
+		if (TryBuildNumericValue(coreType, chooseAttr, rangeAttr, stepAttr, out var numeric))
+			return numeric;
+
+		// 4) Choice (нечисловой) -> Value<T> + AllowedValues
+		if (chooseAttr is not null)
+		{
+			return new Value<object>(chooseAttr.DefaultValue)
+			{
+				AllowedValues = chooseAttr.Values
+			};
+		}
+
+		// 5) Просто default
+		return null;
+	}
+
+	private static bool ImplementsGenericInterface(Type type, Type genericInterfaceDefinition)
+	{
+		if (!genericInterfaceDefinition.IsGenericTypeDefinition)
+			return false;
+		foreach (var iface in type.GetInterfaces())
+		{
+			if (iface.IsGenericType && iface.GetGenericTypeDefinition() == genericInterfaceDefinition)
+			{
+				var args = iface.GetGenericArguments();
+				if (args.Length == 1 && args[0] == type)
+					return true;
+			}
+		}
+		return false;
+	}
+
+	private static bool TryBuildNumericValue(
+		Type coreType,
+		BotValueChooseAttribute? chooseAttr,
+		BotRangeAttribute? rangeAttr,
+		BotStepAttribute? stepAttr,
+		out ValueBase? value)
+	{
+		value = null;
+		if (!coreType.IsValueType)
+			return false;
+		if (!ImplementsGenericInterface(coreType, typeof(System.Numerics.INumber<>)))
+			return false;
+		if (!ImplementsGenericInterface(coreType, typeof(IParsable<>)))
+			return false;
+
+		var method = typeof(BotBuilder).GetMethod(nameof(CreateNumericValue), BindingFlags.NonPublic | BindingFlags.Static)!
+			.MakeGenericMethod(coreType);
+		value = method.Invoke(null, new object?[] { chooseAttr, rangeAttr, stepAttr }) as ValueBase;
+		return value != null;
+	}
+
+	private static NumericValue<T> CreateNumericValue<T>(
+		BotValueChooseAttribute? chooseAttr,
+		BotRangeAttribute? rangeAttr,
+		BotStepAttribute? stepAttr)
+		where T : struct, System.Numerics.INumber<T>, IParsable<T>
+	{
+		var defaultVal = chooseAttr?.DefaultValue is T d ? d : default(T?);
+		return new NumericValue<T>(defaultVal)
+		{
+			AllowedValues = chooseAttr?.Values?.OfType<T>().ToArray(),
+			Min = TryConvert<T>(rangeAttr?.Min),
+			Max = TryConvert<T>(rangeAttr?.Max),
+			StepBase = TryConvert<T>(stepAttr?.BaseStep) ?? T.One,
+			Multipliers = stepAttr?.Multipliers ?? Array.Empty<int>(),
+		};
+	}
+
+	private static T? TryConvert<T>(object? value) where T : struct
+	{
+		if (value is null) return null;
+		if (value is T t) return t;
+		try
+		{
+			return (T)Convert.ChangeType(value, typeof(T), CultureInfo.InvariantCulture);
+		}
+		catch
+		{
+			return null;
+		}
 	}
 
 	private static Option CreateOption(BotParameterDescription arg)

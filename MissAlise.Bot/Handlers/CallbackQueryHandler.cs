@@ -30,12 +30,14 @@ namespace MissAlise.TelegramBot.Handlers
 
 		protected override async Task BeforeHandleAsync(CallbackQuery data, CancellationToken cancel)
 		{
-			await _bot.ApiClient.AnswerCallbackQuery(data.Id, cancellationToken: cancel).ConfigureAwait(false);				
+			_ = _bot.ApiClient.AnswerCallbackQuery(data.Id, cancellationToken: cancel).ConfigureAwait(false);				
 			await _bot.ApiClient.SendChatAction(Chat.Id, Telegram.Bot.Types.Enums.ChatAction.Typing, cancellationToken: cancel).ConfigureAwait(false);
 		}
 
 		protected override async Task HandleAsync(CallbackQuery data, CancellationToken cancel)
 		{
+			DateTime start;
+			_log.LogInformation("Start handle callback {Id} {now}", data.Id, (start = DateTime.UtcNow).ToLongTimeString());
 			var chatId = data.Message?.Chat.Id;
 			ArgumentNullException.ThrowIfNull(data.Message?.Chat.Id, nameof(chatId));
 
@@ -43,6 +45,8 @@ namespace MissAlise.TelegramBot.Handlers
 			var response = await _engine.HandleAsync(request, cancel).ConfigureAwait(false);
 
 			await _workflowRenderer.RenderAsync(response.Result, cancel).ConfigureAwait(false);
+
+			_log.LogInformation("End handle callback {Id} {now}", data.Id, (DateTime.UtcNow - start));
 		}
 	}
 }

@@ -40,21 +40,22 @@ namespace MissAlise.TelegramBot
 	internal partial class Bot<TUpdate> : Bot where TUpdate : Update
 	{
 		private UpdatesSource<TUpdate> _updatesSource;
-		private readonly Channel<TUpdate> Updates = Channel.CreateUnbounded<TUpdate>(
-			new()
+		private readonly Channel<TUpdate> Updates = Channel.CreateBounded<TUpdate>(
+			new BoundedChannelOptions(1024)
 			{
 				SingleReader = true,
 				SingleWriter = true,
+				FullMode = BoundedChannelFullMode.Wait
 			}
 		);
 
-		public Bot(IOptions<BotConfiguration> options, ILogger<Bot<TUpdate>> log, BotDefinition definition) : base(log, definition)
+		public Bot(IOptions<BotConfiguration> options, ILogger<Bot<TUpdate>> log, BotDefinition definition, ITelegramBotClient apiClient) : base(log, definition)
 		{
 			botOptions = options.Value;
 
-			ApiClient = new TelegramBotClient(botOptions.ApiKey, HttpConnection);
+			ApiClient = apiClient;//new TelegramBotClient(botOptions.ApiKey, HttpConnection);
 
-			receiveOptions = new ReceiverOptions() { Limit = 100, AllowedUpdates = [UpdateType.Message, UpdateType.InlineQuery, UpdateType.CallbackQuery, UpdateType.ChosenInlineResult] };
+			receiveOptions = new ReceiverOptions() { Limit = 10, AllowedUpdates = [UpdateType.Message, UpdateType.InlineQuery, UpdateType.CallbackQuery, UpdateType.ChosenInlineResult] };
 		}
 		
 		public virtual IAsyncEnumerable<TUpdate> UpdatesSource 

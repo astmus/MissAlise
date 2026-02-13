@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Threading.Channels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -5,81 +7,102 @@ using MissAlise.Application.Common.RequestHandler;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace MissAlise.TelegramBot
 {
-	internal partial class Bot<TUpdate> where TUpdate: Update
+	internal partial class Bot<TUpdate> where TUpdate : Update
 	{
 		internal sealed class UpdateReceiver : BackgroundService
 		{
+			private int _messageOffset;
 			private readonly ILogger<UpdateReceiver> _log;
-			private readonly IServiceScopeFactory _scopeFactory;
-
-			private IServiceScope? _scope;
 			private Bot<TUpdate>? _bot;
 
-			public UpdateReceiver(ILogger<UpdateReceiver> log, IServiceScopeFactory scopeFactory)
+			public UpdateReceiver(ILogger<UpdateReceiver> log, Bot<TUpdate> bot)
 			{
 				_log = log;
-				_scopeFactory = scopeFactory;
+				_bot = bot;
 			}
 
 			private async Task InitializeAsync(CancellationToken cancel)
 			{
-				_scope = _scopeFactory.CreateScope();
+				_bot.Info = await _bot.ApiClient.GetMe(cancel);
 
-				try
-				{
-					_bot = _scope.ServiceProvider.GetRequiredService<Bot<TUpdate>>();
-					_bot.Info = await _bot.ApiClient.GetMe(cancel);
-					
-					await _bot.ApiClient.DeleteMyCommands(cancellationToken: cancel);
+				await _bot.ApiClient.DeleteMyCommands(cancellationToken: cancel);
 
-					_log.LogInformation("Connected as {Bot}", _bot.Info);
-				}
-				catch
-				{
-					_scope.Dispose();
-					_scope = null;
-					_bot = null;
-					throw;
-				}
+				_log.LogInformation("Connected as {Bot}", _bot.Info);
 			}
 
-			protected override async Task ExecuteAsync(CancellationToken ct)
+			protected override async Task ExecuteAsync(CancellationToken cancel)
 			{
-				await InitializeAsync(ct);
+				await InitializeAsync(cancel);
+				await DropPendingUpdatesIfNeeded(cancel).ConfigureAwait(false);
 
-				try
+				var getUpdatesRequest = new GetUpdatesRequest<TUpdate>
 				{
-					if (_bot is null) return;
+					Offset = _messageOffset,
+					Limit = _bot.receiveOptions.Limit,
+					Timeout = 120,
+					AllowedUpdates = _bot.receiveOptions.AllowedUpdates,
+				};
 
-					await foreach (var update in _bot.UpdatesSource.WithCancellation(ct))
+				var backoffMs = 200;
+				while (!cancel.IsCancellationRequested)
+				{
+					try
 					{
-						_log.LogInformation("Got update {Id}", update.Id);
-						await _bot.Updates.Writer.WriteAsync(update, ct);
+						var updateArray = await _bot.ApiClient.SendRequest(getUpdatesRequest, cancellationToken: cancel).ConfigureAwait(false);
+
+						if (updateArray.Length > 0)
+						{
+							_messageOffset = updateArray[^1].Id + 1;
+
+							foreach (var update in updateArray)
+							{
+								await _bot.Updates.Writer.WriteAsync(update);
+							}
+
+							getUpdatesRequest.Offset = _messageOffset;
+						}
+
+						backoffMs = 200;
+					}
+					catch (OperationCanceledException)
+					{
+						return;
+					}
+					catch (Telegram.Bot.Exceptions.RequestException ex) when (ex.InnerException is TaskCanceledException or TimeoutException)
+					{
+						await Task.Delay(backoffMs, cancel).ConfigureAwait(false);
+						backoffMs = Math.Min(backoffMs * 2, 5000);
+						continue;
+					}
+					catch (Exception ex)
+					{
+						await _bot.HandleErrorAsync(ex, cancel).ConfigureAwait(false);
+						await Task.Delay(backoffMs, cancel).ConfigureAwait(false);
+						backoffMs = Math.Min(backoffMs * 2, 10000);
 					}
 				}
-				catch (OperationCanceledException) when (ct.IsCancellationRequested)
-				{
-					// normal stop
-				}
-				catch (Exception ex)
-				{
-					_log.LogError(ex, "UpdateReceiver crashed");
-					throw; // опционально: чтобы хост остановился/перезапустился
-				}
+
+				_bot.Updates.Writer.Complete();
 			}
 
-			public override async Task StopAsync(CancellationToken cancellationToken)
+			private async Task DropPendingUpdatesIfNeeded(CancellationToken cancel)
 			{
-				await base.StopAsync(cancellationToken);
+				if (_bot.receiveOptions.DropPendingUpdates is false)
+					return;
 
-				_scope?.Dispose();
-				_scope = null;
-				_bot = null;
+				try
+				{
+					var updates = await _bot.ApiClient.GetUpdates(-1, 1, 0, [], cancel).ConfigureAwait(false);
+					_messageOffset = updates.Length == 0 ? 0 : updates[^1].Id + 1;
+				}
+				catch (OperationCanceledException)
+				{				
+				}
 			}
 		}
-
 	}
 }

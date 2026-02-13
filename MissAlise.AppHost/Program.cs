@@ -7,7 +7,7 @@ var pgUser = builder.AddParameter("pgUser", "postgres");
 var pgPass = builder.AddParameter("pgPass", "postgres");
 
 // Redis
-var cache = builder.AddRedis("cache", 6606);
+var cache = builder.AddRedis("cache");
 
 // PostgreSQL
 var postgres = builder.AddPostgres("psserver", pgUser, pgPass)
@@ -31,7 +31,13 @@ var pgDb = postgres.AddDatabase("missdb");
 var mongoUser = builder.AddParameter("mongoUser", "admin");
 var mongoPass = builder.AddParameter("mongoPass", "ChangeMe123!");
 
-var mongo = builder.AddMongoDB("mongo", port: 27017, mongoUser, mongoPass)
+var mongo = builder.AddMongoDB("mongo", null, mongoUser, mongoPass)
+	.WithEndpoint(
+		name: "mongoendpoint",
+		scheme: "tcp",
+		port: 27014,
+		targetPort: 27017,
+		isProxied: false)
 	.WithImage("futark/mongo-seeded")
 	.WithImageTag("dump-v1")	
 	.WithDataVolume("mongo-seeded-data")

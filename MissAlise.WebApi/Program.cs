@@ -16,6 +16,7 @@ using MissAlise.TelegramBot.Building;
 using MissAlise.TelegramBot.Commands;
 using MissAlise.ValueObjects;
 using MissAlise.Workflow.Demo.BackgroundSync;
+using MissAlise.Workflow.Demo.BotAttrPlayground;
 using StackExchange.Redis;
 
 namespace MissAlise.WebApi;
@@ -50,6 +51,8 @@ public class Program
 				.AddCommand<StartCommand>("start", "restart")
 				.AddCommand<SyncCommand>("sync", "run sync full/deff", "Синхронизация")
 				.AddCommand<MyCommand>("my", "Тестовая команда", "Teстировать")
+				.AddCommand<AllInOneDemoCommand>("all", "Тестовая команда", "В одном")
+				.AddCommand<BotAttributesPlaygroundCommand>("attr", "attributes test", "Тест атрибутов")
 				.AddCommand<BackgroundSyncCommand>("back_sync", "back sync", "Фоновое выполнение")
 				.BeginScope<OneDriveRoot>("onedrive", "one drive commands", "Onedrive облако")
 					.AddCommand<OneDriveStatus>("status", "status of client")
@@ -81,6 +84,10 @@ public class Program
 				cfg.CreateMap<Telegram.Bot.Types.User, UserProfile>();
 			});
 
+		
+		builder.Logging.AddConsole();
+		
+
 		builder.Services.AddEndpointsApiExplorer(); // только для minimal api
 		builder.Services.AddSwaggerGen(options=> {
 			var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -88,6 +95,9 @@ public class Program
 		});
 
 		var app = builder.Build();
+		
+		app.Logger.LogInformation("WEBAPI STARTED {pid}", Environment.ProcessId);
+		Console.WriteLine($"STDOUT TEST from WebApi pid={Environment.ProcessId}");
 
 		app.Services.UseBotWorkflow();
 

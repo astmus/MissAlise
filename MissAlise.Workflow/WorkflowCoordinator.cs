@@ -26,9 +26,7 @@ public sealed class WorkflowCoordinator : IWorkflowCoordinator
 		_commandSink = commandSink;
 	}
 
-	public async Task<WorkflowRequest> HandleAsync(
-		WorkflowRequest request,
-		CancellationToken cancellationToken = default)
+	public async Task<WorkflowRequest> HandleAsync(WorkflowRequest request, CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(request);
 

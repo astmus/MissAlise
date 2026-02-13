@@ -9,9 +9,9 @@ namespace MissAlise.TelegramBot.Workflow.Cli;
 internal sealed class TelegramCliWorkflow
 {
 	public static readonly WorkflowId Id = new("telegram-cli");
-	public static readonly WorkflowStepId MenuStep = new("cli:menu");
-	public static readonly WorkflowStepId WizardStep = new("cli:wizard");
-	public static readonly WorkflowStepId CommandStep = new("cli:command");
+	public static readonly WorkflowStepId MenuStep = WorkflowStepId.From<TelegramCliMenuStep>();
+	public static readonly WorkflowStepId WizardStep = WorkflowStepId.From<TelegramCliWizardStep>();
+	public static readonly WorkflowStepId CommandStep = WorkflowStepId.From<TelegramCliCommandStep>();
 
 	public static void Register(WorkflowRegistry registry)
 	{
