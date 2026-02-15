@@ -197,27 +197,26 @@ internal sealed class TelegramCliSession
 			return false;
 		}
 
-		if (!TryValidateValue(option, raw, out error))
+		if (!TryValidateValue(leaf, option, raw, out error))
 			return false;
 
 		SetArg(param.Name, raw);
 		return true;
 	}
 
-	public static bool TryValidateValue(Option option, string raw, out string? error)
+	public static bool TryValidateValue(BotCommandDescription leaf, Option option, string raw, out string? error)
 	{
 		error = null;
 
-		var cmd = option.RecursiveParent as Command;
-		if (cmd is null)
+		if (leaf.Command is null)
 		{
-			error = $"Option '{option.Name}' не привязан к команде.";
+			error = "Не найдена команда для валидации параметра.";
 			return false;
 		}
 
 		var optionAlias = option.RawAliases.FirstOrDefault() ?? option.Name;
 		var escapedValue = EscapeCliValue(raw);
-		var parseResult = cmd.Parse($"{cmd.Name} {optionAlias} {escapedValue}");
+		var parseResult = leaf.Command.Parse($"{optionAlias} {escapedValue}");
 		if (parseResult.Errors.Count == 0)
 		{
 			return true;
