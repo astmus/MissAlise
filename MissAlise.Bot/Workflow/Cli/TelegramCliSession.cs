@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -190,27 +191,44 @@ internal sealed class TelegramCliSession
 			return false;
 		}
 
-		if (!TryValidateValue(param, raw, out error))
+		if (leaf.OptionsByParamKey is null || !leaf.OptionsByParamKey.TryGetValue(param.Name, out var option))
+		{
+			error = $"Для параметра '{paramName}' не найден CLI option.";
+			return false;
+		}
+
+		if (!TryValidateValue(option, raw, out error))
 			return false;
 
 		SetArg(param.Name, raw);
 		return true;
 	}
 
-	public static bool TryValidateValue(BotParameterDescription param, string raw, out string? error)
+	public static bool TryValidateValue(Option option, string raw, out string? error)
 	{
 		error = null;
-		try
+
+		var cmd = option.RecursiveParent as Command;
+		if (cmd is null)
 		{
-			_ = ConvertFromString(raw, param.ValueType);
-			return true;
-		}
-		catch (Exception ex) when (ex is FormatException or NotSupportedException or ArgumentException)
-		{
-			error = ex.Message;
+			error = $"Option '{option.Name}' не привязан к команде.";
 			return false;
 		}
+
+		var optionAlias = option.RawAliases.FirstOrDefault() ?? option.Name;
+		var escapedValue = EscapeCliValue(raw);
+		var parseResult = cmd.Parse($"{cmd.Name} {optionAlias} {escapedValue}");
+		if (parseResult.Errors.Count == 0)
+		{
+			return true;
+		}
+
+		error = string.Join(" ", parseResult.Errors.Select(e => e.Message));
+		return false;
 	}
+
+	private static string EscapeCliValue(string value)
+		=> '"' + value.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal) + '"';
 
 	private static readonly ConcurrentDictionary<Type, ParameterInfo[]> _ctorParamsCache = new();
 
