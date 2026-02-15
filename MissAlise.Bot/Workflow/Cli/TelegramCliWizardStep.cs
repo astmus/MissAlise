@@ -91,10 +91,10 @@ internal sealed class TelegramCliWizardStep : TelegramCliStep
 
 			if (string.IsNullOrWhiteSpace(currentValue)
 				&& curParam.IsRequired
-				&& curParam.DefaultValue is not null
-				&& curParam.DefaultValue.Default is not null)
+				&& curParam.Value is not null
+				&& curParam.Value.Default is not null)
 			{
-				cli.SetArg(curParam.Name, Convert.ToString(curParam.DefaultValue.Default, System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty);
+				cli.SetArg(curParam.Name, Convert.ToString(curParam.Value.Default, System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty);
 				currentValue = cli.GetArg(curParam.Name);
 			}
 

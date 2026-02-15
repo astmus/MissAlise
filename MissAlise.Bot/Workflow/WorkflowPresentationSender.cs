@@ -1,3 +1,4 @@
+using System.Linq;
 using MissAlise.Workflow.Presentation;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -11,10 +12,10 @@ internal static class WorkflowPresentationSender
 	{
 		ReplyMarkup? markup = null;
 
-		if (presentation.Buttons.Count > 0)
+		if (presentation.Buttons?.Any() == true)
 		{
 			var rows = presentation.Buttons
-				.Select(b => new[] { InlineKeyboardButton.WithCallbackData(b.Text, b.Payload) })
+				.Select(row => row.Select(btn => InlineKeyboardButton.WithCallbackData(btn.Text, btn.Payload)).ToArray())
 				.ToArray();
 
 			markup = new InlineKeyboardMarkup(rows);
@@ -36,10 +37,10 @@ internal static class WorkflowPresentationSender
 	{
 		InlineKeyboardMarkup? markup = null;
 
-		if (presentation.Buttons.Count > 0)
+		if (presentation.Buttons?.Any() == true)
 		{
 			var rows = presentation.Buttons
-				.Select(b => new[] { InlineKeyboardButton.WithCallbackData(b.Text, b.Payload) })
+				.Select(row => row.Select(btn => InlineKeyboardButton.WithCallbackData(btn.Text, btn.Payload)).ToArray())
 				.ToArray();
 
 			markup = new InlineKeyboardMarkup(rows);

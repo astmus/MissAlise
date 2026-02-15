@@ -32,10 +32,10 @@ public sealed class BackgroundSyncWorkflowPresenter : IWorkflowPresenter
                 "1) Выбери Full/Diff\n2) Выбери Force on/off\n3) После выбора режима мы пойдём дальше.",
             Buttons = new[]
             {
-                new WorkflowButton { Text = "Full", Payload = "bs:mode:full" },
-                new WorkflowButton { Text = "Diff", Payload = "bs:mode:diff" },
-                new WorkflowButton { Text = "Force ON", Payload = "bs:force:on" },
-                new WorkflowButton { Text = "Force OFF", Payload = "bs:force:off" },
+               new[]{ new WorkflowButton { Text = "Full", Payload = "bs:mode:full" },
+				new WorkflowButton { Text = "Diff", Payload = "bs:mode:diff" }},
+                new [] {new WorkflowButton { Text = "Force ON", Payload = "bs:force:on" },
+				new WorkflowButton { Text = "Force OFF", Payload = "bs:force:off" }},
             }
         };
     }
@@ -55,7 +55,7 @@ public sealed class BackgroundSyncWorkflowPresenter : IWorkflowPresenter
                 "или нажми пресет:",
             Buttons = new[]
             {
-                new WorkflowButton { Text = "Preset: /incoming → C:\\MissAlise\\Incoming", Payload = "bs:folder:preset:1" }
+                new [] {new WorkflowButton { Text = "Preset: /incoming → C:\\MissAlise\\Incoming", Payload = "bs:folder:preset:1" } }
             }
         };
     }
@@ -71,9 +71,12 @@ public sealed class BackgroundSyncWorkflowPresenter : IWorkflowPresenter
                 "Выбери вариант кнопкой или пришли число секунд сообщением.",
             Buttons = new[]
             {
-                new WorkflowButton { Text = "5 min", Payload = "bs:period:300" },
-                new WorkflowButton { Text = "15 min", Payload = "bs:period:900" },
-                new WorkflowButton { Text = "1 hour", Payload = "bs:period:3600" },
+                new[]
+                {
+                    new WorkflowButton { Text = "5 min", Payload = "bs:period:300" },
+                    new WorkflowButton { Text = "15 min", Payload = "bs:period:900" },
+                    new WorkflowButton { Text = "1 hour", Payload = "bs:period:3600" },
+                }
             }
         };
     }
@@ -89,8 +92,11 @@ public sealed class BackgroundSyncWorkflowPresenter : IWorkflowPresenter
                 "Включить аккуратные отчёты в Telegram о загруженных файлах?",
             Buttons = new[]
             {
-                new WorkflowButton { Text = "Reporting ON", Payload = "bs:report:on" },
-                new WorkflowButton { Text = "Reporting OFF", Payload = "bs:report:off" },
+                new[]
+                {
+                    new WorkflowButton { Text = "Reporting ON", Payload = "bs:report:on" },
+                    new WorkflowButton { Text = "Reporting OFF", Payload = "bs:report:off" },
+                }
             }
         };
     }
@@ -120,8 +126,11 @@ public sealed class BackgroundSyncWorkflowPresenter : IWorkflowPresenter
                 "Потом кнопкой Toggle можно включать/выключать.",
             Buttons = new[]
             {
-                new WorkflowButton { Text = "Confirm", Payload = "bs:confirm" },
-                new WorkflowButton { Text = active ? "Disable" : "Enable", Payload = "bs:toggle" },
+                new[]
+                {
+                    new WorkflowButton { Text = "Confirm", Payload = "bs:confirm" },
+                    new WorkflowButton { Text = active ? "Disable" : "Enable", Payload = "bs:toggle" },
+                }
             }
         };
     }

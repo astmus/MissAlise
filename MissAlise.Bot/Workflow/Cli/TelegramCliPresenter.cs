@@ -103,8 +103,14 @@ internal sealed class TelegramCliPresenter : IWorkflowPresenter
 		return new WorkflowPresentation
 		{
 			Text = string.Join("\n", lines),
-			Buttons = buttons
+			Buttons = ChunkButtons(buttons, 4)
 		};
+	}
+
+	private static IEnumerable<IEnumerable<WorkflowButton>> ChunkButtons(IList<WorkflowButton> buttons, int maxPerRow)
+	{
+		for (var i = 0; i < buttons.Count; i += maxPerRow)
+			yield return buttons.Skip(i).Take(maxPerRow);
 	}
 
 	private WorkflowPresentation PresentWizard(WorkflowSession session, TelegramCliSession cli)
@@ -115,9 +121,9 @@ internal sealed class TelegramCliPresenter : IWorkflowPresenter
 			return new WorkflowPresentation
 			{
 				Text = "Сессия ввода параметров устарела. Выбери команду заново.",
-				Buttons = _bot.Definition.Description.SubCommands
+				Buttons = new[] { _bot.Definition.Description.SubCommands
 					.Select(c => new WorkflowButton { Text = "/" + c.Name, Payload = "cmd:" + c.Name })
-					.ToArray()
+					.ToList() }
 			};
 		}
 
@@ -132,8 +138,8 @@ internal sealed class TelegramCliPresenter : IWorkflowPresenter
 
 		lines.Add($"Команда: /{path}");
 		lines.Add($"Параметр {idx + 1}/{leaf.Parameters.Count}: {p.Name}");
-		if (p.DefaultValue is not null && p.DefaultValue.Default is not null)
-			lines.Add($"По умолчанию: {p.DefaultValue.Default}");
+		if (p.Value is not null && p.Value.Default is not null)
+			lines.Add($"По умолчанию: {p.Value.Default}");
 		
 		lines.Add($"\n Текущее значение: {currentValueText}\n");
 		
@@ -143,10 +149,10 @@ internal sealed class TelegramCliPresenter : IWorkflowPresenter
 		var buttons = new List<WorkflowButton>();
 
 		// Generic editor buttons via Visitor (choices, numeric spinner, bool groups, ...)
-		if (p.DefaultValue is not null)
+		if (p.Value is not null)
 		{
 			var visitor = new TelegramCliWizardValueButtonsVisitor(cli, p);
-			p.DefaultValue.Accept(visitor);
+			p.Value.Accept(visitor);
 			if (visitor.Hints.Count > 0)
 				lines.AddRange(visitor.Hints);
 			if (visitor.Buttons.Count > 0)
@@ -156,7 +162,7 @@ internal sealed class TelegramCliPresenter : IWorkflowPresenter
 		buttons.Add(new WorkflowButton { Text = "Отмена", Payload = "nav:cancel" });
 		buttons.Add(new WorkflowButton { Text = "← В меню", Payload = "nav:back" });
 
-		return new WorkflowPresentation { Text = string.Join('\n', lines), Buttons = buttons };
+		return new WorkflowPresentation { Text = string.Join('\n', lines), Buttons = new[] { buttons } };
 	}
 
 	private WorkflowPresentation PresentCommand(WorkflowSession session, TelegramCliSession cli)
@@ -164,16 +170,16 @@ internal sealed class TelegramCliPresenter : IWorkflowPresenter
 		var path = cli.Path;
 		if (string.IsNullOrWhiteSpace(path) || !_bot.Definition.TryGetLeafByPath(path, out var leaf))
 		{
-			return new WorkflowPresentation
-			{
-				Text = "Команда устарела. Выбери её заново.",
-				Buttons = _bot.Definition.Description.SubCommands
-					.Select(c => new WorkflowButton { Text = "/" + c.Name, Payload = "cmd:" + c.Name })
-					.ToArray()
-			};
-		}
+		return new WorkflowPresentation
+		{
+			Text = "Команда устарела. Выбери её заново.",
+			Buttons = new[] { _bot.Definition.Description.SubCommands
+				.Select(c => new WorkflowButton { Text = "/" + c.Name, Payload = "cmd:" + c.Name })
+				.ToList() }
+		};
+	}
 
-		var lines = new List<string>();
+	var lines = new List<string>();
 		if (!string.IsNullOrWhiteSpace(cli.Error))
 			lines.Add(cli.Error);
 		lines.Add($"Команда: /{path}");
@@ -182,7 +188,7 @@ internal sealed class TelegramCliPresenter : IWorkflowPresenter
 		{
 			var raw = cli.GetArg(p.Name);
 			var v = string.IsNullOrWhiteSpace(raw)
-				? (p.DefaultValue?.Default?.ToString() ?? "не задано")
+				? (p.Value?.Default?.ToString() ?? "не задано")
 				: raw;
 			var req = p.IsRequired ? " *" : "";
 			lines.Add($"- {p.Name}{req}: {v}");
@@ -205,7 +211,7 @@ internal sealed class TelegramCliPresenter : IWorkflowPresenter
 		return new WorkflowPresentation
 		{
 			Text = string.Join("\n", lines),
-			Buttons = buttons
+			Buttons = new[] { buttons }
 		};
 	}
 }

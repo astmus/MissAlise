@@ -224,7 +224,7 @@ internal sealed class TelegramCliSession
 		{
 			var p = ctorParams[i];
 			var paramDesc = leaf.Parameters.FirstOrDefault(x => x.Name.Equals(p.Name, StringComparison.OrdinalIgnoreCase));
-			var raw = GetArg(p.Name!) ?? DefaultValueToRaw(paramDesc?.DefaultValue, p.ParameterType);
+			var raw = GetArg(p.Name!) ?? DefaultValueToRaw(paramDesc?.Value, p.ParameterType);
 			if (raw is null)
 				throw new InvalidOperationException($"Missing session value for '{p.Name}'");
 
@@ -238,7 +238,7 @@ internal sealed class TelegramCliSession
 	public bool TryAdjustNumeric(BotParameterDescription param, string deltaValue, out string adjusted)
 	{
 		adjusted = string.Empty;
-		var valueMeta = param.DefaultValue; // may contain range/step info
+		var valueMeta = param.Value; // may contain range/step info
 		var targetType = param.ValueType;
 		var underlying = Nullable.GetUnderlyingType(targetType);
 		if (underlying is not null)

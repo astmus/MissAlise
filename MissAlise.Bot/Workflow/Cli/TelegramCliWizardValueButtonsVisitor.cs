@@ -12,7 +12,7 @@ namespace MissAlise.TelegramBot.Workflow.Cli;
 
 /// <summary>
 /// Visitor, который умеет построить набор кнопок для wizard-редактирования параметра
-/// на основе meta-описания <see cref="ValueBase"/> (лежит в <see cref="BotParameterDescription.DefaultValue"/>).
+/// на основе meta-описания <see cref="ValueBase"/> (лежит в <see cref="BotParameterDescription.Value"/>).
 /// 
 /// Поддерживает <see cref="NumericValue{T}"/> (int, long, double, decimal и др. через <see cref="INumber{T}"/>), <see cref="BoolValue"/>, <see cref="StepValue{T}"/>.
 /// </summary>
