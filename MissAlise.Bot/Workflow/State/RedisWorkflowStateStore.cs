@@ -25,20 +25,17 @@ public sealed class RedisWorkflowStateStore : IWorkflowStateStore
 		_defaultSessionTtl = options.DefaultSessionTtl;
 		_defaultWorkflowId = options.DefaultWorkflowId;
 		_defaultStartStep = options.DefaultStartStep;
-		_jsonOptions = DefaultJsonOptions();
+		_jsonOptions = _options;
 	}
 
-	static JsonSerializerOptions _options;
-	private static JsonSerializerOptions DefaultJsonOptions()
-	{
-		return _options ?? (_options ?? new JsonSerializerOptions
+	static readonly JsonSerializerOptions _options = new JsonSerializerOptions
 		{
 			PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
 			WriteIndented = false,
 			DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
 			PropertyNameCaseInsensitive = true,
-		});
-	}
+		};
+	
 
 	private string SessionKey(string sessionId) => $"{_keyPrefix}:sess:{sessionId}";
 	private string ActiveKey(long chatId, long userId) => $"{_keyPrefix}:active:{chatId}:{userId}";
@@ -54,7 +51,12 @@ public sealed class RedisWorkflowStateStore : IWorkflowStateStore
 		var sessKey = SessionKey(sid!);
 		var exists = await _db.KeyExistsAsync(sessKey).ConfigureAwait(false);
 
-		return !exists;
+		if (exists)
+			return false;
+
+		// cleanup: активный указатель указывает в никуда
+		await _db.KeyDeleteAsync(activeKey).ConfigureAwait(false);
+		return true;
 	}
 
 	private TimeSpan GetTtlFromSession(WorkflowSession session)
@@ -113,7 +115,7 @@ public sealed class RedisWorkflowStateStore : IWorkflowStateStore
 		var batch = _db.CreateBatch();
 
 		var tSetSession = batch.StringSetAsync(sessKey, payload, expiry: ttl);
-		var tSetActive = batch.StringSetAsync(activeKey, session.SessionId, expiry: ttl);			
+		var tSetActive = batch.StringSetAsync(activeKey, session.SessionId);			
 
 		batch.Execute();
 

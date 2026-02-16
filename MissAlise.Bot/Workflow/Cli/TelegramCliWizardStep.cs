@@ -43,46 +43,15 @@ internal sealed class TelegramCliWizardStep : TelegramCliStep
 		if (string.IsNullOrWhiteSpace(inputData))
 			return Task.FromResult(WorkflowStepResult.Stay());
 
-		if (TelegramCliSession.TryParseChoicePagePayload(inputData, out var choiceKey, out var deltaPage))
+		var result = GetCallbackType(inputData) switch
 		{
-			var p = leaf.Parameters.FirstOrDefault(x => x.Name.Equals(choiceKey, StringComparison.OrdinalIgnoreCase))
-				?? leaf.Parameters[idx];
-			var currentPage = cli.GetChoicePage(p.Name);
-			cli.SetChoicePage(p.Name, Math.Max(0, currentPage + deltaPage));
-			cli.ParamIndex = idx;
-			return Task.FromResult(WorkflowStepResult.Stay());
-		}
-
-		if (TelegramCliSession.TryParseAdjustPayload(inputData, out var adjKey, out var deltaValue))
-		{
-			var param = leaf.Parameters.FirstOrDefault(x => x.Name == adjKey);
-			if (param is not null && cli.TryAdjustNumeric(param, deltaValue, out var adjusted))
-			{
-				cli.SetArg(param.Name, adjusted);
-				cli.ParamIndex = idx;
-			}
-			return Task.FromResult(WorkflowStepResult.Stay());
-		}
-
-		if (TelegramCliSession.TryParseSetPayload(inputData, out var pKey, out var pValue))
-		{
-			if (!cli.TryApplyValue(leaf, pKey, pValue, out var error))
-			{
-				cli.Error = error ?? "Некорректное значение.";
-				cli.ParamIndex = idx;
-				return Task.FromResult(WorkflowStepResult.Stay());
-			}
-
-			cli.SetChoicePage(pKey, 0);
-
-			if (cli.AllRequiredCollected(leaf))
-				return Task.FromResult(WorkflowStepResult.Next(TelegramCliWorkflow.CommandStep));
-
-			idx = cli.NextMissingRequiredIndex(leaf);
-			if (idx < 0) idx = 0;
-			cli.ParamIndex = idx;
-			return Task.FromResult(WorkflowStepResult.Stay());
-		}
+			"choice" => TryParseChoicePayload(inputData, out var choiceKey, out var deltaPage) ? (WorkflowStepResult?)HandleChoice(cli, leaf, idx, choiceKey, deltaPage) : null,
+			"adj" => TryParseAdjustPayload(inputData, out var adjKey, out var deltaValue) ? (WorkflowStepResult?)HandleAdjust(cli, leaf, idx, adjKey, deltaValue) : null,
+			"set" => TryParseSetPayload(inputData, out var pKey, out var pValue) ? (WorkflowStepResult?)HandleSet(cli, leaf, idx, pKey, pValue) : null,
+			_ => null
+		};
+		if (result is not null)
+			return Task.FromResult(result);
 
 		if (string.Equals(inputData, "nav:accept", StringComparison.OrdinalIgnoreCase))
 		{
@@ -111,5 +80,61 @@ internal sealed class TelegramCliWizardStep : TelegramCliStep
 		}
 
 		return Task.FromResult(WorkflowStepResult.Stay());
+	}
+
+	private WorkflowStepResult HandleChoice(
+		TelegramCliSession cli,
+		BotCommandDescription leaf,
+		int idx,
+		string choiceKey,
+		int deltaPage)
+	{
+		var p = leaf.Parameters.FirstOrDefault(x => x.Name.Equals(choiceKey, StringComparison.OrdinalIgnoreCase))
+			?? leaf.Parameters[idx];
+		var currentPage = cli.GetChoice(p.Name);
+		cli.SetChoice(p.Name, Math.Max(0, currentPage + deltaPage));
+		cli.ParamIndex = idx;
+		return WorkflowStepResult.Stay();
+	}
+
+	private WorkflowStepResult HandleAdjust(
+		TelegramCliSession cli,
+		BotCommandDescription leaf,
+		int idx,
+		string adjKey,
+		string deltaValue)
+	{
+		var param = leaf.Parameters.FirstOrDefault(x => x.Name == adjKey);
+		if (param is not null && cli.TryAdjustNumeric(param, deltaValue, out var adjusted))
+		{
+			cli.SetArg(param.Name, adjusted);
+			cli.ParamIndex = idx;
+		}
+		return WorkflowStepResult.Stay();
+	}
+
+	private WorkflowStepResult HandleSet(
+		TelegramCliSession cli,
+		BotCommandDescription leaf,
+		int idx,
+		string pKey,
+		string pValue)
+	{
+		if (!cli.TryApplyValue(leaf, pKey, pValue, out var error))
+		{
+			cli.Error = error ?? "Некорректное значение.";
+			cli.ParamIndex = idx;
+			return WorkflowStepResult.Stay();
+		}
+
+		cli.SetChoice(pKey, 0);
+
+		if (cli.AllRequiredCollected(leaf))
+			return WorkflowStepResult.Next(TelegramCliWorkflow.CommandStep);
+
+		idx = cli.NextMissingRequiredIndex(leaf);
+		if (idx < 0) idx = 0;
+		cli.ParamIndex = idx;
+		return WorkflowStepResult.Stay();
 	}
 }

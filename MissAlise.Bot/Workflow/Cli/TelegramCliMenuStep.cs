@@ -34,8 +34,10 @@ internal sealed class TelegramCliMenuStep : TelegramCliStep
 		// Callback navigation
 		if (input.Kind == WorkflowInputKind.Callback && input.Payload is not null)
 		{
-			if (TelegramCliSession.TryParseCmdPayload(input.Payload, out var cbPath))
+			if (TryParseCmdPayload(input.Payload, out var cbPath))
 				return Task.FromResult(StartCommandOrWizard(cli, cbPath));
+			else
+				return Task.FromResult(DisplayMenu(cli));
 		}
 
 		// Command line text
@@ -45,7 +47,7 @@ internal sealed class TelegramCliMenuStep : TelegramCliStep
 			if (string.IsNullOrWhiteSpace(text))
 				return Task.FromResult(DisplayMenu(cli));
 
-			if (TelegramCliSession.TryParseCmdPayload(text, out var pastedPath))
+			if (TryParseCmdPayload(text, out var pastedPath))
 				return Task.FromResult(StartCommandOrWizard(cli, pastedPath));
 
 			//if (!text.StartsWith('/'))

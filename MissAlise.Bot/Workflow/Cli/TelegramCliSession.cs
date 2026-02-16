@@ -79,6 +79,7 @@ internal sealed class TelegramCliSession
 		var keys = _session.State.Keys
 			.Where(k => k.StartsWith(ArgPrefix, StringComparison.OrdinalIgnoreCase))
 			.ToArray();
+
 		foreach (var k in keys)
 			_session.State.Remove(k);
 	}
@@ -95,69 +96,17 @@ internal sealed class TelegramCliSession
 			_session.State.Remove(k);
 	}
 
-	public int GetChoicePage(string paramName)
+	public int GetChoice(string paramName)
 	{
 		var key = $"{KeyChoicePrefix}{paramName}:page";
 		var raw = _session.State.TryGetValue(key, out var v) ? v : null;
 		return int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var p) ? p : 0;
 	}
 
-	public void SetChoicePage(string paramName, int page)
+	public void SetChoice(string paramName, int page)
 	{
 		var key = $"{KeyChoicePrefix}{paramName}:page";
 		_session.State[key] = page.ToString(CultureInfo.InvariantCulture);
-	}
-
-	public static bool TryParseCmdPayload(string payload, out string path)
-	{
-		path = string.Empty;
-		if (!payload.StartsWith("cmd:", StringComparison.OrdinalIgnoreCase))
-			return false;
-		path = payload.Substring(4);
-		path = BotDefinition.NormalizePath(path);
-		return path.Length > 0;
-	}
-
-	public static bool TryParseSetPayload(string payload, out string paramKey, out string value)
-	{
-		paramKey = string.Empty;
-		value = string.Empty;
-		if (!payload.StartsWith("set:", StringComparison.OrdinalIgnoreCase)) return false;
-
-		var rest = payload.Substring(4);
-		var i = rest.IndexOf(':');
-		if (i <= 0) return false;
-		paramKey = rest[..i];
-		value = rest[(i + 1)..];
-		return paramKey.Length > 0;
-	}
-
-	public static bool TryParseAdjustPayload(string payload, out string paramKey, out string delta)
-	{
-		paramKey = string.Empty;
-		delta = string.Empty;
-		if (!payload.StartsWith("adj:", StringComparison.OrdinalIgnoreCase)) return false;
-
-		var rest = payload.Substring(4);
-		var i = rest.IndexOf(':');
-		if (i <= 0) return false;
-		paramKey = rest[..i];
-		delta = rest[(i + 1)..];
-		return paramKey.Length > 0;
-	}
-
-	public static bool TryParseChoicePagePayload(string payload, out string paramKey, out int delta)
-	{
-		paramKey = string.Empty;
-		delta = 0;
-		if (!payload.StartsWith("choicepage:", StringComparison.OrdinalIgnoreCase)) return false;
-
-		var rest = payload.Substring("choicepage:".Length);
-		var i = rest.IndexOf(':');
-		if (i <= 0) return false;
-		paramKey = rest[..i];
-		var deltaStr = rest[(i + 1)..];
-		return paramKey.Length > 0 && int.TryParse(deltaStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out delta);
 	}
 
 	public bool AllRequiredCollected(BotCommandDescription leaf)
@@ -198,19 +147,7 @@ internal sealed class TelegramCliSession
 	}
 
 	public static bool TryValidateValue(BotParameterDescription param, string raw, out string? error)
-	{
-		error = null;
-		try
-		{
-			_ = ConvertFromString(raw, param.ValueType);
-			return true;
-		}
-		catch (Exception ex) when (ex is FormatException or NotSupportedException or ArgumentException)
-		{
-			error = ex.Message;
-			return false;
-		}
-	}
+		=> BotDefinition.ValidateParameterValue(param, raw, out error);
 
 	private static readonly ConcurrentDictionary<Type, ParameterInfo[]> _ctorParamsCache = new();
 

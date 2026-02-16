@@ -84,9 +84,6 @@ public class Program
 				cfg.CreateMap<Telegram.Bot.Types.User, UserProfile>();
 			});
 
-		
-		builder.Logging.AddConsole();
-		
 
 		builder.Services.AddEndpointsApiExplorer(); // только для minimal api
 		builder.Services.AddSwaggerGen(options=> {
@@ -96,9 +93,6 @@ public class Program
 
 		var app = builder.Build();
 		
-		app.Logger.LogInformation("WEBAPI STARTED {pid}", Environment.ProcessId);
-		Console.WriteLine($"STDOUT TEST from WebApi pid={Environment.ProcessId}");
-
 		app.Services.UseBotWorkflow();
 
 		app.MapGet("/signin-oidc", Signin);

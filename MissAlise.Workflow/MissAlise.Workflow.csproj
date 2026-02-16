@@ -15,8 +15,4 @@
     <ProjectReference Include="..\MissAlise.Application\MissAlise.Application.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Demo\" />
-  </ItemGroup>
-
 </Project>

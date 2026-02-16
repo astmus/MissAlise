@@ -24,16 +24,11 @@ internal sealed class TelegramCliCommandStep : TelegramCliStep
 		CancellationToken cancellationToken)
 	{
 		var path = cli.Path;
-		if (string.IsNullOrWhiteSpace(path) || !botDefinition.TryGetLeafByPath(path, out var leaf))
-		{
-			cli.ResetAll();
-			return Task.FromResult(WorkflowStepResult.Next(TelegramCliWorkflow.MenuStep, cli.BuildStateUpdate(error: "Команда устарела. Выбери её заново из меню.")));
-		}
 
 		if (input.Kind == WorkflowInputKind.Callback && input.Payload is not null)
 		{
 			var p = input.Payload;
-
+			botDefinition.TryGetLeafByPath(path, out var leaf);
 			if (string.Equals(p, "nav:back", StringComparison.OrdinalIgnoreCase))
 				return Task.FromResult(WorkflowStepResult.Next(TelegramCliWorkflow.MenuStep));
 
@@ -70,6 +65,6 @@ internal sealed class TelegramCliCommandStep : TelegramCliStep
 				return Task.FromResult(WorkflowStepResult.Stay(cli.BuildStateUpdate(error: "Нажми ▶ Выполнить.")));
 		}
 
-		return Task.FromResult(WorkflowStepResult.Stay());
+		return Task.FromResult(WorkflowStepResult.Next<TelegramCliMenuStep>());
 	}
 }

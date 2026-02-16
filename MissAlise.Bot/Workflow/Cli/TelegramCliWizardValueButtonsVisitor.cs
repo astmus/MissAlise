@@ -32,45 +32,51 @@ internal sealed class TelegramCliWizardValueButtonsVisitor : IValueVisitor
 
 	public void Visit(ValueBase value)
 	{
-		// 1) Если задан набор допустимых значений — показываем “choice” редактор.
-		if (TryBuildChoices(value))
-			return;
-
 		switch (value)
 		{
+			case ChoiceValue cv:
+				BuildChoices(cv);
+				break;
 			case BoolValue bv:
 				BuildBool(bv);
 				break;
-			default:
-				if (TryBuildNumericSpinner(value))
-					break;
-				if (value is StepValue<TimeSpan> sv)
-					BuildTimeSpanSpinner(sv);
+			case NumericValue<int> nvi:
+				BuildNumericSpinner<int>(nvi);
+				break;
+			case NumericValue<long> nvl:
+				BuildNumericSpinner<long>(nvl);
+				break;
+			case NumericValue<double> nvd:
+				BuildNumericSpinner<double>(nvd);
+				break;
+			case NumericValue<decimal> nvm:
+				BuildNumericSpinner<decimal>(nvm);
+				break;
+			case StepValue<TimeSpan> sv:
+				BuildTimeSpanSpinner(sv);
 				break;
 		}
 	}
 
-	private bool TryBuildChoices(ValueBase value)
+	private void BuildChoices(ChoiceValue value)
 	{
 		// Обобщённо читаем Value<T>.AllowedValues через reflection.
-		var allowedProp = value.GetType().GetProperty("AllowedValues");
-		if (allowedProp is null) return false;
-		var allowed = allowedProp.GetValue(value) as System.Collections.IEnumerable;
-		if (allowed is null) return false;
+		var allowed = value.AllowedValues;
+		if (allowed is null) return;		
 
-		var list = allowed.Cast<object?>().Where(x => x is not null).ToList();
-		if (list.Count == 0) return false;
+		//var list = allowed.Cast<object?>().Where(x => x is not null).ToList();
+		//if (list.Count == 0) return;
 
 		const int pageSize = 8;
-		var page = _cli.GetChoicePage(_param.Name);
-		var maxPage = (int)Math.Ceiling(list.Count / (double)pageSize) - 1;
+		var page = _cli.GetChoice(_param.Name);
+		var maxPage = (int)Math.Ceiling(allowed.Count / (double)pageSize) - 1;
 		if (page < 0) page = 0;
 		if (page > maxPage) page = maxPage;
 
 		var start = page * pageSize;
-		var pageItems = list.Skip(start).Take(pageSize).ToList();
+		var pageItems = allowed.Skip(start).Take(pageSize).ToList();
 		Hints.Add("Выбери значение:");
-		if (list.Count > pageSize)
+		if (allowed.Count > pageSize)
 			Hints.Add($"Страница: {page + 1}/{maxPage + 1}");
 
 		foreach (var item in pageItems)
@@ -84,26 +90,24 @@ internal sealed class TelegramCliWizardValueButtonsVisitor : IValueVisitor
 			});
 		}
 
-		if (list.Count > pageSize)
+		if (allowed.Count > pageSize)
 		{
 			Buttons.Add(new WorkflowButton
 			{
 				Text = "◀",
-				Payload = $"choicepage:{_param.Name}:-1"
+				Payload = $"choice:{_param.Name}:-1"
 			});
 			Buttons.Add(new WorkflowButton
 			{
 				Text = "▶",
-				Payload = $"choicepage:{_param.Name}:1"
+				Payload = $"choice:{_param.Name}:1"
 			});
 		}
-
-		return true;
 	}
 
 	private void BuildBool(BoolValue bv)
 	{
-		var (t, f) = BoolVisualGroups.Get(bv.VisualGroupKey);
+		var (t, f) = BoolVisualGroups.Get(bv.VisualStateKey);
 		Buttons.Add(new WorkflowButton { Text = t, Payload = $"set:{_param.Name}:true" });
 		Buttons.Add(new WorkflowButton { Text = f, Payload = $"set:{_param.Name}:false" });
 	}
@@ -121,13 +125,13 @@ internal sealed class TelegramCliWizardValueButtonsVisitor : IValueVisitor
 			return false;
 
 		var method = typeof(TelegramCliWizardValueButtonsVisitor)
-			.GetMethod(nameof(BuildNumericSpinnerCore), BindingFlags.NonPublic | BindingFlags.Instance)!
+			.GetMethod(nameof(BuildNumericSpinner), BindingFlags.NonPublic | BindingFlags.Instance)!
 			.MakeGenericMethod(t);
 		method.Invoke(this, new object[] { value });
 		return true;
 	}
 
-	private void BuildNumericSpinnerCore<T>(NumericValue<T> nv) where T : struct, INumber<T>, IParsable<T>
+	private void BuildNumericSpinner<T>(NumericValue<T> nv) where T : struct, INumber<T>, IParsable<T>
 	{
 		var fp = CultureInfo.InvariantCulture;
 		var currentRaw = _cli.GetArg(_param.Name);

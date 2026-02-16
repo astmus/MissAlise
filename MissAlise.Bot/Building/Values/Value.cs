@@ -4,14 +4,14 @@ using System.Collections.Generic;
 namespace MissAlise.TelegramBot.Building.Values;
 
 /// <summary>
-/// Универсальное описание значения параметра.
+/// Универсальное описание значения параметра. Тип T должен поддерживать парсинг (IParsable).
 /// </summary>
-/// <summary>Значение по умолчанию, если пользователь ещё не ввёл параметр (позиционный параметр DefaultValue).</summary>
 public record Value<T> : ValueBase
+	where T : IParsable<T>
 {
-	public Value(T? DefaultValue = default)
+	public Value(T? defaultValue = default)
 	{
-		Default = DefaultValue ?? default;	
+		Default = defaultValue ?? default;
 	}
 
 	public override Type ValueType => typeof(T);

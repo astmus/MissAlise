@@ -103,7 +103,7 @@ internal sealed class TelegramCliPresenter : IWorkflowPresenter
 		return new WorkflowPresentation
 		{
 			Text = string.Join("\n", lines),
-			Buttons = ChunkButtons(buttons, 4)
+			Buttons = ChunkButtons(buttons, 3)
 		};
 	}
 

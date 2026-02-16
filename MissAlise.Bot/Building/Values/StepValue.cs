@@ -11,7 +11,7 @@ namespace MissAlise.TelegramBot.Building.Values;
 /// поэтому тип T НЕ обязан реализовывать IAdditionOperators/ISubtractionOperators.
 /// </summary>
 public sealed record StepValue<T> : Value<T>
-	where T : struct, IComparable<T>
+	where T : struct, IComparable<T>, IParsable<T>
 {
 	public StepValue(T? defaultValue = default) : base(defaultValue is { } v ? v : default) { }
 
