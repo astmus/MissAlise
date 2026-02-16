@@ -37,11 +37,17 @@ public sealed record NumericValue<T> : Value<T>
 		return value;
 	}
 
-	public T GetDefaultOr(T fallback)
+	public override T GetDefaultOr(T fallback)
 	{
 		T? v = Default as T?;
 		return v.HasValue ? v.Value : fallback;
 	}
+
+	/// <summary>
+	/// Посчитать следующее значение на основе текущего и delta.
+	/// </summary>
+	public override T Next(T current, T delta)
+		=> Clamp(current + delta);
 
 	/// <summary>
 	/// Посчитать следующее значение на основе текущего и (baseStep * multiplier).
@@ -51,6 +57,6 @@ public sealed record NumericValue<T> : Value<T>
 	{
 		var step = StepBase * T.CreateChecked(multiplier);
 		var delta = direction < 0 ? -step : step;
-		return Clamp(current + delta);
+		return Next(current, delta);
 	}
 }

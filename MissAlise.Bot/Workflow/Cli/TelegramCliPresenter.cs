@@ -5,6 +5,7 @@ using System.Linq;
 using MissAlise.TelegramBot.Building;
 using MissAlise.Workflow;
 using MissAlise.Workflow.Presentation;
+using System.CommandLine;
 
 namespace MissAlise.TelegramBot.Workflow.Cli;
 
@@ -65,7 +66,9 @@ internal sealed class TelegramCliPresenter : IWorkflowPresenter
 		}
 		else
 		{
-			commands = _bot.Definition.Description.SubCommands;
+			var parsed = _bot.Definition.RootCommand.Parse(path);
+			_bot.Definition.TryResolveLeaf(parsed, out var leaf);
+			commands = leaf.SubCommands;
 			title = "Выбери команду:";
 		}
 

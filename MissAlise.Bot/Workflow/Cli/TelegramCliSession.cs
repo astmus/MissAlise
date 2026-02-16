@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using MissAlise.TelegramBot.Building;
+using MissAlise.TelegramBot.Building.Values;
 using MissAlise.Workflow;
 
 namespace MissAlise.TelegramBot.Workflow.Cli;
@@ -125,11 +128,7 @@ internal sealed class TelegramCliSession
 		return -1;
 	}
 
-	public bool TryApplyValue(
-		BotCommandDescription leaf,
-		string paramName,
-		string raw,
-		out string? error)
+	public bool TryApplyValue(BotCommandDescription leaf, string paramName, string raw, out string? error)
 	{
 		error = null;
 		var param = leaf.Parameters.FirstOrDefault(x => x.Name.Equals(paramName, StringComparison.OrdinalIgnoreCase));
@@ -139,15 +138,43 @@ internal sealed class TelegramCliSession
 			return false;
 		}
 
-		if (!TryValidateValue(param, raw, out error))
+		if (leaf.OptionsByParamKey is null || !leaf.OptionsByParamKey.TryGetValue(param.Name, out var option))
+		{
+			error = $"Для параметра '{paramName}' не найден CLI option.";
+			return false;
+		}
+
+		if (!TryValidateValue(leaf, option, raw, out error))
 			return false;
 
 		SetArg(param.Name, raw);
 		return true;
 	}
 
-	public static bool TryValidateValue(BotParameterDescription param, string raw, out string? error)
-		=> BotDefinition.ValidateParameterValue(param, raw, out error);
+	public static bool TryValidateValue(BotCommandDescription leaf, Option option, string raw, out string? error)
+	{
+		error = null;
+
+		if (leaf.Command is null)
+		{
+			error = "Не найдена команда для валидации параметра.";
+			return false;
+		}
+
+		var optionAlias = option.Aliases.FirstOrDefault() ?? option.Name;
+		var escapedValue = EscapeCliValue(raw);
+		var parseResult = leaf.Command.Parse($"{optionAlias} {escapedValue}");
+		if (parseResult.Errors.Count == 0)
+		{
+			return true;
+		}
+
+		error = string.Join(" ", parseResult.Errors.Select(e => e.Message));
+		return false;
+	}
+
+	private static string EscapeCliValue(string value)
+		=> '"' + value.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal) + '"';
 
 	private static readonly ConcurrentDictionary<Type, ParameterInfo[]> _ctorParamsCache = new();
 
@@ -175,74 +202,114 @@ internal sealed class TelegramCliSession
 	public bool TryAdjustNumeric(BotParameterDescription param, string deltaValue, out string adjusted)
 	{
 		adjusted = string.Empty;
-		var valueMeta = param.Value; // may contain range/step info
-		var targetType = param.ValueType;
-		var underlying = Nullable.GetUnderlyingType(targetType);
-		if (underlying is not null)
-			targetType = underlying;
+		if (param.Value is not null && TryAdjustByValueMeta(param, param.Value, deltaValue, out adjusted))
+			return true;
 
-		var currentRaw = GetArg(param.Name);
+		return TryAdjustByTargetTypeFallback(param, deltaValue, out adjusted);
+	}
+
+	private bool TryAdjustByValueMeta(BotParameterDescription param, ValueBase valueMeta, string deltaRaw, out string adjusted)
+	{
+		switch (valueMeta)
+		{
+			case Value<int> vInt:
+				return TryAdjustTypedValue(param, vInt, deltaRaw, 0, out adjusted);
+			case Value<long> vLong:
+				return TryAdjustTypedValue(param, vLong, deltaRaw, 0L, out adjusted);
+			case Value<double> vDouble:
+				return TryAdjustTypedValue(param, vDouble, deltaRaw, 0.0, out adjusted);
+			case Value<decimal> vDecimal:
+				return TryAdjustTypedValue(param, vDecimal, deltaRaw, 0m, out adjusted);
+			case Value<TimeSpan> vTimeSpan:
+				return TryAdjustTypedValue(param, vTimeSpan, deltaRaw, TimeSpan.Zero, out adjusted);
+			default:
+				adjusted = string.Empty;
+				return false;
+		}
+	}
+
+	private bool TryAdjustByTargetTypeFallback(BotParameterDescription param, string deltaRaw, out string adjusted)
+	{
+		adjusted = string.Empty;
+		var targetType = Nullable.GetUnderlyingType(param.ValueType) ?? param.ValueType;
 		if (targetType == typeof(int))
-		{
-			var current = string.IsNullOrWhiteSpace(currentRaw)
-				? (valueMeta is MissAlise.TelegramBot.Building.Values.NumericValue<int> nv ? nv.GetDefaultOr(0) : 0)
-				: int.Parse(currentRaw, CultureInfo.InvariantCulture);
-			var delta = int.Parse(deltaValue, CultureInfo.InvariantCulture);
-			var next = current + delta;
-			if (valueMeta is MissAlise.TelegramBot.Building.Values.NumericValue<int> nv2)
-				next = nv2.Clamp(next);
-			adjusted = next.ToString(CultureInfo.InvariantCulture);
-			return true;
-		}
-
+			return TryAdjustPlainNumeric<int>(param, deltaRaw, out adjusted);
 		if (targetType == typeof(long))
-		{
-			var current = string.IsNullOrWhiteSpace(currentRaw)
-				? (valueMeta is MissAlise.TelegramBot.Building.Values.NumericValue<long> nv ? nv.GetDefaultOr(0L) : 0L)
-				: long.Parse(currentRaw, CultureInfo.InvariantCulture);
-			var delta = long.Parse(deltaValue, CultureInfo.InvariantCulture);
-			var next = current + delta;
-			if (valueMeta is MissAlise.TelegramBot.Building.Values.NumericValue<long> nv2)
-				next = nv2.Clamp(next);
-			adjusted = next.ToString(CultureInfo.InvariantCulture);
-			return true;
-		}
-
+			return TryAdjustPlainNumeric<long>(param, deltaRaw, out adjusted);
 		if (targetType == typeof(double))
-		{
-			var current = string.IsNullOrWhiteSpace(currentRaw)
-				? (valueMeta is MissAlise.TelegramBot.Building.Values.NumericValue<double> nv ? nv.GetDefaultOr(0.0) : 0.0)
-				: double.Parse(currentRaw, CultureInfo.InvariantCulture);
-			var delta = double.Parse(deltaValue, CultureInfo.InvariantCulture);
-			var next = current + delta;
-			if (valueMeta is MissAlise.TelegramBot.Building.Values.NumericValue<double> nv2)
-				next = nv2.Clamp(next);
-			adjusted = next.ToString(CultureInfo.InvariantCulture);
-			return true;
-		}
-
+			return TryAdjustPlainNumeric<double>(param, deltaRaw, out adjusted);
 		if (targetType == typeof(decimal))
-		{
-			var current = string.IsNullOrWhiteSpace(currentRaw)
-				? (valueMeta is MissAlise.TelegramBot.Building.Values.NumericValue<decimal> nv ? nv.GetDefaultOr(0m) : 0m)
-				: decimal.Parse(currentRaw, CultureInfo.InvariantCulture);
-			var delta = decimal.Parse(deltaValue, CultureInfo.InvariantCulture);
-			var next = current + delta;
-			if (valueMeta is MissAlise.TelegramBot.Building.Values.NumericValue<decimal> nv2)
-				next = nv2.Clamp(next);
-			adjusted = next.ToString(CultureInfo.InvariantCulture);
-			return true;
-		}
-
+			return TryAdjustPlainNumeric<decimal>(param, deltaRaw, out adjusted);
 		if (targetType == typeof(TimeSpan))
+			return TryAdjustPlainTimeSpan(param, deltaRaw, out adjusted);
+		return false;
+	}
+
+	private bool TryAdjustTypedValue<T>(BotParameterDescription param, Value<T> valueMeta, string deltaRaw, T fallbackDefault, out string adjusted)
+		where T : IParsable<T>
+	{
+		adjusted = string.Empty;
+		var currentRaw = GetArg(param.Name);
+
+		if (!TryParseOrDefault(valueMeta, currentRaw, fallbackDefault, out var current))
+			return false;
+		if (!valueMeta.TryParseRaw(deltaRaw, out var delta))
+			return false;
+
+		T next;
+		try
 		{
-			var current = string.IsNullOrWhiteSpace(currentRaw) ? TimeSpan.Zero : TimeSpan.Parse(currentRaw, CultureInfo.InvariantCulture);
-			var delta = TimeSpan.Parse(deltaValue, CultureInfo.InvariantCulture);
-			adjusted = (current + delta).ToString("c", CultureInfo.InvariantCulture);
+			next = valueMeta.Next(current, delta);
+		}
+		catch (NotSupportedException)
+		{
+			return false;
+		}
+
+		adjusted = valueMeta.ToRaw(next);
+		return true;
+	}
+
+	private bool TryAdjustPlainNumeric<T>(BotParameterDescription param, string deltaRaw, out string adjusted)
+		where T : struct, INumber<T>, IParsable<T>
+	{
+		adjusted = string.Empty;
+		var parser = new Value<T>();
+		var currentRaw = GetArg(param.Name);
+		if (!TryParseOrDefault(parser, currentRaw, T.AdditiveIdentity, out var current))
+			return false;
+		if (!parser.TryParseRaw(deltaRaw, out var delta))
+			return false;
+
+		var next = current + delta;
+		adjusted = parser.ToRaw(next);
+		return true;
+	}
+
+	private bool TryAdjustPlainTimeSpan(BotParameterDescription param, string deltaRaw, out string adjusted)
+	{
+		adjusted = string.Empty;
+		var parser = new Value<TimeSpan>();
+		var currentRaw = GetArg(param.Name);
+		if (!TryParseOrDefault(parser, currentRaw, TimeSpan.Zero, out var current))
+			return false;
+		if (!parser.TryParseRaw(deltaRaw, out var delta))
+			return false;
+
+		adjusted = parser.ToRaw(current + delta);
+		return true;
+	}
+
+	private static bool TryParseOrDefault<T>(Value<T> valueMeta, string? raw, T fallbackDefault, out T value)
+		where T : IParsable<T>
+	{
+		if (string.IsNullOrWhiteSpace(raw))
+		{
+			value = valueMeta.GetDefaultOr(fallbackDefault);
 			return true;
 		}
 
-		return false;
+		return valueMeta.TryParseRaw(raw, out value);
 	}
 
 	private static object? ConvertFromString(string raw, Type targetType)

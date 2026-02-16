@@ -76,8 +76,6 @@ internal sealed class TelegramCliMenuStep : TelegramCliStep
 				cli.ParamIndex = Math.Max(idx, 0);
 				return Task.FromResult(WorkflowStepResult.Next(TelegramCliWorkflow.WizardStep));
 			}
-
-			return Task.FromResult(WorkflowStepResult.Next(TelegramCliWorkflow.CommandStep));
 		}
 
 		return Task.FromResult(DisplayMenu(cli));

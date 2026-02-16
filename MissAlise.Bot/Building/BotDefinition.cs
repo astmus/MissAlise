@@ -138,20 +138,4 @@ public sealed class BotDefinition
 		if (path.StartsWith('/')) path = path[1..];
 		return string.Join(' ', path.Split(' ', StringSplitOptions.RemoveEmptyEntries));
 	}
-
-	/// <summary>Проверяет значение параметра средствами System.CommandLine (парсинг опции).</summary>
-	public static bool ValidateParameterValue(BotParameterDescription param, string raw, out string? error)
-	{
-		error = null;
-		var opt = BotBuilder.CreateOption(param);
-		var cmd = new Command("_");
-		cmd.AddOption(opt);
-		var result = cmd.Parse(new[] { opt.Aliases.First(), raw ?? string.Empty });
-		if (result.Errors.Count > 0)
-		{
-			error = result.Errors[0].Message;
-			return false;
-		}
-		return true;
-	}
 }

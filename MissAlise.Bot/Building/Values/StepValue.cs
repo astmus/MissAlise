@@ -58,6 +58,18 @@ public sealed record StepValue<T> : Value<T>
 	}
 
 	/// <summary>
+	/// Рассчитать следующее значение на основе текущего и delta.
+	/// Обычно используется в сценарии, где delta уже содержит знак (например TimeSpan).
+	/// </summary>
+	public override T Next(T current, T delta)
+	{
+		var add = Add;
+		if (add is null)
+			throw new InvalidOperationException($"{nameof(StepValue<T>)} for {typeof(T).Name} requires {nameof(Add)} to be set.");
+		return Clamp(add(current, delta));
+	}
+
+	/// <summary>
 	/// Рассчитать следующее значение.
 	/// direction: -1 (назад) или +1 (вперёд)
 	/// multiplier: 1 (базовый шаг) или множитель ускорения.
